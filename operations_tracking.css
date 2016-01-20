@@ -1,0 +1,268 @@
+.big-button {
+    width: 200px;
+    height: 75px;
+}
+.cal-image {
+    width: 30px;
+    vertical-align: middle
+}
+.cal-table {
+    border: 3px solid rgb(200,200,200);
+    border-collapse: collapse;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: monospace;
+    text-align: center;
+    color: rgb(70,70,70);
+}
+.cal-table-month {
+    border: 1px solid rgb(0,0,0);
+    border-collapse: collapse;
+    background-color: rgb(113,176,80);
+    font-size: 14px;
+    color: rgb(255,255,255);
+}
+.cal-table-month span {
+    display: inline-block;
+}
+.cal-table-wkhead {
+    border: 1px solid rgb(0,0,0);
+    border-collapse: collapse;
+    width: 14%;
+}
+.cal-table-day {
+    border: 1px solid rgb(0,0,0);
+    border-collapse: collapse;
+    width: 2.5em;
+    text-decoration: underline;
+}
+.cal-table-today {
+    background-color: rgb(113,176,80);
+    color: rgb(255,255,255);
+}
+.cal-day-highlight {
+    background-color: rgb(0,155,255);
+    color: rgb(255,255,255);
+}
+.checkbox-input {
+    width: 2em;
+}
+.dropbox-option-grey {
+    padding: 2px;
+    background-color: rgb(240,240,240);
+}
+.dropbox-option-white {
+    padding: 2px;
+    background-color: rgb(255,255,255);
+}
+.cal-span {
+    position: relative;
+    float: right;
+    right: 20%;
+}
+.edit_link {
+    color: rgb(0,0,235);    
+}
+.edit_link:hover {
+    text-decoration: underline;
+}
+.emp_data_table {
+    margin: auto;
+    border: 0px solid rgb(0,0,0);
+    border-collapse: collapse;
+}
+.emp-data-header {
+    border: 1px solid rgb(0,0,0);
+    border-collapse: collapse;
+    padding: 5px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+.emp_data_tr-highlight {
+    background-color: rgb(220,220,220);
+    box-shadow: 3px 3px 2px;
+}
+.emp-data-td {
+    border: 1px solid rgb(0,0,0);
+    border-collapse: collapse;
+    padding: 5px;
+}
+.error-msg {
+    color: rgb(255,0,0)
+}
+.fieldset-default {
+    width: 50em;
+    line-height: 1.5em;
+}
+.fieldset-trans {
+    width: 50em;
+    line-height: 1.5em;
+}
+.fieldset-wide {
+    width: 75%;
+    line-height: 1.5em;
+}
+.failed-login {
+    color: rgb(240,0,0);
+}
+.head {
+    width: 100%;
+}
+input[type="text"]:-moz-read-only { /* For Firefox */
+    color: rgb(200,200,200)
+}
+
+input[type="text"]:read-only {
+    color: rgb(200,200,200)
+}
+.input-long {
+    width: 20em;
+    display: inline-block;
+}
+.invalid-field {
+    box-shadow: 0em 0em 0.3em 0.1em rgb(255,0,0);
+}
+.invalid-login {
+    color: rgb(240,0,0);
+}
+.label {
+  display: inline-block;
+  width: 10em;
+  vertical-align: top;
+}
+.label-bold {
+  display: inline-block;
+  width: 10em;
+  vertical-align: top;
+  font-weight: bold;
+}
+.label-large {
+  display: inline-block;
+  width: 15em;
+  vertical-align: top;
+}
+.label-4em {
+  display: inline-block;
+  width: 4em;
+  vertical-align: top;
+}
+.label-5em {
+  display: inline-block;
+  width: 5em;
+  vertical-align: top;
+}
+.label-7em {
+  display: inline-block;
+  width: 7em;
+  vertical-align: top;
+}
+.label-12em {
+  display: inline-block;
+  width: 12em;
+  vertical-align: top;
+}
+.main-container {
+    width: 100%;
+}
+.multi-line-dropbox-input {
+    width: 100%;
+    font-size: 16px;
+    line-height: 3em;
+    font-family: monospace;
+}
+.nav-container{
+    width: 100%;
+    text-align: center;
+}
+.nav-span {
+    display: inline-block;
+    padding: 5px;
+}
+.page_nav {
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    font-size: 20px;
+    }
+.page_nav_link {
+    color: rgb(0,0,235);    
+}
+.page_nav_link:hover {
+    text-decoration: underline;
+    padding-left: 3px;
+    padding-right: 3px;
+    font-size: 22px;
+}
+.page_nav_link_curr {
+    pointer-events: none;
+    color: rgb(0,0,0);
+}
+.readonly-select {
+    pointer-events: none; 
+    cursor: default;
+}
+.report-column-header {
+    border: solid 1px rgb(0,0,0);
+    text-align: center;
+    padding: 3px;
+    text-transform: capitalize;
+}
+.report-data-div {
+    width: 100%;
+    padding: 5px;
+}
+.report-data-span-sum {
+}
+.report-data-span-avg {
+    border-top: solid 1px rgb(0,0,0);
+    padding-top: 1px;
+    
+}
+.report-data-td {
+    border: solid 1px rgb(0,0,0);
+    text-align: center;
+    padding: 3px
+}
+.report-spacer-td { 
+    display: inline-block;
+    width: 20px;
+}
+.report-table {
+    border: solid 1px rgb(0,0,0);
+    border-collapse: collapse;
+    margin: auto
+}
+.return-button {
+    float: left;
+}
+.selected-field {
+    box-shadow: 0em 0em 0.3em 0.1em rgb(75,155,215);
+}
+.submit-changes-button {
+    box-shadow: 0em 0em 0.3em 0.1em rgb(75,155,215);
+}
+.text-input {
+    width: 15em;
+    display: inline-block;
+}
+.text-input-small {
+    width: 5em;
+    display: inline-block;
+}
+.text-input-xsmall {
+    width: 2em;
+    display: inline-block;
+}
+.update_data_form {
+    margin: auto;
+}
+.welcome-line {
+    display: inline-block;
+    width: 100%;
+    text-align: right;
+}
+/*Has to be last so it overrides any other applied display styles*/
+.hidden-elm {
+    display: None;
+}
