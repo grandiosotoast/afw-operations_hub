@@ -7,7 +7,7 @@
 // this sets up the page if the item maintence button is clicked
 function item_maintenance() {
     //
-    reset_page();
+    reset_meat_page();
     //
     document.getElementById('tab-clicked').value = 'item-maintenance';
     // 
@@ -24,7 +24,7 @@ function item_maintenance() {
 //
 function stock_changes() {
     //
-    reset_page();
+    reset_meat_page();
     //
     remove_class('hidden-elm','update-stock'); 
     remove_class('hidden-elm','mod-record');
@@ -33,7 +33,7 @@ function stock_changes() {
 // this sets up the page if stock reports is clicked
 function stock_reports() {
     //
-    reset_page();
+    reset_meat_page();
     //
     document.getElementById('tab-clicked').value = 'stock-reports';
     //
@@ -42,7 +42,7 @@ function stock_reports() {
 }
 //
 // this resets the page after main buttons are pressed
-function reset_page() {
+function reset_meat_page() {
     //
     // re-hiding everything in the additional-buttons div
     var childNodes = document.getElementById('additional-buttons').childNodes;

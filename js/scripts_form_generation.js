@@ -496,6 +496,69 @@ var stock_change_form = ''+
     '<button id="create-record" type="button" onclick="validate_stock_form(\'create\');">Update Item</button>'+
     '</form>';
 //
+//
+var sales_rep_form = ''+
+    "<form id=\"add-new-rep\" method=\"POST\">"+
+    "<fieldset class=\"fieldset-default\">"+
+    "<legend>Basic Information</legend>"+
+    "<br>"+
+    "<label class=\"label\">Sales Rep ID<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"rep-id\" class=\"text-input\" type=\"text\" name=\"rep_id\" onkeyup=\"remove_class('invalid-field',this.id);\">"+
+    "&nbsp;&nbsp;&nbsp;"+
+    "<label id=\"rep-id-uni-err\" class=\"error-msg hidden-elm\"><sup>*</sup>Unique Rep ID Required</label>"+
+    "<br>"+
+    "<label class=\"label\">First Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"dbuser-first-name\" class=\"text-input\" type=\"text\" name=\"dbuser_first_name\" onkeyup=\"remove_class('invalid-field',this.id);\">"+
+    "<br>"+
+    "<label class=\"label\">Last Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"dbuser-last-name\" class=\"text-input\" type=\"text\" name=\"dbuser_last_name\" onkeyup=\"remove_class('invalid-field',this.id);\">"+
+    "<br>"+
+    "<label class=\"label\">Email</label><input id=\"email\" class=\"text-input\"  type=\"text\" name=\"email\" onkeyup=\"remove_class('invalid-field',this.id); check_email_str(this.id,'email-err-str',false)\">"+
+    "<label id=\"email-err-str\" class=\"error-msg hidden-elm\">&nbsp;&nbsp;&nbsp;Error - Invalid Email Format, Valid Format: example@foo.bar</label><br>"+
+    "<br>"+
+    "</fieldset>"+
+    "<br>"+
+    "<fieldset class=\"fieldset-default\">"+
+    "<legend>Login Information</legend>"+
+    "<label class=\"label\">Username<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"username\" class=\"text-input\" type=\"text\" name=\"username\" onkeyup=\"remove_class('invalid-field',this.id);\">"+
+    "<label id=\"username-uni-err\" class=\"error-msg hidden-elm\">&nbsp;&nbsp;&nbsp;Username is taken</label><br>"+
+    "<label class=\"label\">Password<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"password\" class=\"text-input\" type=\"password\" name=\"password\" onkeyup=\"remove_class('invalid-field',this.id); check_equality('password','conf-password','pass-not-equal-err-str',false);\"><br>"+
+    "<label class=\"label\">Confirm Password<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"conf-password\" class=\"text-input\" type=\"password\" onkeyup=\"remove_class('invalid-field',this.id); check_equality('password','conf-password','pass-not-equal-err-str',false);\">"+
+    "<label id=\"pass-not-equal-err-str\" class=\"error-msg hidden-elm\">&nbsp;&nbsp;&nbsp;Error - Password and Confirm Password Do Not Match</label><br>"+
+    "</fieldset>"+
+    "<br>"+
+    "<fieldset class=\"fieldset-default\">"+
+    "<legend>Other Information</legend>"+
+    '<label class="label">Comments:</label><textarea id="comments" name="comments" rows="4" cols="60" value="" onkeyup="remove_class(\'invalid-field\',this.id);"></textarea>'+
+    "</fieldset>"+
+    "<input id=\"department\" type=\"hidden\" name=\"department\" value=\"sales_rep\"></input>"+
+    "<input id=\"permissions\" type=\"hidden\" name=\"permissions\" value=\"0040\"></input>"+
+    "<input id=\"dbuser-status\" type=\"hidden\" name=\"dbuser_status\" value=\"active\"></input>"+
+    "<input id=\"dbuser-internal-id\" type=\"hidden\" name=\"dbuser_internal_id\" value=\"\">"+
+    // button and err msg
+    "<label id=\"form-errors\" class=\"error-msg hidden-elm\">Form errors are highlighted in red</label><br>"+
+    "<button id=\"create-new-rep\" type=\"button\" onclick=\"init_rep_form_valiation('create');\">Add New Rep</button>"+
+    "</form>";
+//
+// this function will return one of the above forms to a page
+function create_form(form_name,out_id) {    
+    var forms = {}
+    forms.add_employee = add_employee;
+    forms.add_dbuser = add_dbuser;
+    forms.receiving_data = receiving_data;
+    forms.transportation_data = transportation_data;
+    forms.backhaul_form = backhaul_form;
+    forms.warehouse_data = warehouse_data;
+    forms.meat_shop_item = meat_shop_item;
+    forms.stock_change_form = stock_change_form;
+    forms.sales_rep_form = sales_rep_form;
+    //
+    if (!!(forms[form_name])) {
+        document.getElementById(out_id).innerHTML = forms[form_name];
+    }
+    else {
+       document.getElementById(out_id).innerHTML = "No form with that name found."; 
+    }
+    return;
+}
+//
 // this iterates over a provided list of objects to append child nodes to a parent element
 function addChildren(parentNode,elementsArray) {
     for (var i = 0; i < elementsArray.length; i++) {
@@ -781,27 +844,6 @@ function set_date(day,mon,year,day_id,mon_id,year_id,cal_id) {
     //
     show_hide(cal_id)
     remove_class_all('selected-field');  
-}
-//
-// this function will return one of the above forms to a page
-function create_form(form_name,out_id) {    
-    var forms = {}
-    forms.add_employee = add_employee;
-    forms.add_dbuser = add_dbuser;
-    forms.receiving_data = receiving_data;
-    forms.transportation_data = transportation_data;
-    forms.backhaul_form = backhaul_form;
-    forms.warehouse_data = warehouse_data;
-    forms.meat_shop_item = meat_shop_item;
-    forms.stock_change_form = stock_change_form;
-    //
-    if (!!(forms[form_name])) {
-        document.getElementById(out_id).innerHTML = forms[form_name];
-    }
-    else {
-       document.getElementById(out_id).innerHTML = "No form with that name found."; 
-    }
-    return
 }
 //
 // this function gets a row from a table using the unique col and data entry
