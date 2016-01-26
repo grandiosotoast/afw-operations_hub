@@ -152,7 +152,6 @@ function get_backhaul_form(emp_id,form_div_id) {
 //
 // this creates the employee table for the view_employee page
 function view_emp_table(page,sort_col,sort_dir) {
-    
     //
     // creating argument objects
     var emp_table_args = {};
@@ -677,7 +676,9 @@ function mod_employee_data_entry(entry_id,department,row_id) {
         var name = document.getElementById(row_id+'-emp_first_name').innerHTML+" "+document.getElementById(row_id+'-emp_last_name').innerHTML;
         document.getElementById('modify-header').innerHTML = "Modfiying Record: "+entry_id+" of Employee "+name;
     }
-    document.getElementById('modify-header').innerHTML = "Modfiying Record: "+entry_id;
+    else {
+        document.getElementById('modify-header').innerHTML = "Modfiying Record: "+entry_id;
+    }
     //
     // creating form
     create_form(data_form,'update-entry-form-div');

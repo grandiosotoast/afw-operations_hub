@@ -43,10 +43,6 @@ function reset_sales_page() {
 // this sets up the page for rep creation
 function new_rep() {
     //
-    // this and the mod rep functions will work joinly with dbUser table
-    // only sales admins will be set up using dbUsers
-    // reps will be set up here
-    //
     document.getElementById('modify-header').innerHTML = 'Creating a New Sales Rep';
     create_form('sales_rep_form','content-div');
 }
@@ -54,12 +50,129 @@ function new_rep() {
 // this sets up the page for rep modification
 function mod_rep() {
     //
-    // 
-    alert('Mod Rep Button')
+    // adding a show inactive button
+    var fieldset = document.createElement('FIELDSET');
+    var formElements = Array(
+            {'elm' : 'legend','textNode' : 'Rep Selection Parameters'},
+            //
+            {'elm' : 'label', 'className' : 'label','textNode' : 'Show Inactive Reps:'},
+            {'elm' : 'input', 'id' : 'show-inactive', 'type' : 'checkbox', 'events' : [{'event' : 'click', 'function' : function() {create_rep_table(1,'rep_id','ASC');}}]},
+            {'elm' : 'br'}
+        );
+    fieldset.id = 'rep-selection-parameters';
+    fieldset.className = 'fieldset-default';
+    addChildren(fieldset,formElements);
+    document.getElementById('input-div').appendChild(fieldset);
+    //
+    create_rep_table(1,'rep_id','ASC');
 }
 //
 // this function creates the sales rep table
-function create_rep_table(page,sort_col,sort_dir) {
+function create_rep_table(page,sort_col,sort_dir) {   
+    //
+    // initializating argument objects
+    var rep_table_args = {};
+    var data_sql_args = {};
+    var meta_sql_args = {};
+    //
+    // creating sql statements
+    rep_table_args.show_inactive = document.getElementById('show-inactive').checked;
+    var where = '';
+    if (!(rep_table_args.show_inactive)) {
+        data_sql_args.where = [['rep_status','LIKE','active']];
+        var where = "WHERE dbUsers.dbuser_status LIKE 'active' " 
+    }
+    meta_sql_args.cmd = 'SELECT';
+    meta_sql_args.table = 'table_meta_data';
+    meta_sql_args.where = [['in_tables','REGEXP','(^|%)sales_rep_table(%|$)|(^|%)dbusers(%|$)'],['use_on_pages','REGEXP','sales_maintenance|sales_reporting'],['use_in_html_tables','REGEXP','sales_rep_table']];
+    meta_sql_args.orderBy = [['order_index','ASC']]
+    
+    rep_table_args.data_sql = "SELECT * FROM sales_rep_table INNER JOIN dbUsers ON sales_rep_table.dbuser_internal_id=dbUsers.dbuser_internal_id "+where+" ORDER BY sales_rep_table."+sort_col+" "+sort_dir;
+    rep_table_args.meta_sql = gen_sql(meta_sql_args);
+    //
+    // creating table argument object   
+    rep_table_args.table_output_id = 'table-div';
+    rep_table_args.table_id = 'sales_rep_table';
+    rep_table_args.table_class = 'emp_data_table';
+    rep_table_args.row_id_prefix = 'rep-row-';
+    rep_table_args.table_data_cell_class = 'emp-data-td';  
+    rep_table_args.page_nav_div_id = 'rep-table-page-nav';
+    rep_table_args.page_nav_class = 'page_nav';
+    rep_table_args.page_nav_id_prefix = 'rep';
+    rep_table_args.page_class_str = 'page_nav_link';
+    rep_table_args.page = page;
+    rep_table_args.num_per_page = 15;
+    rep_table_args.tot_pages_shown = 9;
+    rep_table_args.page_onmouse_str = '';
+    rep_table_args.page_onclick = 'create_rep_table(%%,%sort_col%,%sort_dir%)';
+    rep_table_args.head_row_class_str = 'emp-data-header';
+    rep_table_args.sort_col = sort_col;
+    rep_table_args.sort_dir = sort_dir;
+    rep_table_args.sort_onclick = 'create_rep_table(%%,%column_name%,%sort_dir%)';
+    rep_table_args.row_onclick = "modify_rep_form('%dbuser_internal_id%','%row_id%')";
+    rep_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
+    rep_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')";  
+    //
+    create_sortable_table(rep_table_args);
+}
+//
+//
+function modify_rep_form(dbuser_internal_id,row_id) {
+    //
+    //
+    // creating header 
+    name = ''
+    if (row_id != '') {
+        var name = document.getElementById(row_id+'-rep_name').innerHTML;
+        document.getElementById('modify-header').innerHTML = "Modfiying User: "+name;
+    }
+    else {
+        document.getElementById('modify-header').innerHTML = "Modfiying User:";
+    }
+    //
+    // creating form
+    create_form('sales_rep_form','content-div');
+    //
+    // adding new buttons
+    var form = document.getElementById('sales-rep-form');
+    var form_elements = Array(
+            //
+            {'elm' : 'button', 'id' : 'mod-rep', 'type' : 'button', 'textNode' : 'Modify Rep', 'events' : [{'event' : 'click', 'function' : function() {init_rep_form_valiation('update');}}]},
+            {'elm' : 'span','textNode' : '\u00A0\u00A0'},
+            //
+            {'elm' : 'button', 'id' : 'delete-rep', 'type' : 'button', 'textNode' : 'Delete Rep', 'events' : [{'event' : 'click', 'function' : function() {init_rep_form_valiation('delete');}}]},
+            {'elm' : 'span','textNode' : '\u00A0\u00A0'},
+            //
+            {'elm' : 'button', 'id' : 'restore-rep', 'type' : 'button', 'textNode' : 'Restore Rep', 'events' : [{'event' : 'click', 'function' : function() {init_rep_form_valiation('restore');}}]}
+        );
+    addChildren(form,form_elements)
+    form.removeChild(document.getElementById('submit-rep-form'));
+    //
+    // callback function to determine what buttons to show or hide based on dbuser status
+    var button_fun = function() {
+        // 
+        if (document.getElementById('dbuser-status').value == 'active') { add_class('hidden-elm','restore-rep');}
+        else { add_class('hidden-elm','delete-rep');}
+        //
+        document.getElementById('password').value = '';
+    }
+    // populating form from the dbuser table
+    var populate_form_args = {};
+    populate_form_args.table = 'dbUsers';
+    populate_form_args.unique_col = 'dbuser_internal_id';
+    populate_form_args.unique_data = dbuser_internal_id;
+    populate_form_args.form_id = 'sales-rep-form';
+    populate_form_args.trigger_events = false;
+    populate_form_args.add_callback_funs = button_fun; 
+    populate_form(populate_form_args);
+    // populating form based on department specific table
+    populate_form_args = {};
+    populate_form_args.table = 'sales_rep_table';
+    populate_form_args.unique_col = 'dbuser_internal_id';
+    populate_form_args.unique_data = dbuser_internal_id;
+    populate_form_args.form_id = 'sales-rep-form';
+    populate_form_args.trigger_events = false; //this is set to false to prevent an obscene number of rapid AJAX calls
+    populate_form(populate_form_args);
 }
 //
 // this starts off the form validation
@@ -69,11 +182,11 @@ function init_rep_form_valiation(action) {
     //
     // checking form for empty fields
     if (action != 'create') { skip_str += ',password,conf-password'}
-    basic_val_error = basic_validate('add-new-rep',skip_str);
+    basic_val_error = basic_validate('sales-rep-form',skip_str);
     //
     // getting all form values
     document.getElementById('rep-id').disabled = false;
-    var name_val_obj = get_all_form_values('add-new-rep','');
+    var name_val_obj = get_all_form_values('sales-rep-form','');
     if (action != 'create') { document.getElementById('rep-id').disabled = true;}
     if (name_val_obj['rep_id']   == '') { return;}
     if (name_val_obj['username'] == '') { return;}
@@ -103,7 +216,7 @@ function rep_form_valiation(args) {
     var rep_id_test = args.response['rep_id_test'];
     var username_test = args.response['username_test'];
     var name_val_obj = args.name_val_obj;
-    var all_inputs = document.getElementById('add-new-rep').getElementsByTagName("*");
+    var all_inputs = document.getElementById('sales-rep-form').getElementsByTagName("*");
     //
     // converting meta_data from an array to an object
     var col_meta_data = {};
@@ -216,6 +329,8 @@ function submit_sales_rep_form(args) {
         user_sql_args.where = [['dbuser_internal_id','LIKE',name_val_obj['dbuser_internal_id']]];
         rep_sql_args.cmd  = "UPDATE";
         rep_sql_args.where  = [['dbuser_internal_id','LIKE',name_val_obj['dbuser_internal_id']]];
+        //
+        if (name_val_obj['password'] == '') { delete name_val_obj['password']}
     }
     else {
         callback = insert_callback;

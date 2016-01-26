@@ -42,7 +42,7 @@ var CONSTANTS =  {
 //
 // setting default perms by department
 function set_default_perms(dept_id,user_perm_id) {
-    
+    //
     var perms;
     var dept = document.getElementById(dept_id).value; 
     //
@@ -70,7 +70,7 @@ function set_default_perms(dept_id,user_perm_id) {
 //
 // calculates the number of hours from a start and end time
 function calc_hours(st_id,en_id,out_id) {
-    
+    //
     var st_time_str = document.getElementById(st_id).value;
     var en_time_str = document.getElementById(en_id).value;
     var st_hr,st_mm,en_hr,en_mm,time_diff;
@@ -106,7 +106,7 @@ function calc_hours(st_id,en_id,out_id) {
 //
 // subtracts the indirect time from total hours for receiving data
 function calc_prod_time(hours_id,indir_id,out_id) {
-    
+    //
     var hours = parseFloat(document.getElementById(hours_id).value);
     var indir = parseFloat(document.getElementById(indir_id).value);
     var diff = (hours - indir/60)
@@ -116,7 +116,7 @@ function calc_prod_time(hours_id,indir_id,out_id) {
 
 // calculates value per hour
 function calc_per_hr(num_id,time_id,out_id) {
-    
+    //
     var num = document.getElementById(num_id).value;
     var time = document.getElementById(time_id).value;
     var num_hr = 0.0;
@@ -127,6 +127,7 @@ function calc_per_hr(num_id,time_id,out_id) {
 //
 // sums all of the values in the provided ID string
 function total_fields(id_arr_str,out_id) {  
+    //
     var id_arr = id_arr_str.split(',')
     var total;
     total = 0;
@@ -140,7 +141,6 @@ function total_fields(id_arr_str,out_id) {
 //
 // creates page link line
 function create_page_links(page_nav_args) {
-    
     //
     // defining presets
     var curr_page = 1;
@@ -200,7 +200,7 @@ function create_page_links(page_nav_args) {
 //
 // function to generate sortable employee table 
 function create_sortable_table(table_args) {
-    
+    //
     var sql_args = {};
     var data_sql = '';
     var meta_sql = '';
@@ -219,8 +219,11 @@ function create_sortable_table(table_args) {
     // determing if its sortable or not
     if (table_args.hasOwnProperty('sortable')) {sortable = table_args.sortable;}
     //
-    data_sql = gen_sql(table_args.data_sql_args);
-    meta_sql = gen_sql(table_args.meta_sql_args);
+    if (table_args.data_sql) { data_sql = table_args.data_sql;}
+    else { data_sql = gen_sql(table_args.data_sql_args);}
+    //
+    if (table_args.meta_sql) { meta_sql = table_args.meta_sql;}
+    else { meta_sql = gen_sql(table_args.meta_sql_args);}
     //
     // rearranging table args to proper form
     var page_nav_args = {};

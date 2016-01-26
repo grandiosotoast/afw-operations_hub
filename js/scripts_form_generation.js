@@ -498,7 +498,7 @@ var stock_change_form = ''+
 //
 //
 var sales_rep_form = ''+
-    "<form id=\"add-new-rep\" method=\"POST\">"+
+    "<form id=\"sales-rep-form\" method=\"POST\">"+
     "<fieldset class=\"fieldset-default\">"+
     "<legend>Basic Information</legend>"+
     "<br>"+
@@ -534,7 +534,7 @@ var sales_rep_form = ''+
     "<input id=\"dbuser-internal-id\" type=\"hidden\" name=\"dbuser_internal_id\" value=\"\">"+
     // button and err msg
     "<label id=\"form-errors\" class=\"error-msg hidden-elm\">Form errors are highlighted in red</label><br>"+
-    "<button id=\"create-new-rep\" type=\"button\" onclick=\"init_rep_form_valiation('create');\">Add New Rep</button>"+
+    "<button id=\"submit-rep-form\" type=\"button\" onclick=\"init_rep_form_valiation('create');\">Add New Rep</button>"+
     "</form>";
 //
 // this function will return one of the above forms to a page
@@ -579,7 +579,16 @@ function addChildren(parentNode,elementsArray) {
         for(var prop in elm_obj) {
             element[prop] = elm_obj[prop];
         }
-        parentNode.appendChild(element);
+        //
+        if (element.id == '') {
+            parentNode.appendChild(element);
+        }
+        else if (document.getElementById(element.id)) {
+            parentNode.replaceChild(element,document.getElementById(element.id));
+        }
+        else {
+            parentNode.appendChild(element);
+        }
     }
 }
 //
