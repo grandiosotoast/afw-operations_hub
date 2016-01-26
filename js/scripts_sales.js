@@ -43,12 +43,24 @@ function reset_sales_page() {
 // this sets up the page for rep creation
 function new_rep() {
     //
+    // clearing elements inside main-container div
+    var childNodes = document.getElementById('main-container').childNodes;
+    for (var i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+    }
+    //
     document.getElementById('modify-header').innerHTML = 'Creating a New Sales Rep';
     create_form('sales_rep_form','content-div');
 }
 // 
 // this sets up the page for rep modification
 function mod_rep() {
+    //
+    // clearing elements inside main-container div
+    var childNodes = document.getElementById('main-container').childNodes;
+    for (var i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+    }
     //
     // adding a show inactive button
     var fieldset = document.createElement('FIELDSET');
@@ -232,10 +244,7 @@ function rep_form_valiation(args) {
     var rep_id_uni_error = false;
     var username_uni_error = false;
     //
-    // testing uniqueness
-    console.log(rep_id_test,name_val_obj['dbuser_internal_id']);
-    console.log(username_test,name_val_obj['dbuser_internal_id'])
-
+    // testing uniqueness of id and username
     if (rep_id_test.length > 0) {
         if (rep_id_test[0]['dbuser_internal_id'] != name_val_obj['dbuser_internal_id']) { rep_id_uni_error = true;}
     }
