@@ -100,6 +100,54 @@ function new_customer() {
 //
 // this sets up the page to modify a customer
 function mod_customer() {
+    //
+    // clearing elements inside main-container div
+    var childNodes = document.getElementById('main-container').childNodes;
+    for (var i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+    }
+    //
+    // adding refinement fields
+    var fieldset = document.createElement('FIELDSET');
+    var formElements = Array(
+            {'elm' : 'legend','textNode' : 'Rep Selection Parameters'}, 
+            //
+            {'elm' : 'label', 'className' : 'label-12em','textNode' : 'Refine by Customer ID:'},
+            {'elm' : 'input', 'id' : 'refine-by-cid', 'type' : 'text'},
+            {'elm' : 'span','textNode' : '\u00A0\u00A0\u00A0\u00A0'},
+            {'elm' : 'label', 'className' : 'label-medium','textNode' : 'Exact Match:'},
+            {'elm' : 'input', 'id' : 'cid-match-type', 'type' : 'checkbox', 'value' : 'REGEXP', 'events' : [{'event' : 'click', 'function' : function(){ toggle_checkbox_value(this.id,'LIKE','REGEXP');} }]},
+            {'elm' : 'br'},
+            //
+            {'elm' : 'label', 'className' : 'label-12em','textNode' : 'Refine by Rep ID:'},
+            {'elm' : 'input', 'id' : 'refine-by-rid', 'type' : 'text'},
+            {'elm' : 'span','textNode' : '\u00A0\u00A0\u00A0\u00A0'},
+            {'elm' : 'label', 'className' : 'label-medium','textNode' : 'Exact Match:'},
+            {'elm' : 'input', 'id' : 'rid-match-type', 'type' : 'checkbox', 'value' : 'REGEXP', 'events' : [{'event' : 'click', 'function' : function(){ toggle_checkbox_value(this.id,'LIKE','REGEXP');} }]},
+            {'elm' : 'br'},
+            //
+            {'elm' : 'label', 'className' : 'label-12em','textNode' : 'Refine by Customer Name:'},
+            {'elm' : 'input', 'id' : 'refine-by-name', 'type' : 'text'},
+            {'elm' : 'span','textNode' : '\u00A0\u00A0\u00A0\u00A0'},
+            {'elm' : 'label', 'className' : 'label-medium','textNode' : 'Exact Match:'},
+            {'elm' : 'input', 'id' : 'name-match-type', 'type' : 'checkbox', 'value' : 'REGEXP', 'events' : [{'event' : 'click', 'function' : function(){ toggle_checkbox_value(this.id,'LIKE','REGEXP');} }]},
+            {'elm' : 'br'},
+            //
+            {'elm' : 'label', 'className' : 'label-12em','textNode' : 'Refine by Customer Status:'},
+            {'elm' : 'input', 'id' : 'refine-by-status', 'type' : 'text'},
+            {'elm' : 'span','textNode' : '\u00A0\u00A0\u00A0\u00A0'},
+            {'elm' : 'label', 'className' : 'label-medium','textNode' : 'Exact Match:'},
+            {'elm' : 'input', 'id' : 'status-match-type', 'type' : 'checkbox', 'value' : 'REGEXP', 'events' : [{'event' : 'click', 'function' : function(){ toggle_checkbox_value(this.id,'LIKE','REGEXP');} }]},
+            {'elm' : 'br'},
+            //
+            {'elm' : 'button', 'textNode' : 'Refine Customer Table', 'type' : 'button', 'events' : [{'event' : 'click', 'function' : function() {create_customer_table(1,'rep_id','ASC');}}]}
+        );
+    fieldset.id = 'customer-selection-parameters';
+    fieldset.className = 'fieldset-default';
+    addChildren(fieldset,formElements);
+    document.getElementById('input-div').appendChild(fieldset);
+    //
+    create_customer_table(1,'rep_id','ASC')
 }
 //
 // this function creates the sales rep table
@@ -151,9 +199,71 @@ function create_rep_table(page,sort_col,sort_dir) {
     create_sortable_table(rep_table_args);
 }
 //
-//
-function modify_rep_form(dbuser_internal_id,row_id) {
+// this function creates the sales rep table
+function create_customer_table(page,sort_col,sort_dir) {   
     //
+    // initializating argument objects
+    var customer_table_args = {};
+    var data_sql_args = {};
+    var meta_sql_args = {};
+    var ref_customer_id = '.';
+    var ref_rep_id = '.';
+    var ref_customer_name = '.';
+    var ref_customer_status = '.';
+    //
+    // creating sql statements
+    meta_sql_args.cmd = 'SELECT';
+    meta_sql_args.table = 'table_meta_data';
+    meta_sql_args.where = [];
+    meta_sql_args.where.push(['in_tables','REGEXP','(^|%)sales_customer_table(%|$)|(^|%)dbusers(%|$)']);
+    meta_sql_args.where.push(['use_on_pages','REGEXP','sales_maintenance|sales_reporting']);
+    meta_sql_args.where.push(['use_in_html_tables','REGEXP','sales_customer_table']);
+    meta_sql_args.orderBy = [['order_index','ASC']]
+    //
+    data_sql_args.cmd = 'SELECT';
+    data_sql_args.table = 'sales_customer_table';
+    if (trim(document.getElementById('refine-by-cid').value) != '') { ref_customer_id = trim(document.getElementById('refine-by-cid').value);}
+    if (trim(document.getElementById('refine-by-rid').value) != '') { ref_rep_id = trim(document.getElementById('refine-by-rid').value);}
+    if (trim(document.getElementById('refine-by-name').value) != '') { ref_customer_name = trim(document.getElementById('refine-by-name').value);}
+    if (trim(document.getElementById('refine-by-status').value) != '') { ref_customer_status = trim(document.getElementById('refine-by-status').value);}
+    data_sql_args.where = [];
+    data_sql_args.where.push(['customer_id',document.getElementById('cid-match-type').value,ref_customer_id]);
+    data_sql_args.where.push(['rep_id',document.getElementById('rid-match-type').value,ref_rep_id]);
+    data_sql_args.where.push(['customer_name',document.getElementById('name-match-type').value,ref_customer_name]);
+    data_sql_args.where.push(['customer_status',document.getElementById('status-match-type').value,ref_customer_status]);
+    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    //
+    customer_table_args.data_sql = gen_sql(data_sql_args);
+    customer_table_args.meta_sql = gen_sql(meta_sql_args);
+    //
+    // creating table argument object   
+    customer_table_args.table_output_id = 'table-div';
+    customer_table_args.table_id = 'sales_customer_table';
+    customer_table_args.table_class = 'emp_data_table';
+    customer_table_args.row_id_prefix = 'customer-row-';
+    customer_table_args.table_data_cell_class = 'emp-data-td';  
+    customer_table_args.page_nav_div_id = 'customer-table-page-nav';
+    customer_table_args.page_nav_class = 'page_nav';
+    customer_table_args.page_nav_id_prefix = 'customer';
+    customer_table_args.page_class_str = 'page_nav_link';
+    customer_table_args.page = page;
+    customer_table_args.num_per_page = 15;
+    customer_table_args.tot_pages_shown = 9;
+    customer_table_args.page_onmouse_str = '';
+    customer_table_args.page_onclick = 'create_customer_table(%%,%sort_col%,%sort_dir%)';
+    customer_table_args.head_row_class_str = 'emp-data-header';
+    customer_table_args.sort_col = sort_col;
+    customer_table_args.sort_dir = sort_dir;
+    customer_table_args.sort_onclick = 'create_customer_table(%%,%column_name%,%sort_dir%)';
+    customer_table_args.row_onclick = "modify_customer_form('%customer_internal_id%','%row_id%')";
+    customer_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
+    customer_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')";  
+    //
+    create_sortable_table(customer_table_args);
+}
+//
+// sets the page to modify a rep's information
+function modify_rep_form(dbuser_internal_id,row_id) {
     //
     // creating header 
     name = ''
@@ -209,6 +319,67 @@ function modify_rep_form(dbuser_internal_id,row_id) {
     populate_form_args.form_id = 'sales-rep-form';
     populate_form_args.trigger_events = false; //this is set to false to prevent an obscene number of rapid AJAX calls
     populate_form(populate_form_args);
+}
+//
+// sets the page to modify a rep's information
+function modify_customer_form(customer_internal_id,row_id) {
+    //
+    // creating header 
+    name = ''
+    if (row_id != '') {
+        var name = document.getElementById(row_id+'-customer_name').innerHTML;
+        document.getElementById('modify-header').innerHTML = "Modfiying Customer: "+name;
+    }
+    else {
+        document.getElementById('modify-header').innerHTML = "Modfiying Customer:";
+    }
+    //
+    // creating form
+    create_form('sales_customer_form','content-div');
+    document.getElementById('customer-id').disabled = true;
+    //
+    // adding new buttons
+    var form = document.getElementById('sales-customer-form');
+    var form_elements = Array(
+            //
+            {'elm' : 'button', 'id' : 'mod-customer', 'type' : 'button', 'textNode' : 'Modify Customer', 'events' : [{'event' : 'click', 'function' : function() {init_customer_form_valiation('update');}}]},
+            {'elm' : 'span','textNode' : '\u00A0\u00A0'},
+            //
+            {'elm' : 'button', 'id' : 'delete-customer', 'type' : 'button', 'textNode' : 'Delete Customer', 'events' : [{'event' : 'click', 'function' : function() {init_customer_form_valiation('delete');}}]},
+            {'elm' : 'span','textNode' : '\u00A0\u00A0'},
+            //
+            {'elm' : 'button', 'id' : 'restore-customer', 'type' : 'button', 'textNode' : 'Restore Customer', 'events' : [{'event' : 'click', 'function' : function() {init_customer_form_valiation('restore');}}]}
+        );
+    addChildren(form,form_elements)
+    form.removeChild(document.getElementById('submit-customer-form'));
+    //
+    // callback function to determine what buttons to show or hide based on dbuser status
+    var button_fun = function() {
+        // 
+        if (document.getElementById('customer-status').value != 'inactive') { add_class('hidden-elm','restore-customer');}
+        else if (document.getElementById('customer-status').value == 'inactive') { add_class('hidden-elm','delete-customer');}
+    }
+    //
+    // nesting this in a callback so populate form can never execute before dropboxes are populated
+    var callback = function() {
+        // populating form from customer table
+        var populate_form_args = {};
+        populate_form_args.table = 'sales_customer_table';
+        populate_form_args.unique_col = 'customer_internal_id';
+        populate_form_args.unique_data = customer_internal_id;
+        populate_form_args.form_id = 'sales-customer-form';
+        populate_form_args.trigger_events = false;
+        populate_form_args.add_callback_funs = button_fun; 
+        populate_form(populate_form_args)
+    }
+    //
+    // populating rep dropbox
+    var add_args = {
+        'format_str'   : '%rep_id% - %rep_name%',
+        'add_callback' : callback
+
+    };
+    populate_dropbox_options('rep-id','sales_rep_table','rep_id','rep_name','Rep ID - Rep Name',add_args)
 }
 //
 // this starts off the sales rep form validation
@@ -499,7 +670,7 @@ function customer_form_valiation(args) {
         confirm_message = 'Confirm restoration of Customer: '+name_val_obj['customer_id']+' '+name_val_obj['customer_name'];
         args.return_message  = 'Sucessfully restored Customer: '+name_val_obj['customer_id']+' '+name_val_obj['customer_name'];
         //
-        name_val_obj['dbuser_status'] = 'active';
+        name_val_obj['customer_status'] = 'active';
     }
     //
     cont = confirm(confirm_message);
