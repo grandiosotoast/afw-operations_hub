@@ -537,6 +537,34 @@ var sales_rep_form = ''+
     "<button id=\"submit-rep-form\" type=\"button\" onclick=\"init_rep_form_valiation('create');\">Add New Rep</button>"+
     "</form>";
 //
+//
+var sales_customer_form = ''+
+    '<form id="sales-customer-form" method="POST">'+
+    '<fieldset class="fieldset-default">'+
+    '<legend>Customer Information</legend>'+
+    '<br>'+
+    '<label class="label">Customer ID<span style="color: red;"><sup>*</sup></span></label><input id="customer-id" class="text-input" type="text" name="customer_id" onkeyup="remove_class(\'invalid-field\',this.id);">'+
+    '&nbsp;&nbsp;&nbsp;'+
+    '<label id="customer-id-uni-err" class="error-msg hidden-elm"><sup>*</sup>Unique Customer ID Required</label>'+
+    '<br>'+
+    '<label class="label">Customer Name<span style="color: red;"><sup>*</sup></span></label><input id="customer-name" class="text-input" type="text" name="customer_name" onkeyup="remove_class(\'invalid-field\',this.id);">'+
+    '<br>'+
+    '<label class="label">Customer Status</label><input id="customer-status" class="text-input" type="text" name="customer_status" value="active" onkeyup="remove_class(\'invalid-field\',this.id);">'+
+    '<br>'+
+    '<label class="label">Associated Sales Rep<span style="color: red;"><sup>*</sup></span></label>'+
+    '<select id="rep-id" name="rep_id" onchange="remove_class(\'invalid-field\',this.id);"></select>'+
+    '<br>'+
+    '</fieldset>'+
+    '<br>'+
+    '<fieldset class="fieldset-default">'+
+    '<legend>Other Information</legend>'+
+    '<label class="label">Comments:</label><textarea id="comments" name="comments" rows="4" cols="60" value="" onkeyup="remove_class(\'invalid-field\',this.id);"></textarea>'+
+    '</fieldset>'+
+    '<input id="customer-internal-id" type="hidden" name="customer_internal_id" value="">'+
+    '<label id="form-errors" class="error-msg hidden-elm">Form errors are highlighted in red</label><br>'+
+    '<button id="submit-customer-form" type="button" onclick="init_customer_form_valiation(\'create\');">Add New Customer</button>'+
+    '</form>';
+//
 // this function will return one of the above forms to a page
 function create_form(form_name,out_id) {    
     var forms = {}
@@ -549,6 +577,7 @@ function create_form(form_name,out_id) {
     forms.meat_shop_item = meat_shop_item;
     forms.stock_change_form = stock_change_form;
     forms.sales_rep_form = sales_rep_form;
+    forms.sales_customer_form = sales_customer_form;
     //
     if (!!(forms[form_name])) {
         document.getElementById(out_id).innerHTML = forms[form_name];
@@ -967,11 +996,14 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
     var sql_args = {};
     var place_holder_value = '';
     var place_holder_status = 'disabled selected';
+    var format_str = '%'+text_col+'%';
     var callback = false;
     sql_args.cmd = "SELECT";
     sql_args.table = table;
     sql_args.cols = [value_col,text_col];
     // processing additional arguments
+    if (!!(add_args.format_str)) { format_str = add_args.format_str;}
+    if (!!(add_args.add_cols)) { sql_args.cols = sql_args.cols.concat(add_args.add_cols);}
     if (!!(add_args.sql_where)) { sql_args.where = add_args.sql_where;}
     if (!!(add_args.place_holder_value)) {place_holder_value = add_args.place_holder_value;}
     if (!!(add_args.place_holder_status)) {place_holder_status = add_args.place_holder_status;}
@@ -981,17 +1013,17 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
     // temporary function to populate a drop box
     var pop_dropbox = function(response) {
         var data_arr = response;
+        var options_str = "";
         //
         // creating options for dropbox
         if (place_holder != ""){
-            var options_str = "<option value= \""+place_holder_value+"\" "+place_holder_status+">"+place_holder+"</option>";
-        }
-        else {
-            var options_str = "";
+            options_str += "<option value= \""+place_holder_value+"\" "+place_holder_status+">"+place_holder+"</option>";
         }
         //
         for (var i = 0; i < data_arr.length; i++) {
-            options_str += "<option value=\""+data_arr[i][value_col]+"\">"+data_arr[i][text_col]+"</option>";
+            var text = format_str;
+            for (var prop in data_arr[i]) { text = text.replace('%'+prop+'%',data_arr[i][prop]);}
+            options_str += "<option value=\""+data_arr[i][value_col]+"\">"+text+"</option>";
         }
         //
         // placing additional options in list

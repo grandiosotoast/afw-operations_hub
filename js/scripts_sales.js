@@ -79,6 +79,29 @@ function mod_rep() {
     create_rep_table(1,'rep_id','ASC');
 }
 //
+// this sets up the page for manual customer creation
+function new_customer() {
+    //
+    // clearing elements inside main-container div
+    var childNodes = document.getElementById('main-container').childNodes;
+    for (var i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+    }
+    //
+    document.getElementById('modify-header').innerHTML = 'Creating a New Customer';
+    create_form('sales_customer_form','content-div');
+    //
+    // populating rep dropbox
+    var add_args = {
+        'format_str' : '%rep_id% - %rep_name%'
+    };
+    populate_dropbox_options('rep-id','sales_rep_table','rep_id','rep_name','Rep ID - Rep Name',add_args)
+}
+//
+// this sets up the page to modify a customer
+function mod_customer() {
+}
+//
 // this function creates the sales rep table
 function create_rep_table(page,sort_col,sort_dir) {   
     //
@@ -144,6 +167,7 @@ function modify_rep_form(dbuser_internal_id,row_id) {
     //
     // creating form
     create_form('sales_rep_form','content-div');
+    document.getElementById('rep-id').disabled = true;
     //
     // adding new buttons
     var form = document.getElementById('sales-rep-form');
@@ -187,7 +211,7 @@ function modify_rep_form(dbuser_internal_id,row_id) {
     populate_form(populate_form_args);
 }
 //
-// this starts off the form validation
+// this starts off the sales rep form validation
 function init_rep_form_valiation(action) {
     var basic_val_error = false;
     var skip_str = 'dbuser-last-name,comments,dbuser-internal-id';
@@ -195,6 +219,9 @@ function init_rep_form_valiation(action) {
     // checking form for empty fields
     if (action != 'create') { skip_str += ',password,conf-password'}
     basic_val_error = basic_validate('sales-rep-form',skip_str);
+    //
+    if (basic_val_error) { remove_class('hidden-elm','form-errors');}
+    else { add_class('hidden-elm','form-errors');}
     //
     // getting all form values
     document.getElementById('rep-id').disabled = false;
@@ -301,7 +328,7 @@ function rep_form_valiation(args) {
     cont = confirm(confirm_message);
     if (!(cont)) {return;}
     //
-    submit_sales_rep_form(args)
+    submit_sales_rep_form(args);
 }
 //
 // this submits the rep form
@@ -381,5 +408,153 @@ function submit_sales_rep_form(args) {
     sql += 'COMMIT;';
     //
     console.log(sql);
+    ajax_exec_db(sql,callback);
+}
+//
+// this function starts off the sales customer form validation
+function init_customer_form_valiation(action) {
+    var basic_val_error = false;
+    var skip_str = 'comments,customer-status,customer-internal-id';
+    //
+    // checking form for empty fields
+    basic_val_error = basic_validate('sales-customer-form',skip_str);
+    if (basic_val_error) { remove_class('hidden-elm','form-errors');}
+    else { add_class('hidden-elm','form-errors');}
+    //
+    // getting all form values
+    document.getElementById('customer-id').disabled = false;
+    var name_val_obj = get_all_form_values('sales-customer-form','');
+    if (action != 'create') { document.getElementById('customer-id').disabled = true;}
+    if (name_val_obj['customer_id']   == '') { return;}
+    //
+    // fetching stuff from DB
+    var customer_id_sql   = "SELECT `customer_id`,`customer_internal_id` FROM `sales_customer_table` WHERE `customer_id` LIKE '"+name_val_obj['customer_id']+"'";
+    var callback = function(response) {
+        var args = {
+            'action'          : action,
+            'basic_val_error' : basic_val_error,
+            'name_val_obj'    : name_val_obj,
+            'response'        : response
+        };
+        customer_form_valiation(args);
+    }
+    //
+    ajax_multi_fetch([customer_id_sql],['customer_id_test'],callback);
+}
+//
+// this finishes form validation after the database query
+function customer_form_valiation(args) {
+    //
+    var action = args.action;
+    var customer_id_test = args.response['customer_id_test'];
+    var name_val_obj = args.name_val_obj;
+    var all_inputs = document.getElementById('sales-customer-form').getElementsByTagName("*");
+    //
+    var error = false;
+    var basic_val_error = args.basic_val_error;
+    var customer_id_uni_error = false;
+    //
+    // testing uniqueness of id and username
+    if (customer_id_test.length > 0) {
+        if (customer_id_test[0]['customer_internal_id'] != name_val_obj['customer_internal_id']) { customer_id_uni_error = true;}
+    }
+    //
+    // additional error checking
+    for (var i = 0; i < all_inputs.length; i++) {
+        // checking if child node is an element
+        if (all_inputs[i].disabled == true) {continue;}
+        if (all_inputs[i].className.match('invalid-field')) {
+            console.log("Invalid Error: ",all_inputs[i].id);
+            error = true;
+        }
+    }
+    //
+    // final error checks
+    if (basic_val_error) { error = true;}
+    //
+    if (customer_id_uni_error) { error = true; add_class('invalid-field','customer-id'); remove_class('hidden-elm','customer-id-uni-err');}
+    else { remove_class('invalid-field','customer-id'); add_class('hidden-elm','customer-id-uni-err');}
+    //
+    if (error) { remove_class('hidden-elm','form-errors'); return;}
+    else { add_class('hidden-elm','form-errors');}
+    //
+    // defining action based values
+    var confirm_message = '';
+    var cont = false;
+    if (action == 'create') {
+        confirm_message = 'Confirm creation of Customer: '+name_val_obj['customer_id']+' '+name_val_obj['customer_name'];
+        args.return_message  = 'Sucessfully created Customer: '+name_val_obj['customer_id']+' '+name_val_obj['customer_name'];
+    }
+    else if (action == 'update') {
+        confirm_message = 'Confirm modifcation of Customer: '+name_val_obj['customer_id']+' '+name_val_obj['customer_name'];
+        args.return_message  = 'Sucessfully modified Customer: '+name_val_obj['customer_id']+' '+name_val_obj['customer_name'];
+    }
+    else if (action == 'delete') {
+        confirm_message = 'Confirm deletion of Customer: '+name_val_obj['customer_id']+' '+name_val_obj['customer_name'];
+        args.return_message  = 'Sucessfully deleted Customer: '+name_val_obj['customer_id']+' '+name_val_obj['customer_name'];
+        //
+        name_val_obj['customer_status'] = 'inactive';
+    }
+    else if (action == 'restore') {
+        confirm_message = 'Confirm restoration of Customer: '+name_val_obj['customer_id']+' '+name_val_obj['customer_name'];
+        args.return_message  = 'Sucessfully restored Customer: '+name_val_obj['customer_id']+' '+name_val_obj['customer_name'];
+        //
+        name_val_obj['dbuser_status'] = 'active';
+    }
+    //
+    cont = confirm(confirm_message);
+    if (!(cont)) {return;}
+    //
+    submit_sales_customer_form(args);
+}
+//
+// this submits the sales customer form
+function submit_sales_customer_form(args) {
+    //
+    var name_val_obj = args.name_val_obj;
+    var action = args.action;
+    var callback = '';
+    var sql_args  = {'table' : 'sales_customer_table'};
+    //
+    // creating the two callback functions  
+    var insert_callback = function() {
+        create_form('sales_customer_form','content-div');
+        alert(args.return_message);
+    }
+    var update_callback = function() {
+        var curr_page = document.getElementById('customer-table-page-nav').dataset.currPage;
+        var sort_col  = document.getElementById('customer-table-page-nav').dataset.sortCol;
+        var sort_dir  = document.getElementById('customer-table-page-nav').dataset.sortDir;
+        create_customer_table(curr_page,sort_col,sort_dir);
+        // clearing form off of page
+        document.getElementById('modify-header').innerHTML = "";
+        document.getElementById('content-div').innerHTML = "";
+        //
+        alert(args.return_message);
+    }
+    //
+    // defining sql command and where clause if needed
+    if (action != 'create') {
+        callback = update_callback
+        sql_args.cmd = "UPDATE";
+        sql_args.where = [['customer_internal_id','LIKE',name_val_obj['customer_internal_id']]];
+        //
+        delete name_val_obj['customer_internal_id'];
+    }
+    else {
+        callback = insert_callback;
+        sql_args.cmd = "INSERT";
+        //
+        delete name_val_obj['customer_internal_id'];
+    }
+    //
+    sql_args.cols = [];
+    sql_args.vals = [];
+    for (var name in name_val_obj) {
+        sql_args.cols.push(name);
+        sql_args.vals.push(name_val_obj[name]);
+    }
+    //
+    var sql = gen_sql(sql_args);
     ajax_exec_db(sql,callback);
 }

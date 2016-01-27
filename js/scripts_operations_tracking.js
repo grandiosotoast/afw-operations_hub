@@ -133,7 +133,7 @@ function total_fields(id_arr_str,out_id) {
     total = 0;
     //
     for (var i = 0; i < id_arr.length; i++) {
-    total += parseInt(document.getElementById(id_arr[i]).value);
+        total += parseInt(document.getElementById(id_arr[i]).value);
     }
     if (isNaN(total)) {total = 0;}
     document.getElementById(out_id).value = total

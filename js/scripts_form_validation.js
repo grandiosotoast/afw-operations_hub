@@ -295,6 +295,7 @@ function basic_validate(parent_id,empty_elms_id) {
             error = true;
         }
     }
+    //
     return error;
 }
 //
