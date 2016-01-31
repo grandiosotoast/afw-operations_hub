@@ -517,7 +517,7 @@ var sales_rep_form = ''+
     "<br>"+
     "<fieldset class=\"fieldset-default\">"+
     "<legend>Login Information</legend>"+
-    "<label class=\"label\">Username<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"username\" class=\"text-input\" type=\"text\" name=\"username\" onkeyup=\"remove_class('invalid-field',this.id);\">"+
+    "<label class=\"label\">Username<span style=\"color: red;\"><sup>*</sup></span></label>"+"<input id=\"username\" class=\"text-input\" type=\"text\" name=\"username\" onkeyup=\"remove_class('invalid-field',this.id);\">"+
     "<label id=\"username-uni-err\" class=\"error-msg hidden-elm\">&nbsp;&nbsp;&nbsp;Username is taken</label><br>"+
     "<label class=\"label\">Password<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"password\" class=\"text-input\" type=\"password\" name=\"password\" onkeyup=\"remove_class('invalid-field',this.id); check_equality('password','conf-password','pass-not-equal-err-str',false);\"><br>"+
     "<label class=\"label\">Confirm Password<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"conf-password\" class=\"text-input\" type=\"password\" onkeyup=\"remove_class('invalid-field',this.id); check_equality('password','conf-password','pass-not-equal-err-str',false);\">"+
@@ -996,18 +996,23 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
     var sql_args = {};
     var place_holder_value = '';
     var place_holder_status = 'disabled selected';
-    var format_str = '%'+text_col+'%';
+    var text_format = '%'+text_col+'%';
+    var value_format = '%'+value_col+'%';
     var callback = false;
     sql_args.cmd = "SELECT";
     sql_args.table = table;
     sql_args.cols = [value_col,text_col];
     // processing additional arguments
-    if (!!(add_args.format_str)) { format_str = add_args.format_str;}
+    if (!!(add_args.value_format)) { value_format = add_args.value_format;}
+    if (!!(add_args.format_str)) { text_format = add_args.format_str;}
     if (!!(add_args.add_cols)) { sql_args.cols = sql_args.cols.concat(add_args.add_cols);}
     if (!!(add_args.sql_where)) { sql_args.where = add_args.sql_where;}
     if (!!(add_args.place_holder_value)) {place_holder_value = add_args.place_holder_value;}
     if (!!(add_args.place_holder_status)) {place_holder_status = add_args.place_holder_status;}
     if (!!(add_args.add_callback)) {callback = add_args.add_callback;}
+    if (!!(add_args.sql_args)) { 
+        for (var arg in add_args.sql_args) { sql_args[arg] = add_args.sql_args[arg];}
+    }
     sql = gen_sql(sql_args);
     //
     // temporary function to populate a drop box
@@ -1021,9 +1026,10 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
         }
         //
         for (var i = 0; i < data_arr.length; i++) {
-            var text = format_str;
-            for (var prop in data_arr[i]) { text = text.replace('%'+prop+'%',data_arr[i][prop]);}
-            options_str += "<option value=\""+data_arr[i][value_col]+"\">"+text+"</option>";
+            var text = text_format;
+            var value = value_format;
+            for (var prop in data_arr[i]) { text = text.replace('%'+prop+'%',data_arr[i][prop]); value = value.replace('%'+prop+'%',data_arr[i][prop]);}
+            options_str += "<option value=\""+value+"\">"+text+"</option>";
         }
         //
         // placing additional options in list

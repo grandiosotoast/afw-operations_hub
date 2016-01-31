@@ -6,13 +6,13 @@
 //
 // this creates a method to output a YYYY-MM-DD formatted date 
 Date.prototype.yyyymmdd = function() {
-   // getting components of date
-   var YYYY =  this.getFullYear().toString();
-   var   MM = (this.getMonth()+1).toString();
-   var   DD =  this.getDate().toString();
-   //
-   // returning formatted string
-  return YYYY + '-' + (MM[1]?MM:"0"+MM[0]) + '-' + (DD[1]?DD:"0"+DD[0])
+    // getting components of date
+    var YYYY =  this.getFullYear().toString();
+    var   MM = (this.getMonth()+1).toString();
+    var   DD =  this.getDate().toString();
+    //
+    // returning formatted string
+    return YYYY + '-' + (MM[1]?MM:"0"+MM[0]) + '-' + (DD[1]?DD:"0"+DD[0])
 };
 //
 // this performs and outputs the desired math on 2 values
@@ -310,6 +310,18 @@ function remove_class_all(class_name) {
     }
 }
 //
+// this prints a given page element
+function print_page(printableArea) {
+     var printContents = document.getElementById(printableArea).innerHTML;
+     var originalContents = document.body.innerHTML;
+     //
+     document.body.innerHTML = printContents;
+     // this is where CSV export logic can go as well I think
+     window.print();
+     //
+     document.body.innerHTML = originalContents;
+}
+//
 // storing data in session variable to be used on different pages 
 function store_session(key_val_str) {
     
@@ -364,7 +376,7 @@ function get_session(process_fun) {
     xmlhttp.send("get_session=true");  
 }
 //
-// generates a sql command to be used in an ajax command
+// generates a sql command to be used in an ajax request
 function gen_sql(arg_object) {
     // cmd values = INSERT, SELECT, UPDATE, DELETE
     // Syntax to gen INSERT command: cmd = "INSERT", table=table, cols=[c1,c2,..c#], vals=[v1,v2,...,v#]
@@ -508,9 +520,6 @@ function gen_sql(arg_object) {
         return;
     }
     //
-    // adding in limit clause if it is available
-    if (arg_object.limit) {sql += ' LIMIT '+arg_object.limit.splice(0,2).join();}
-    //
     // handling order by clauses
     if (arg_object.orderBy) {
         sql += ' ORDER BY `'+arg_object.orderBy[0][0]+'` '+arg_object.orderBy[0][1]
@@ -524,6 +533,10 @@ function gen_sql(arg_object) {
         arg_object.addLogic = arg_object.addLogic.replace(';','');
         sql += ' ' + arg_object.addLogic;
     }
+    //
+    // adding in limit clause if it is available
+    if (arg_object.limit) {sql += ' LIMIT '+arg_object.limit.splice(0,2).join();}
+    //
     return(sql);
 }
 //

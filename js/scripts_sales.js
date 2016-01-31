@@ -150,6 +150,120 @@ function mod_customer() {
     create_customer_table(1,'rep_id','ASC')
 }
 //
+// this function sets up the page for a sales rep report
+function rep_report() {
+    //
+    // clearing elements inside main-container div
+    var childNodes = document.getElementById('main-container').childNodes;
+    for (var i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+    }
+    //
+    // setting up report inputs
+    var update_fun = function(){ show_update_button('create-rep-report','sales-rep-report','Show Changes');};
+    var update_fun_str = "show_update_button('create-rep-report','sales-rep-report','Show Changes');"
+    var fieldset = document.createElement('FIELDSET');
+    var legend = document.createElement('LEGEND');
+    fieldset.id = 'report-inputs';
+    fieldset.className = 'fieldset-default';
+    legend.appendChild(document.createTextNode('Report Parameters'));
+    document.getElementById('input-div').appendChild(fieldset);
+    //
+    var input_args = {
+        output_id : 'report-inputs',
+        time_range_onchange : update_fun_str,
+        day_onkeyup : update_fun_str,
+        month_onchange : update_fun_str,
+        year_onchange  : update_fun_str
+    };
+    create_time_range_inputs(input_args);
+    fieldset.insertBefore(legend,fieldset.childNodes[0]);
+    //
+    var elements = Array(
+        {'elm' : 'br'},
+        {'elm' : 'br'},
+        //
+        {'elm' : 'label', 'className' : 'label', 'textNode' : 'Report Type:'},
+        //
+        {'elm' : 'br'},
+        {'elm' : 'label', 'className' : 'label-4em', 'textNode' : 'Detailed:'},
+        {'elm' : 'input', 'id' : 'report-type-detailed', 'type' : 'radio', 'name' : 'report-type', 'value' : 'detailed', 'checked' : true, 'events' : [{'event' : 'change', 'function' : update_fun}]},
+        //
+        {'elm' : 'span','textNode' : '\u00A0\u00A0\u00A0\u00A0'},
+        {'elm' : 'label', 'className' : 'label-4em', 'textNode' : 'Summary:'},
+        {'elm' : 'input', 'id' : 'report-type-summary', 'type' : 'radio', 'name' : 'report-type', 'value' : 'summary', 'events' : [{'event' : 'change', 'function' : update_fun}]},
+        //
+        {'elm' : 'span','textNode' : '\u00A0\u00A0\u00A0\u00A0'},
+        {'elm' : 'label', 'className' : 'label-5em', 'textNode' : 'No Totals:'},
+        {'elm' : 'input', 'id' : 'report-type-noTotals', 'type' : 'radio', 'name' : 'report-type', 'value' : 'nototals', 'events' : [{'event' : 'change', 'function' : update_fun}]},
+        //
+        {'elm' : 'br'},
+        {'elm' : 'br'},
+        //
+        {'elm' : 'label', 'className' : 'label', 'textNode' : 'Preset Report Options:'},
+        {'elm' : 'select', 'id' : 'preset-report', 'className' : 'dropbox-input', 'name' : 'preset-report' , 'events' : [{'event' : 'change', 'function' : function(){ show_update_button('create-rep-report','sales-rep-report','Show Changes'); remove_class('hidden-elm','sel-cols-div'); rep_report_data_columns('sel-cols-div','show-data-sel-cols',false,true);}}]},
+        //
+        {'elm' : 'br'},
+        {'elm' : 'br'},
+        //
+        {'elm' : 'label', 'className' : 'label', 'textNode' : 'Sorting Column:'},
+        {'elm' : 'select', 'id' : 'sort-column', 'className' : 'dropbox-input', 'name' : 'sort-column', 'events' : [{'event' : 'change', 'function' : update_fun}]},
+        {'elm' : 'span','textNode' : '\u00A0\u00A0\u00A0\u00A0'},
+        {'elm' : 'label', 'className' : 'label', 'textNode' : 'Sorting Direction:'},
+        {'elm' : 'select', 'id' : 'sort-direction', 'className' : 'dropbox-input', 'name' : 'sort-direction', 'events' : [{'event' : 'change', 'function' : update_fun}]}
+        );
+    addChildren(fieldset,elements);
+    //
+    elements = Array(
+        {'elm' : 'option', 'textNode' : 'Ascending', 'value' : 'ASC'},
+        {'elm' : 'option', 'textNode' : 'Descending', 'value' : 'DESC'}
+        );
+    addChildren(document.getElementById('sort-direction'),elements);
+    //
+    // creating the required buttons and selection cols div
+    elements = Array(
+        {'elm' : 'br'},
+        //
+        {'elm' : 'button', 'id' : 'show-data-sel-cols', 'textNode' : 'Show Data Selection Columns', 'events' : [{'event' : 'click', 'function' : function(){ rep_report_data_columns('sel-cols-div','show-data-sel-cols',true,false);}}]},
+        //
+        {'elm' : 'button', 'id' : 'create-rep-table', 'textNode' : 'Show Sales Rep Table', 'events' : [{'event' : 'click', 'function' : function(){ report_rep_table(1,'rep_id','ASC',true);}}]},
+        //
+        {'elm' : 'button', 'id' : 'create-rep-report', 'textNode' : 'Create Report', 'events' : [{'event' : 'click', 'function' : function(){ create_rep_report('.');}}]},
+        //
+        {'elm' : 'button', 'id' : 'create-all-rep-report', 'textNode' : 'Create All Rep Report', 'className' : 'hidden-elm', 'events' : [{'event' : 'click', 'function' : function(){ create_rep_report('.'); add_class('hidden-elm',this.id);}}]},
+        //
+        {'elm' : 'button', 'id' : 'print-rep-report', 'textNode' : 'Print', 'events' : [{'event' : 'click', 'function' : function(){ print_page('content-div');}}]},
+        //
+        {'elm' : 'div', 'id' : 'sel-cols-div', 'className' : 'hidden-elm'}
+        );
+    addChildren(document.getElementById('input-div'),elements);
+    //
+    // populating dropboxes
+    var dropbox_args = {
+        sql_where : [['report_type','REGEXP','(^|%)sales(%|$)']]
+    };
+    populate_dropbox_options('preset-report','report_presets','preset_index','preset_name','',dropbox_args);
+    dropbox_args = {
+        sql_args : {
+            where : [['column_type','LIKE','static'],['in_tables','REGEXP','(^|%)sales_rep_data(%|$)'],['use_on_pages','REGEXP','(^|%)sales_reporting(%|$)'],['use_in_html_tables','REGEXP','(^|%)sales_rep_report(%|$)']],
+            orderBy : [['order_index','ASC']]
+        },
+        value_format : 'sales_rep_data.%column_name%'
+    };
+    populate_dropbox_options('sort-column','table_meta_data','column_name','column_nickname','',dropbox_args);
+}
+//
+// this function sets up the page for a customer report
+function customer_report() {
+    //
+    // clearing elements inside main-container div
+    var childNodes = document.getElementById('main-container').childNodes;
+    for (var i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+    }
+    alert('WIP')
+}
+//
 // this function creates the sales rep table
 function create_rep_table(page,sort_col,sort_dir) {   
     //
@@ -728,4 +842,317 @@ function submit_sales_customer_form(args) {
     //
     var sql = gen_sql(sql_args);
     ajax_exec_db(sql,callback);
+}
+//
+//
+function report_show_cols() {
+    //
+    alert('WIP');
+}
+//
+//
+function report_rep_table(page,sort_col,sort_dir,toggle) {   
+    //
+    // initializating argument objects
+    var rep_table_args = {};
+    var data_sql_args = {};
+    var meta_sql_args = {};
+    //
+    // creating sql statements
+    meta_sql_args.cmd = 'SELECT';
+    meta_sql_args.table = 'table_meta_data';
+    meta_sql_args.where = [['in_tables','REGEXP','(^|%)sales_rep_table(%|$)|(^|%)dbusers(%|$)'],['use_on_pages','REGEXP','sales_maintenance|sales_reporting'],['use_in_html_tables','REGEXP','sales_rep_table']];
+    meta_sql_args.orderBy = [['order_index','ASC']]
+    
+    rep_table_args.data_sql = "SELECT * FROM sales_rep_table INNER JOIN dbUsers ON sales_rep_table.dbuser_internal_id=dbUsers.dbuser_internal_id WHERE dbUsers.dbuser_status LIKE 'active' ORDER BY sales_rep_table."+sort_col+" "+sort_dir;
+    rep_table_args.meta_sql = gen_sql(meta_sql_args);
+    //
+    // creating table argument object   
+    rep_table_args.table_output_id = 'table-div';
+    rep_table_args.table_id = 'sales-rep-table';
+    rep_table_args.table_class = 'emp_data_table';
+    rep_table_args.row_id_prefix = 'rep-row-';
+    rep_table_args.table_data_cell_class = 'emp-data-td';  
+    rep_table_args.page_nav_div_id = 'rep-table-page-nav';
+    rep_table_args.page_nav_class = 'page_nav';
+    rep_table_args.page_nav_id_prefix = 'rep';
+    rep_table_args.page_class_str = 'page_nav_link';
+    rep_table_args.page = page;
+    rep_table_args.num_per_page = 15;
+    rep_table_args.tot_pages_shown = 9;
+    rep_table_args.page_onmouse_str = '';
+    rep_table_args.page_onclick = 'report_rep_table(%%,%sort_col%,%sort_dir%,false)';
+    rep_table_args.head_row_class_str = 'emp-data-header';
+    rep_table_args.sort_col = sort_col;
+    rep_table_args.sort_dir = sort_dir;
+    rep_table_args.sort_onclick = 'report_rep_table(%%,%column_name%,%sort_dir%,false)';
+    rep_table_args.row_onclick = "create_rep_report('%rep_id%')";
+    rep_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
+    rep_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')"; 
+    rep_table_args.add_callback = function() { 
+        if (document.getElementById('rep-table-header')) { return;}
+        var header = document.createElement('H4');
+        header.appendChild(document.createTextNode('Click on a sales rep to generate a report for them.'))
+        document.getElementById('table-div').insertBefore(header,document.getElementById('table-div').childNodes[0]);
+    };
+    //
+    create_sortable_table(rep_table_args);
+    //
+    if (toggle == true) {
+        toggle_view_element_button('create-rep-table','table-div','Hide Sales Rep Table','Show Sales Rep Table');
+        if (document.getElementById('rep-table-header')) { show_hide('rep-table-header');}
+        if (document.getElementById('table-div').className.match('hidden-elm')) {
+            remove_class('hidden-elm','create-all-rep-report');
+        }
+        else {
+            add_class('hidden-elm','create-rep-report');
+        }
+    }
+}
+//
+// this makes the data selection columns for the report
+//
+// creates the data columns table for the report page
+function rep_report_data_columns(out_id,button_id,toggle,reset) { 
+    var sql = "";
+    var preset_sql = '';
+    var preset = document.getElementById('preset-report').value;
+    //
+    var sql_args = {};
+    sql_args.cmd = 'SELECT';
+    sql_args.table = 'report_presets';
+    sql_args.where = [['preset_index','LIKE',preset]]
+    preset_sql = gen_sql(sql_args);
+    //
+    sql = "SELECT * FROM `table_meta_data` WHERE `in_tables` REGEXP '(^|%)sales_rep_data(%|$)|(^|%)sales_rep_table(%|$)' ";
+    sql += "AND `use_on_pages` REGEXP 'sales_reporting' AND `use_in_html_tables` REGEXP 'sales_rep_report' ORDER BY `order_index` ASC"
+    //
+    // creating reset button
+    var reset_onclick = "rep_report_data_columns('"+out_id+"','"+button_id+"',false,true); show_update_button('create-rep-report','sales-rep-report','Show Changes'); add_class('hidden-elm','restore-data-col-defaults');";
+    var button = "<br><button id=\"restore-data-col-defaults\" type=\"button\" class=\"hidden-elm\" onclick=\""+reset_onclick+"\">Restore Defaults</button>";
+    //
+    var callback = function(response) {
+        var args = {};
+        args.data = response.data;
+        args.preset_data = response.meta_data[0];
+        args.hide_sort_row = true;
+        args.hide_totals_row = true;
+        var table = make_data_columns_table(args)
+        //
+        // shows or hides the data column div
+        if (toggle) { show_hide(out_id);}
+        //
+        if (document.getElementById(out_id).className.match(/hidden/i)) {
+            document.getElementById(button_id).innerHTML = "Show Data Selection Columns";
+        }
+        else {
+            document.getElementById(button_id).innerHTML = "Hide Data Selection Columns";
+        }
+        //
+        // checking if the checkbox array needs reset or not
+        if (!(reset)) {
+            if (document.getElementById(out_id).innerHTML.match(/table/)) {return; }
+        }
+        //
+        document.getElementById(out_id).innerHTML = button+table;
+    }
+    //
+    ajax_fetch_db(sql,preset_sql,callback)
+    //
+}
+//
+// this creates the rep report 
+function create_rep_report(rep_id) {
+    //
+    var name_val_obj = get_all_form_values('report-inputs','');
+    var ts_obj = to_and_from_timestamps();
+    //
+    // making new create report button to allow button to properly update the report
+    var new_btn = document.createElement('BUTTON');
+    new_btn.appendChild(document.createTextNode('Create All Rep Report'));
+    new_btn.id = 'create-rep-report';
+    new_btn.className = 'hidden-elm';
+    new_btn.addEventListener("click",function(){ 
+        create_rep_report(rep_id);
+    });
+    document.getElementById('create-rep-report').parentNode.replaceChild(new_btn,document.getElementById('create-rep-report'));
+    //
+    // getting report args from form
+    var report_args = {};
+    report_args.rep_id = rep_id;
+    report_args.preset = name_val_obj['preset-report'];
+    report_args.sort_col = name_val_obj['sort-column'];
+    report_args.sort_dir = name_val_obj['sort-direction'];
+    report_args.report_type = name_val_obj['report-type'];
+    //
+    var sel_cols = false;
+    if (!!(document.getElementById('data_sel_cols_table'))) {
+        sel_cols = [];
+        var all_children = document.getElementById('data_sel_cols_table').getElementsByTagName("*");
+        for (var i = 0; i < all_children.length; i++) {
+            if (all_children[i].nodeType != 1) {continue;}
+            if (all_children[i].nodeName.toUpperCase() != 'INPUT') {continue;}
+            if (all_children[i].disabled == true) {continue;}
+            if (all_children[i].checked == false) {continue;}
+            //
+            if (all_children[i].id.match('-viewcol-')) { sel_cols.push(all_children[i].value);}
+        }
+    }
+    report_args.sel_cols = sel_cols;
+    //
+    // setting up SQL statement to query REP table to determine the most recent AR date
+    var sql_args = {
+        'cmd' : 'SELECT',
+        'table' : 'sales_rep_data',
+        'cols' : ['date'],
+        'where' : [['date', '<=',ts_obj.to_ts]],
+        'orderBy' : [['date','DESC']],
+        'limit' : [0,1]
+    };
+    var sql = gen_sql(sql_args);
+    //
+    var callback = function(response) {
+        if (!(response[0][0])) {document.getElementById('content-div').innerHTML = '<table id="sales-rep-report"><h3>No available data</h3></table>'; return;}
+        report_args.end_date = response[0][0]['date'];
+        rep_report_get_data(report_args);
+    }
+    //
+    ajax_multi_fetch([sql],[0],callback);
+}
+//
+// this function uses the inputs from the previous function to fetch the required data 
+function rep_report_get_data(args) {
+    //
+    // determining start and end dates for YTD and LYTD totals
+    var date_arr = args.end_date.split('-');
+    for (var i = 0; i < date_arr.length; i++) {date_arr[i] = Number(date_arr[i]);}
+    date_arr[0] = date_arr[0] - 1;
+    var curr_date = args.end_date;
+    var last_year_date = date_arr.join('-');
+    //
+    // setting up sql statements 
+    var LYTD_sql = 'SELECT sales_rep_table.rep_id, SUM(sales_data.amount) lytd_total FROM sales_data ';
+    LYTD_sql += 'INNER JOIN sales_customer_table ON sales_data.customer_id=sales_customer_table.customer_id ';
+    LYTD_sql += 'INNER JOIN sales_rep_table ON sales_customer_table.rep_id = sales_rep_table.rep_id ';
+    LYTD_sql += "WHERE sales_data.date BETWEEN '"+CONSTANTS.LY_FIRST_BUSINESS_DAY.join('-')+"' AND '"+last_year_date+"' GROUP BY sales_rep_table.rep_id";
+    //
+    var YTD_sql  = 'SELECT sales_rep_table.rep_id, SUM(sales_data.amount) ytd_total FROM sales_data ';
+    YTD_sql  += 'INNER JOIN sales_customer_table ON sales_data.customer_id=sales_customer_table.customer_id ';
+    YTD_sql  += 'INNER JOIN sales_rep_table ON sales_customer_table.rep_id = sales_rep_table.rep_id ';
+    YTD_sql  += "WHERE sales_data.date BETWEEN '"+CONSTANTS.FIRST_BUSINESS_DAY.join('-')+"' AND '"+curr_date+"' GROUP BY sales_rep_table.rep_id";
+    //
+    var rep_data_sql = 'SELECT * FROM sales_rep_data INNER JOIN sales_rep_table ON sales_rep_data.rep_id = sales_rep_table.rep_id ';
+    rep_data_sql += "WHERE sales_rep_data.date LIKE '"+curr_date+"' ORDER BY "+args.sort_col+" "+args.sort_dir;
+    //
+    var dyn_cols_sql = "SELECT * FROM `report_dynamic_columns` WHERE `department` REGEXP '(^|%)sales_rep(%|$)'";
+    //
+    var meta_args = {
+        'cmd'   : 'SELECT',
+        'table' : 'table_meta_data',
+        'where' : [['in_tables','REGEXP','(^|%)sales_rep_data(%|$)'],
+                   ['use_on_pages','REGEXP','(^|%)sales_reporting(%|$)'],
+                   ['use_in_html_tables','REGEXP','(^|%)sales_rep_report(%|$)']],
+        'orderBy' : [['order_index','ASC']]
+    };
+    if (args.sel_cols) { meta_args.where.push(['column_name','REGEXP',args.sel_cols.join('$|')+'$']);}
+    var meta_sql = gen_sql(meta_args);
+    //
+    // defining callback function
+    var callback = function(response) {
+        args.lytd_data = response['LYTD_data'];
+        args.ytd_data  = response['YTD_data'];
+        args.rep_data  = response['rep_data'];
+        args.meta_data = response['meta_data'];
+        args.dynamic_cols  = response['dynamic_cols'];
+        //
+        rep_report_process_data(args);
+    }
+    //
+    var sql_arr =  [LYTD_sql,YTD_sql,rep_data_sql,meta_sql,dyn_cols_sql];
+    var name_arr = ['LYTD_data','YTD_data','rep_data','meta_data','dynamic_cols'];
+    ajax_multi_fetch(sql_arr,name_arr,callback);
+}
+//
+// this function pre-processes the data for the table
+// and then passes the data array off to create_table function
+function rep_report_process_data(args) {
+    var meta_data = args.meta_data;
+    var rep_data = args.rep_data;
+    var lytd_data = args.lytd_data;
+    var ytd_data = args.ytd_data;
+    var dyn_col_arr = args.dynamic_cols;
+    //
+    // making lytd and ytd data an object keyd by rep id
+    var lytd_obj = {};
+    for (var i = 0; i < lytd_data.length; i++) {
+        lytd_obj[lytd_data[i]['rep_id']] = lytd_data[i];
+    }
+    var ytd_obj = {};
+    for (var i = 0; i < ytd_data.length; i++) {
+        ytd_obj[ytd_data[i]['rep_id']] = ytd_data[i];
+    }
+    //
+    // making dynamic cols an object keyed by column_name
+    var dynamic_cols = {};
+    for (var i = 0; i < dyn_col_arr.length; i++) {
+        dynamic_cols[dyn_col_arr[i]['column_name']] = dyn_col_arr[i];
+    }
+    args.dynamic_cols = dynamic_cols;
+    //
+    // initializing rep data ytd and lytd totals
+    for (var i = 0; i < rep_data.length; i++) {
+        rep_data[i].lytd_total = 0.0;
+        rep_data[i].ytd_total  = 0.0;
+        //
+        if (!!(lytd_obj[rep_data[i]['rep_id']])) { rep_data[i].lytd_total = lytd_obj[rep_data[i]['rep_id']]['lytd_total'];}
+        if (!!(ytd_obj[rep_data[i]['rep_id']]))  { rep_data[i].ytd_total  = ytd_obj[rep_data[i]['rep_id']]['ytd_total'];}
+    }
+    //
+    // handling report data precalculations
+    args.called_funs = {};
+    for (var col in dynamic_cols) {
+        col = args.dynamic_cols[col];
+        if (col.column_type != 'precalculate') { continue;}
+        var col_funct = REPORT_FUNCTIONS[col.col_function]
+        if (!(col_funct)) {console.log('Error: No function for column: '+col.column_name); continue;}
+        col_funct(col.column_name,args);
+    }
+    //
+    // handling data types in the report
+    for (var i = 0; i < rep_data.length; i++) {
+        for (var j = 0; j < meta_data.length; j++) {
+            var col = meta_data[j];
+            //console.log(i,col.column_name,rep_data[i][col.column_name],col.data_type)
+            rep_data[i][col.column_name] = process_data_type(rep_data[i][col.column_name],col.data_type);
+        }
+    }
+    //
+    // calling final creation function
+    build_rep_report(args);
+}
+//
+// uses the data arrays to build the report it self
+function build_rep_report(args) {
+    //
+    var table_args = {};
+    //
+    // creating table argument object   
+    table_args.table_output_id = 'content-div';
+    table_args.table_id = 'sales-rep-report';
+    table_args.table_class = 'emp_data_table';
+    table_args.row_id_prefix = 'reports-row-';
+    table_args.table_data_cell_class = 'emp-data-td';  
+    table_args.no_page_nav = true;
+    table_args.sortable = false;
+    table_args.data_arr = args.rep_data;
+    table_args.col_meta_data = args.meta_data;
+    table_args.sort_data = false;
+    table_args.page_nav_args = {};
+    table_args.head_row_args = {
+        head_row_class_str : 'emp-data-header',
+        class_str : 'emp-data-header'
+    };
+    //
+    var output_table = make_sortable_table(table_args)
+    document.getElementById(table_args.table_output_id).innerHTML = output_table;
 }

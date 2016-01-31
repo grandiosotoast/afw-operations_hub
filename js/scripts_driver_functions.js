@@ -1326,21 +1326,25 @@ function create_table(page,sort_col,sort_dir) {
     var table_args = {};
     var data_sql_args = {};
     var meta_sql_args = {};
-    var addLogic = trim(document.getElementById('add-sql-logic').value);
     //
     // unhiding logic box
-    remove_class('hidden-elm','sql-label');
-    remove_class('hidden-elm','add-sql-logic');
+    remove_class('hidden-elm','table-refinement');
     remove_class('hidden-elm','update-table');
     //
     // getting page elements
     var table_name = document.getElementById('table-select').value;
     if (table_name == '') {alert('No Table Selected.'); return;}
+    data_sql_args.where = [];
+    if ((trim(document.getElementById('column-name-1').value) != '') && (trim(document.getElementById('column-value-1').value) != '')) {
+        data_sql_args.where.push([trim(document.getElementById('column-name-1').value),trim(document.getElementById('match-type-1').value),trim(document.getElementById('column-value-1').value)]);
+    }
+    if ((trim(document.getElementById('column-name-2').value) != '') && (trim(document.getElementById('column-value-2').value) != '')) {
+        data_sql_args.where.push([trim(document.getElementById('column-name-2').value),trim(document.getElementById('match-type-2').value),trim(document.getElementById('column-value-2').value)]);
+    }
     //
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = table_name;
     if (sort_col != '') {data_sql_args.orderBy = [[sort_col,sort_dir]];}
-    data_sql_args.addLogic = addLogic;
     //
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';

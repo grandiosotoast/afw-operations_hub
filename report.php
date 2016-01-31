@@ -123,7 +123,10 @@ var input_args = {
     year_onchange  : "show_update_button('get_emp_data','report-table','Show Changes');"
 };
 create_time_range_inputs(input_args);
-populate_dropbox_options('preset-report','report_presets','preset_index','preset_name','','');
+var dropbox_args = {
+    sql_where : [['report_type','REGEXP','(^|%)production(%|$)']]
+};
+populate_dropbox_options('preset-report','report_presets','preset_index','preset_name','',dropbox_args);
 </script>
 </body>
 </html>

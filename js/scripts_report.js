@@ -73,6 +73,63 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
     }
 }
 //
+// creates the data columns table for the report page
+function show_data_columns(department,out_id,button_id,toggle,reset) { 
+    var arg_object = {};
+    var sql = "";
+    var preset_sql = '';
+    var preset = document.getElementById('preset-report').value;
+    //
+    var sql_args = {};
+    sql_args.cmd = 'SELECT';
+    sql_args.table = 'report_presets';
+    sql_args.where = [['preset_index','LIKE',preset]]
+    preset_sql = gen_sql(sql_args);
+    //
+    if (CONSTANTS.DEPT_TABLES.hasOwnProperty(department)) {
+        sql = "SELECT * FROM `table_meta_data` WHERE `in_tables` REGEXP '(^|%)employee_data(%|$)|(^|%)"+CONSTANTS.DEPT_TABLES[department]+"(%|$)' ";
+    }
+    else {
+        console.log('invalid department: '+department);
+        return;
+    }
+    sql += "AND `use_on_pages` REGEXP 'report' AND `use_in_html_tables` REGEXP 'report' ORDER BY `order_index` ASC"
+    //
+    // creating reset button
+    var reset_onclick = "show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',false,true); show_update_button('get_emp_data','report-table','Show Changes'); add_class('hidden-elm','restore-data-col-defaults');";
+    var button = "<br><button id=\"restore-data-col-defaults\" type=\"button\" class=\"hidden-elm\" onclick=\""+reset_onclick+"\">Restore Defaults</button><br>";
+    //
+    var callback = function(response) {
+        arg_object.department = department;
+        arg_object.data = response.data;
+        arg_object.preset_data = response.meta_data[0];
+        var table = make_data_columns_table(arg_object)
+        //
+        // shows or hides the data column div
+        if (toggle) {
+            show_hide(out_id);
+        }
+        //
+        if (document.getElementById(out_id).className.match(/hidden/i)) {
+            document.getElementById(button_id).innerHTML = "Show Data Selection Columns";
+        }
+        else {
+            document.getElementById(button_id).innerHTML = "Hide Data Selection Columns";
+        }
+        //
+        // checking if the checkbox array needs reset or not
+        if (!(reset)) {
+            if (document.getElementById(out_id).innerHTML.match(/table/)) {return; }
+        }
+        //
+        document.getElementById(out_id).innerHTML = button+table;
+        var int_secd_sort = document.getElementById('secd-sort').value
+        document.getElementById(int_secd_sort+'-sortby-radio').checked = true;
+    }
+    //
+    ajax_fetch_db(sql,preset_sql,callback)
+}
+//
 // function to get data and create a data report
 function create_report(parent_form_id,report_div_id,department,emp_id) {
     //
@@ -239,148 +296,6 @@ function make_data_sql(report_args) {
     var sql_arr = [data_sql];
     var name_arr = ['data'];
     ajax_multi_fetch(sql_arr,name_arr,callback)
-}
-//
-// creates the data columns table for the report page
-function show_data_columns(department,out_id,button_id,toggle,reset) { 
-    var arg_object = {};
-    var sql = "";
-    var preset_sql = '';
-    var preset = document.getElementById('preset-report').value;
-    //
-    var sql_args = {};
-    sql_args.cmd = 'SELECT';
-    sql_args.table = 'report_presets';
-    sql_args.where = [['preset_index','LIKE',preset]]
-    preset_sql = gen_sql(sql_args);
-    //
-    if (CONSTANTS.DEPT_TABLES.hasOwnProperty(department)) {
-        sql = "SELECT * FROM `table_meta_data` WHERE `in_tables` REGEXP '(^|%)employee_data(%|$)|(^|%)"+CONSTANTS.DEPT_TABLES[department]+"(%|$)' ";
-    }
-    else {
-        console.log('invalid department: '+department);
-        return;
-    }
-    sql += "AND `use_on_pages` REGEXP 'report' AND `use_in_html_tables` REGEXP 'report' ORDER BY `order_index` ASC"
-    //
-    // creating reset button
-    var reset_onclick = "show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',false,true); show_update_button('get_emp_data','report-table','Show Changes'); add_class('hidden-elm','restore-data-col-defaults');";
-    var button = "<br><button id=\"restore-data-col-defaults\" type=\"button\" class=\"hidden-elm\" onclick=\""+reset_onclick+"\">Restore Defaults</button><br>";
-    //
-    var callback = function(response) {
-        arg_object.department = department;
-        arg_object.data = response.data;
-        arg_object.preset_data = response.meta_data[0];
-        var table = make_data_columns_table(arg_object)
-        //
-        // shows or hides the data column div
-        if (toggle) {
-            show_hide(out_id);
-        }
-        //
-        if (document.getElementById(out_id).className.match(/hidden/i)) {
-            document.getElementById(button_id).innerHTML = "Show Data Selection Columns";
-        }
-        else {
-            document.getElementById(button_id).innerHTML = "Hide Data Selection Columns";
-        }
-        //
-        // checking if the checkbox array needs reset or not
-        if (!(reset)) {
-            if (document.getElementById(out_id).innerHTML.match(/table/)) {return; }
-        }
-        //
-        document.getElementById(out_id).innerHTML = button+table;
-        var int_secd_sort = document.getElementById('secd-sort').value
-        document.getElementById(int_secd_sort+'-sortby-radio').checked = true;
-    }
-    //
-    ajax_fetch_db(sql,preset_sql,callback)
-    //
-}
-//
-// creates the table that allows the user to select viewable columns and totalling type
-function make_data_columns_table(arg_object) {
-    
-    //
-    // variable definitions 
-    var col_meta_data = arg_object.data;  
-    var preset_data = arg_object.preset_data;
-    var department = arg_object.department
-    var checked_cols = [];
-    //
-    // making an array to track columns that should be checked
-    if (preset_data.data_columns.match(/\*/)) {
-        for (var i = 0; i < col_meta_data.length; i++) {
-            checked_cols.push(col_meta_data[i].column_name);
-        }        
-    }
-    else {
-        checked_cols = preset_data.data_columns.split(',');
-    }
-    //
-    // table construction initializations 
-    var table = '<br><table id="data_sel_cols_table" class="report-table">';
-    var view_col_tr = "<tr id=\"data_sel_cols_checkbox_tr\"><td class=\"report-data-td\">Show Column:</td>";
-    var total_type_tr = "<tr id=\"data_sel_cols_radio_tr\"><td class=\"report-data-td\">Sum:<br>or<br>Average:</td>";
-    var sort_by_tr = "<tr id=\"sort-by-col-tr\" ><td class=\"report-data-td\">Sort by Column:</td>";
-    var all_onclick_fun = "show_update_button('get_emp_data','report-table','Show Changes'); remove_class('hidden-elm','restore-data-col-defaults');";
-    //
-    // making header rows
-    var head_rows_props = {};
-    head_rows_props.id_prefix = "sel-cols-";
-    head_rows_props.class_str = "report-column-header";
-    head_rows_props.leading_cells = "<td class=\"report-spacer-td\"></td>";
-    var head = make_head_rows(col_meta_data,head_rows_props);
-    table += head;
-    //
-    // constructing additional table rows
-    for (var i = 0; i < col_meta_data.length; i++) {
-        var col_obj = col_meta_data[i];
-        var checked = '';
-        if (checked_cols.indexOf(col_obj.column_name) >= 0) {checked = 'checked';}
-        view_col_tr += '<td id="'+col_obj.column_name+'-viewcol-td" class="report-data-td"><input id="'+col_obj.column_name+'-viewcol-checkbox" name="sel_cols" type="checkbox" value="'+col_obj.column_name+'" onclick="'+all_onclick_fun+'" '+checked+'></td>';
-        if (col_obj.column_type != 'static') {
-            sort_by_tr += '<td id="'+col_obj.column_name+'-sortby-td" class="report-data-td"></td>'; 
-        }
-        else {
-            sort_by_tr += '<td id="'+col_obj.column_name+'-sortby-td" class="report-data-td"><input id="'+col_obj.column_name+'-sortby-radio" name="secd-sort" type="radio" value="'+col_obj.column_name+'" onclick="'+all_onclick_fun+'"></td>'; 
-        }
-        //
-        if (!!(col_obj.total_type.match(/sum|avg/))) {
-            var sum_check = "";
-            var avg_check = "";
-            if (col_obj.total_type.match(/avg/)) {avg_check = "checked";}
-            else {sum_check = "checked";}
-            total_type_tr += "<td class=\"report-data-td\"><input id=\""+col_obj.column_name+"-totaltype-sum\" type=\"radio\" name=\""+col_obj.column_name+"\" value=\""+col_obj.column_name+":sum\" onclick=\""+all_onclick_fun+"\" "+sum_check+"><br>";
-            total_type_tr += "<input id=\""+col_obj.column_name+"-totaltype-avg\" type=\"radio\" name=\""+col_obj.column_name+"\" value=\""+col_obj.column_name+":avg\" onclick=\""+all_onclick_fun+"\" "+avg_check+"></td>"
-        }
-        else {
-            total_type_tr += "<td id=\""+col_obj.column_name+"-total-td\" class=\"report-data-td\">&nbsp;</td>";
-        }
-    }
-    //
-    // adding closing tags and appending to table
-    view_col_tr += "</tr>";
-    sort_by_tr += "</tr>";
-    total_type_tr += "</tr>";
-    table += view_col_tr;
-    table += sort_by_tr;
-    table += total_type_tr;
-    table += "</table>";
-    //
-    return table;
-}
-//
-// updates the sort_by_col radio button to match drop down list if table exists
-function update_sort_by_col(table_row_id,drop_down_id) {
-    
-    if (!!(document.getElementById(table_row_id))) {
-        var secd_sort = document.getElementById(drop_down_id).value;  
-        if (!!(document.getElementById(secd_sort+'-sortby-radio'))) {
-            document.getElementById(secd_sort+'-sortby-radio').checked = true;       
-        }
-    }
 }
 //
 //

@@ -21,7 +21,14 @@ var REPORT_FUNCTIONS = {
     'calc_cost_per_move'  : calc_cost_per_move,
     'calc_cost_per_route' : calc_cost_per_route,
     'calc_cost_per_stop'  : calc_cost_per_stop,
-    'calc_cost_per_unit'  : calc_cost_per_unit
+    'calc_cost_per_unit'  : calc_cost_per_unit,
+    // sales functions
+    'calc_dso' : calc_dso,
+    'calc_credit_percentage' : calc_credit_percentage,
+    'calc_profit_margin' : calc_profit_margin,
+    'calc_base_commission' : calc_base_commission,
+    'calc_growth' : calc_growth,
+    'calc_total_commission' : calc_total_commission
 }
 //
 // this function checks if a function has already been called on that row
@@ -476,4 +483,120 @@ function calc_warehouse_incentive(col_name,data_row,dynamic_cols) {
     data_row[col_name] = parseFloat(data_row['sel_rate'])*parseFloat(data_row['num_cases']);
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
+////////////////////////////////////////////////////////////////////////////////
+//////////////              Sales Rep Report Functions               ///////////
+////////////////////////////////////////////////////////////////////////////////
 //
+//
+function calc_dso(col_name,report_args) {
+    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    //
+    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
+    //
+    var data = report_args.rep_data;
+    for (var i = 0; i < data.length; i++) {
+        var dso = 0.0
+        dso = data[i]['total_ar']/data[i]['total_ar_sales'];
+        if (isNaN(dso)) { dso = 0.0;}
+        data[i]['dso'] = dso;
+    }
+    
+    //
+    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true; 
+}
+//
+//
+function calc_credit_percentage(col_name,report_args) {
+    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    //
+    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
+    //
+    var data = report_args.rep_data;
+    for (var i = 0; i < data.length; i++) {
+        var perc_credits = 0.0
+        perc_credits = data[i]['total_credits']/data[i]['total_sales'];
+        if (isNaN(perc_credits)) { perc_credits = 0.0;}
+        data[i]['percent_credits'] = perc_credits;
+    }
+    //
+    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true; 
+}
+//
+//
+function calc_profit_margin(col_name,report_args) {
+    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    //
+    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
+    //
+    var data = report_args.rep_data;
+    for (var i = 0; i < data.length; i++) {
+        var profit_margin = 0.0
+        profit_margin = data[i]['profit']/data[i]['total_sales'];
+        if (isNaN(profit_margin)) { profit_margin = 0.0;}
+        data[i]['profit_margin'] = profit_margin;
+    }
+    //
+    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true; 
+}
+//
+//
+function calc_base_commission(col_name,report_args) {
+    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    //
+    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
+    //
+    var data = report_args.rep_data;
+    for (var i = 0; i < data.length; i++) {
+        var base_comm = 0.0
+        base_comm = data[i]['profit']*0.16;
+        if (isNaN(base_comm)) { base_comm = 0.0;}
+        data[i]['base_commission'] = base_comm;
+    }
+    //
+    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true; 
+}
+//
+//
+function calc_growth(col_name,report_args) {
+    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    //
+    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
+    //
+    var data = report_args.rep_data;
+    for (var i = 0; i < data.length; i++) {
+        var growth = 0.0
+        growth = data[i]['ytd_total']/data[i]['lytd_total'] - 1.0; 
+        if (isNaN(growth)) { growth = 0.0;}
+        data[i]['growth'] = growth;
+    }
+    //
+    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true; 
+}
+//
+//
+function calc_total_commission(col_name,report_args) {
+    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    //
+    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
+    //
+    //
+    var data = report_args.rep_data;
+    for (var i = 0; i < data.length; i++) {
+        var total_comm = data[i]['base_commission']; 
+        //
+        // growth bonuses
+        if (data[i]['growth'] >= 0.049) { total_comm += data[i]['profit']*0.01;}
+        if (data[i]['growth'] >= 0.10) { total_comm += data[i]['profit']*0.01;}
+        //
+        // DSO bonus
+        if (data[i]['dso'] <= 0.20) { total_comm += data[i]['profit']*0.0075;}
+        //
+        // credits bonus
+        if (data[i]['credits'] <= 0.01) { total_comm += data[i]['profit']*0.0075;}        
+        //
+        if (isNaN(total_comm)) { total_comm = 0.0;}
+        data[i]['total_commission'] = total_comm;
+    }
+    //
+    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true; 
+}

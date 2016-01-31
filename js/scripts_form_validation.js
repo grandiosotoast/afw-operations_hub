@@ -270,6 +270,8 @@ function get_all_form_values(parent_id,skip_elm_ids) {
 
         //
         name_val_obj[all_children[i].name] = trim(all_children[i].value);
+        // removing line breaks because they can break things
+        name_val_obj[all_children[i].name] = name_val_obj[all_children[i].name].replace(/\r?\n|\r/g,'; ');
     }
     return name_val_obj;
 }

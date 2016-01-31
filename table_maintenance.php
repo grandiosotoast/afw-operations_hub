@@ -37,8 +37,27 @@ check_login('table_maintenance');
 <input id="table-unique-val" type="hidden" value="">
 </form>
 <br>
-<label id="sql-label" class="label-large hidden-elm">Add Additional SQL logic here:</label><br>
-<textarea id ="add-sql-logic" class="hidden-elm" rows="4" cols="60" value=""></textarea><br>
+<fieldset id="table-refinement" class="fieldset-default hidden-elm">
+<legend id="sql-label">Table Refinement</legend>
+
+<table class="emp_data_table" style="margin: 0px">
+<tr>
+<td class="emp-data-header">Column Name</td>
+<td class="emp-data-header">Match Type</td>
+<td class="emp-data-header">Value</td>
+</tr>
+<tr>
+<td class="emp-data-td"><input id="column-name-1" type="text"></td>
+<td class="emp-data-td"><select id="match-type-1"><option value="REGEXP">REGEXP</option><option value="LIKE">LIKE</option></select></td>
+<td class="emp-data-td"><input id="column-value-1" type="text"></td>
+</tr>
+<tr>
+<td class="emp-data-td"><input id="column-name-2" type="text"></td>
+<td class="emp-data-td"><select id="match-type-2"><option value="REGEXP">REGEXP</option><option value="LIKE">LIKE</option></select></td>
+<td class="emp-data-td"><input id="column-value-2" type="text"></td>
+</tr>
+</table>
+</fieldset>
 <button id="update-table" class="hidden-elm" onclick="create_table(1,'','');">Update Table</button>
 <div id="table-div">
 </div>
