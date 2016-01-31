@@ -141,9 +141,9 @@ function gen_item_table(page,sort_col,sort_dir) {
     // setting up the item table arguments
     item_table_args.table_output_id = 'item-table-div';
     item_table_args.table_id = 'meat-shop-items';
-    item_table_args.table_class = 'emp_data_table';
+    item_table_args.table_class = 'default-table';
     item_table_args.row_id_prefix = 'item-row';
-    item_table_args.table_data_cell_class = 'emp-data-td';
+    item_table_args.table_data_cell_class = 'default-table-td';
     item_table_args.page_nav_div_id = 'item-table-page-nav';
     item_table_args.page_nav_class = 'page_nav';
     item_table_args.page_nav_id_prefix = 'item';
@@ -152,12 +152,12 @@ function gen_item_table(page,sort_col,sort_dir) {
     item_table_args.page_onclick = 'gen_item_table(%%,%sort_col%,%sort_dir%);';
     item_table_args.tot_pages_shown = 9;
     item_table_args.page = page;
-    item_table_args.head_row_class_str = 'emp-data-header';
+    item_table_args.head_row_class_str = 'default-table-header';
     item_table_args.sort_col = sort_col;
     item_table_args.sort_dir = sort_dir;
     item_table_args.sort_onclick = 'gen_item_table(%%,%column_name%,%sort_dir%);';
-    item_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
-    item_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')";
+    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = table_callback;
     //
     create_sortable_table(item_table_args);
@@ -257,9 +257,9 @@ function gen_stock_table(page,sort_col,sort_dir) {
     // setting up the item table arguments
     item_table_args.table_output_id = 'item-table-div';
     item_table_args.table_id = 'meat-shop-records';
-    item_table_args.table_class = 'emp_data_table';
+    item_table_args.table_class = 'default-table';
     item_table_args.row_id_prefix = 'record-row';
-    item_table_args.table_data_cell_class = 'emp-data-td';
+    item_table_args.table_data_cell_class = 'default-table-td';
     item_table_args.page_nav_div_id = 'records-table-page-nav';
     item_table_args.page_nav_class = 'page_nav';
     item_table_args.page_nav_id_prefix = 'item';
@@ -268,13 +268,13 @@ function gen_stock_table(page,sort_col,sort_dir) {
     item_table_args.page_onclick = 'gen_stock_table(%%,%sort_col%,%sort_dir%);';
     item_table_args.tot_pages_shown = 9;
     item_table_args.page = page;
-    item_table_args.head_row_class_str = 'emp-data-header';
+    item_table_args.head_row_class_str = 'default-table-header';
     item_table_args.sort_col = sort_col;
     item_table_args.sort_dir = sort_dir;
     item_table_args.sort_onclick = 'gen_stock_table(%%,%column_name%,%sort_dir%);';
     item_table_args.row_onclick = 'mod_stock_change_record(\'%entry_id%\')'; 
-    item_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
-    item_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')";
+    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = ''; 
     //
     create_sortable_table(item_table_args);
@@ -436,9 +436,9 @@ function meat_shop_inventory_report() {
     // setting up the item table arguments
     item_table_args.table_output_id = 'content-div';
     item_table_args.table_id = 'meat-shop-report';
-    item_table_args.table_class = 'emp_data_table';
+    item_table_args.table_class = 'default-table';
     item_table_args.row_id_prefix = 'report-row';
-    item_table_args.table_data_cell_class = 'emp-data-td';
+    item_table_args.table_data_cell_class = 'default-table-td';
     item_table_args.page_nav_div_id = 'report-page-nav';
     item_table_args.page_nav_class = 'page_nav';
     item_table_args.page_nav_id_prefix = report_type;
@@ -448,14 +448,14 @@ function meat_shop_inventory_report() {
     item_table_args.tot_pages_shown = 1;
     item_table_args.page = 1;
     item_table_args.num_per_page = 1000000; //preventing mulitple pags
-    item_table_args.head_row_class_str = 'emp-data-header';
+    item_table_args.head_row_class_str = 'default-table-header';
     item_table_args.sort_col = sort_col;
     item_table_args.sort_dir = sort_dir;
     item_table_args.sortable = false;
     item_table_args.sort_onclick = '';
     item_table_args.row_onclick = ''; 
-    item_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
-    item_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')";
+    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = mod_inventory_report_table;
     //
     create_sortable_table(item_table_args);
@@ -472,7 +472,7 @@ function mod_inventory_report_table() {
     //
     // modifying head row to add in total value column
     var head_row = report_rows[0];
-    var value_td = '<td id="Total Value" class="emp-data-header">Total Value</td>';
+    var value_td = '<td id="Total Value" class="default-table-header">Total Value</td>';
     head_row.innerHTML += value_td;
     //
     // processing rows
@@ -501,7 +501,7 @@ function mod_inventory_report_table() {
         //qty_td.style = 'text-align: right';
         qty_td.innerHTML = round(qty,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") //this regex adds commas
         value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-        value_td = '<td id="'+row.id+'-total_value" class="emp-data-td"><span style="float:left;">$&nbsp;</span><span style="float:right;">'+value+'<span></td>';
+        value_td = '<td id="'+row.id+'-total_value" class="default-table-td"><span style="float:left;">$&nbsp;</span><span style="float:right;">'+value+'<span></td>';
         row.innerHTML += value_td;
         
     }
@@ -510,10 +510,10 @@ function mod_inventory_report_table() {
     total_weight = round(total_weight,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     total_value = round(total_value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     var total_row = '<tr>';
-    total_row += '<td colspan=2 class="emp-data-header" style="font-size:16px;">Total:</td>';
-    total_row += '<td class="emp-data-header" style="text-align: right; font-size:16px;">'+total_weight+'</td>';
-    total_row += '<td class="emp-data-header">&nbsp</td>';
-    total_row += '<td class="emp-data-header"><span style="float:left; font-size:16px;">$&nbsp;</span><span style="float:right; font-size:16px;">'+total_value+'<span></td>';
+    total_row += '<td colspan=2 class="default-table-header" style="font-size:16px;">Total:</td>';
+    total_row += '<td class="default-table-header" style="text-align: right; font-size:16px;">'+total_weight+'</td>';
+    total_row += '<td class="default-table-header">&nbsp</td>';
+    total_row += '<td class="default-table-header"><span style="float:left; font-size:16px;">$&nbsp;</span><span style="float:right; font-size:16px;">'+total_value+'<span></td>';
     document.getElementById('meat-shop-report').innerHTML += total_row;
 }
 //
@@ -588,9 +588,9 @@ function create_change_report() {
     // setting up the item table arguments
     item_table_args.table_output_id = 'content-div';
     item_table_args.table_id = 'stock-change-report-table';
-    item_table_args.table_class = 'emp_data_table';
+    item_table_args.table_class = 'default-table';
     item_table_args.row_id_prefix = 'record-row';
-    item_table_args.table_data_cell_class = 'emp-data-td';
+    item_table_args.table_data_cell_class = 'default-table-td';
     item_table_args.page_nav_div_id = 'report-page-nav';
     item_table_args.page_nav_class = 'page_nav';
     item_table_args.page_nav_id_prefix = 'item';
@@ -600,14 +600,14 @@ function create_change_report() {
     item_table_args.tot_pages_shown = 1;
     item_table_args.page = 1;
     item_table_args.num_per_page = 1000000;
-    item_table_args.head_row_class_str = 'emp-data-header';
+    item_table_args.head_row_class_str = 'default-table-header';
     item_table_args.sort_col = 'creation_timestamp';
     item_table_args.sort_dir = 'DESC';
     item_table_args.sort_onclick = '';
     item_table_args.sortable = false;
     item_table_args.row_onclick = ''; 
-    item_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
-    item_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')";
+    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = function() {
             add_class('hidden-elm','report-page-nav');
     }; 

@@ -40,9 +40,9 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
     emp_table_args.department = document.getElementById('department').value;
     emp_table_args.table_output_id = 'employee-table-div';
     emp_table_args.table_id = 'employee_table';
-    emp_table_args.table_class = 'emp_data_table';
+    emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
-    emp_table_args.table_data_cell_class = 'emp-data-td'; 
+    emp_table_args.table_data_cell_class = 'default-table-td'; 
     emp_table_args.page_nav_div_id = 'emp-table-page-nav';
     emp_table_args.page_nav_class = 'page_nav';
     emp_table_args.page_nav_id_prefix = 'emp';
@@ -50,14 +50,14 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
     emp_table_args.page_onmouse_str = '';
     emp_table_args.tot_pages_shown = 9;
     emp_table_args.page = page;
-    emp_table_args.head_row_class_str = 'emp-data-header';
+    emp_table_args.head_row_class_str = 'default-table-header';
     emp_table_args.sort_col = sort_col;
     emp_table_args.sort_dir = sort_dir;
     emp_table_args.page_onclick = 'report_emp_table(%%,%sort_col%,%sort_dir%,false)';
     emp_table_args.sort_onclick = 'report_emp_table(%%,%column_name%,%sort_dir%,false)';
     emp_table_args.row_onclick = "create_report('report_emp_data','report_data_div','%department%','%emp_id%'); ";
-    emp_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
-    emp_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')";
+    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     //
     // creating employee table
     create_sortable_table(emp_table_args);

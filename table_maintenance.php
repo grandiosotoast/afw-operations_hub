@@ -40,23 +40,24 @@ check_login('table_maintenance');
 <fieldset id="table-refinement" class="fieldset-default hidden-elm">
 <legend id="sql-label">Table Refinement</legend>
 
-<table class="emp_data_table" style="margin: 0px">
+<table class="default-table" style="margin: 0px">
 <tr>
-<td class="emp-data-header">Column Name</td>
-<td class="emp-data-header">Match Type</td>
-<td class="emp-data-header">Value</td>
+<td class="default-table-header">Column Name</td>
+<td class="default-table-header">Match Type</td>
+<td class="default-table-header">Value</td>
 </tr>
 <tr>
-<td class="emp-data-td"><input id="column-name-1" type="text"></td>
-<td class="emp-data-td"><select id="match-type-1"><option value="REGEXP">REGEXP</option><option value="LIKE">LIKE</option></select></td>
-<td class="emp-data-td"><input id="column-value-1" type="text"></td>
+<td class="default-table-td"><input id="column-name-1" type="text"></td>
+<td class="default-table-td"><select id="match-type-1"><option value="REGEXP">REGEXP</option><option value="LIKE">LIKE</option></select></td>
+<td class="default-table-td"><input id="column-value-1" type="text"></td>
 </tr>
 <tr>
-<td class="emp-data-td"><input id="column-name-2" type="text"></td>
-<td class="emp-data-td"><select id="match-type-2"><option value="REGEXP">REGEXP</option><option value="LIKE">LIKE</option></select></td>
-<td class="emp-data-td"><input id="column-value-2" type="text"></td>
+<td class="default-table-td"><input id="column-name-2" type="text"></td>
+<td class="default-table-td"><select id="match-type-2"><option value="REGEXP">REGEXP</option><option value="LIKE">LIKE</option></select></td>
+<td class="default-table-td"><input id="column-value-2" type="text"></td>
 </tr>
 </table>
+<label>** Mouse over table header cell to view actual column name</label>
 </fieldset>
 <button id="update-table" class="hidden-elm" onclick="create_table(1,'','');">Update Table</button>
 <div id="table-div">

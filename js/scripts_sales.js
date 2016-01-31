@@ -290,9 +290,9 @@ function create_rep_table(page,sort_col,sort_dir) {
     // creating table argument object   
     rep_table_args.table_output_id = 'table-div';
     rep_table_args.table_id = 'sales_rep_table';
-    rep_table_args.table_class = 'emp_data_table';
+    rep_table_args.table_class = 'default-table';
     rep_table_args.row_id_prefix = 'rep-row-';
-    rep_table_args.table_data_cell_class = 'emp-data-td';  
+    rep_table_args.table_data_cell_class = 'default-table-td';  
     rep_table_args.page_nav_div_id = 'rep-table-page-nav';
     rep_table_args.page_nav_class = 'page_nav';
     rep_table_args.page_nav_id_prefix = 'rep';
@@ -302,13 +302,13 @@ function create_rep_table(page,sort_col,sort_dir) {
     rep_table_args.tot_pages_shown = 9;
     rep_table_args.page_onmouse_str = '';
     rep_table_args.page_onclick = 'create_rep_table(%%,%sort_col%,%sort_dir%)';
-    rep_table_args.head_row_class_str = 'emp-data-header';
+    rep_table_args.head_row_class_str = 'default-table-header';
     rep_table_args.sort_col = sort_col;
     rep_table_args.sort_dir = sort_dir;
     rep_table_args.sort_onclick = 'create_rep_table(%%,%column_name%,%sort_dir%)';
     rep_table_args.row_onclick = "modify_rep_form('%dbuser_internal_id%','%row_id%')";
-    rep_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
-    rep_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')";  
+    rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
     //
     create_sortable_table(rep_table_args);
 }
@@ -353,9 +353,9 @@ function create_customer_table(page,sort_col,sort_dir) {
     // creating table argument object   
     customer_table_args.table_output_id = 'table-div';
     customer_table_args.table_id = 'sales_customer_table';
-    customer_table_args.table_class = 'emp_data_table';
+    customer_table_args.table_class = 'default-table';
     customer_table_args.row_id_prefix = 'customer-row-';
-    customer_table_args.table_data_cell_class = 'emp-data-td';  
+    customer_table_args.table_data_cell_class = 'default-table-td';  
     customer_table_args.page_nav_div_id = 'customer-table-page-nav';
     customer_table_args.page_nav_class = 'page_nav';
     customer_table_args.page_nav_id_prefix = 'customer';
@@ -365,13 +365,13 @@ function create_customer_table(page,sort_col,sort_dir) {
     customer_table_args.tot_pages_shown = 9;
     customer_table_args.page_onmouse_str = '';
     customer_table_args.page_onclick = 'create_customer_table(%%,%sort_col%,%sort_dir%)';
-    customer_table_args.head_row_class_str = 'emp-data-header';
+    customer_table_args.head_row_class_str = 'default-table-header';
     customer_table_args.sort_col = sort_col;
     customer_table_args.sort_dir = sort_dir;
     customer_table_args.sort_onclick = 'create_customer_table(%%,%column_name%,%sort_dir%)';
     customer_table_args.row_onclick = "modify_customer_form('%customer_internal_id%','%row_id%')";
-    customer_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
-    customer_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')";  
+    customer_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    customer_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
     //
     create_sortable_table(customer_table_args);
 }
@@ -870,9 +870,9 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
     // creating table argument object   
     rep_table_args.table_output_id = 'table-div';
     rep_table_args.table_id = 'sales-rep-table';
-    rep_table_args.table_class = 'emp_data_table';
+    rep_table_args.table_class = 'default-table';
     rep_table_args.row_id_prefix = 'rep-row-';
-    rep_table_args.table_data_cell_class = 'emp-data-td';  
+    rep_table_args.table_data_cell_class = 'default-table-td';  
     rep_table_args.page_nav_div_id = 'rep-table-page-nav';
     rep_table_args.page_nav_class = 'page_nav';
     rep_table_args.page_nav_id_prefix = 'rep';
@@ -882,13 +882,13 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
     rep_table_args.tot_pages_shown = 9;
     rep_table_args.page_onmouse_str = '';
     rep_table_args.page_onclick = 'report_rep_table(%%,%sort_col%,%sort_dir%,false)';
-    rep_table_args.head_row_class_str = 'emp-data-header';
+    rep_table_args.head_row_class_str = 'default-table-header';
     rep_table_args.sort_col = sort_col;
     rep_table_args.sort_dir = sort_dir;
     rep_table_args.sort_onclick = 'report_rep_table(%%,%column_name%,%sort_dir%,false)';
     rep_table_args.row_onclick = "create_rep_report('%rep_id%')";
-    rep_table_args.row_onmouseenter = "add_class('emp_data_tr-highlight','%row_id%')"; 
-    rep_table_args.row_onmouseleave = "remove_class('emp_data_tr-highlight','%row_id%')"; 
+    rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')"; 
     rep_table_args.add_callback = function() { 
         if (document.getElementById('rep-table-header')) { return;}
         var header = document.createElement('H4');
@@ -1139,9 +1139,9 @@ function build_rep_report(args) {
     // creating table argument object   
     table_args.table_output_id = 'content-div';
     table_args.table_id = 'sales-rep-report';
-    table_args.table_class = 'emp_data_table';
+    table_args.table_class = 'default-table';
     table_args.row_id_prefix = 'reports-row-';
-    table_args.table_data_cell_class = 'emp-data-td';  
+    table_args.table_data_cell_class = 'default-table-td';  
     table_args.no_page_nav = true;
     table_args.sortable = false;
     table_args.data_arr = args.rep_data;
@@ -1149,8 +1149,8 @@ function build_rep_report(args) {
     table_args.sort_data = false;
     table_args.page_nav_args = {};
     table_args.head_row_args = {
-        head_row_class_str : 'emp-data-header',
-        class_str : 'emp-data-header'
+        head_row_class_str : 'default-table-header',
+        class_str : 'default-table-header'
     };
     //
     var output_table = make_sortable_table(table_args)

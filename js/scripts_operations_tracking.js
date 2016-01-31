@@ -203,7 +203,8 @@ function create_page_links(page_nav_args) {
 }
 //
 // creates the header rows for a table
-function make_head_rows(col_data,head_rows_props) {  
+function make_head_rows(col_data,head_rows_props) { 
+    console.log(head_rows_props)
     //
     // getting properties table header rows
     var col_meta_data = JSON.parse(JSON.stringify(col_data));
@@ -213,10 +214,12 @@ function make_head_rows(col_data,head_rows_props) {
     var leading_cells = "";
     var sort_data = false;
     var sort_onclick_str = "";
+    var header_tooltip = false;
     var skip_cols = [];
     if (!!(head_rows_props.id_prefix)) { id_prefix = head_rows_props.id_prefix;}
     if (!!(head_rows_props.class_str)) { class_str = head_rows_props.class_str;}
     if (!!(head_rows_props.leading_cells)) { leading_cells = head_rows_props.leading_cells;}
+    if (!!(head_rows_props.header_tooltip)) {header_tooltip = head_rows_props.header_tooltip;}
     if (!!(head_rows_props.sort_data)) {sort_data = head_rows_props.sort_data;}
     if (!!(head_rows_props.sort_onclick_str)) { sort_onclick_str = head_rows_props.sort_onclick_str;}
     if (!!(head_rows_props.skip_cols)) {skip_cols = head_rows_props.skip_cols;}
@@ -347,7 +350,13 @@ function make_head_rows(col_data,head_rows_props) {
         for (var col = 0; col < output_cells[lvl].length; col++) {
             if (output_cells[lvl][col] == '') {continue;}
             var col_obj = output_cells[lvl][col];
-            head_tr[lvl] += '<td id="'+id_prefix+col_obj.id+'" class="'+class_str+'" colspan="'+col_obj.colspan+'" rowspan="'+col_obj.rowspan+'" onclick="'+col_obj.sort_onclick+'">'+col_obj.innerHTML+'&nbsp;'+col_obj.arrow+'</td>';
+            var cell_tooltip = ''
+            if (header_tooltip) {
+                cell_tooltip = header_tooltip;
+                for (var prop in col_obj) { cell_tooltip = cell_tooltip.replace('%'+prop+'%',col_obj[prop])}
+                cell_tooltip = '<span class="default-table-tooltip">'+cell_tooltip+'</span>';
+            }
+            head_tr[lvl] += '<td id="'+id_prefix+col_obj.id+'" class="'+class_str+'" colspan="'+col_obj.colspan+'" rowspan="'+col_obj.rowspan+'" onclick="'+col_obj.sort_onclick+'">'+col_obj.innerHTML+'&nbsp;'+col_obj.arrow+cell_tooltip+'</td>';
         }
     }
     //
@@ -396,11 +405,17 @@ function create_sortable_table(table_args) {
     page_nav_args.class_str = table_args.page_class_str;
     page_nav_args.onclick_str = table_args.page_onclick.replace('%sort_dir%',"'"+table_args.sort_dir+"'");
     page_nav_args.onclick_str = page_nav_args.onclick_str.replace('%sort_col%',"'"+table_args.sort_col+"'"); 
-    page_nav_args.onmouse_str = table_args.page_onmouse_str;  
+    page_nav_args.onmouse_str = table_args.page_onmouse_str; 
+    if (!!(table_args.page_nav_args)) { 
+        for (var arg in table_args.page_nav_args) { page_nav_args[arg] = table_args.page_nav_args[arg];}
+    } 
     //
     var head_row_args = {};
-    head_row_args.class_str = "emp-data-header";
+    head_row_args.class_str = "default-table-header";
     head_row_args.sort_onclick_str = table_args.sort_onclick;
+    if (!!(table_args.head_row_args)) { 
+        for (var arg in table_args.head_row_args) { head_row_args[arg] = table_args.head_row_args[arg];}
+    }
     //
     var sort_data  = {};
     sort_data.sort_col = table_args.sort_col;
