@@ -46,11 +46,13 @@ check_login('report');
 <legend>Report Structure Parameters</legend>
 <label class="label">Report Type:</label>
 <br>
-<label class="label-4em">Detailed:</label><input id="report-type-detailed" type="radio" name="report-type" value="detailed" onclick="show_update_button('get_emp_data','report-table','Show Changes');" checked>
+<label class="label-4em">Detailed:</label><input id="report-type-detailed" type="checkbox" name="report-type-detailed" value="detailed" onclick="show_update_button('get_emp_data','report-table','Show Changes');" checked>
 &nbsp;&nbsp;&nbsp;
-<label class="label-4em">Summary:</label>&nbsp;<input id="report-type-summary" type="radio" name="report-type" value="summary" onclick="show_update_button('get_emp_data','report-table','Show Changes');">
+<label class="label-4em">Summary:</label>&nbsp;<input id="report-type-summary" type="checkbox" name="report-type-summary" value="summary" onclick="show_update_button('get_emp_data','report-table','Show Changes');">
 &nbsp;&nbsp;&nbsp;
-<label class="label-5em">No Totals:</label>&nbsp;<input id="report-type-noTotals" type="radio" name="report-type" value="noTotals" onclick="show_update_button('get_emp_data','report-table','Show Changes');">
+<label class="label-5em">No Totals:</label>&nbsp;<input id="report-type-no_totals" type="checkbox" name="report-type-no_totals" value="no_totals" onclick="show_update_button('get_emp_data','report-table','Show Changes');">
+&nbsp;&nbsp;&nbsp;
+<label class="label-6em">No Section Headers:</label>&nbsp;<input id="report-type-no_sect_heads" type="checkbox" name="report-type-no_sect_heads" value="no_sect_heads" onclick="show_update_button('get_emp_data','report-table','Show Changes');">
 <br>
 <br>
 <label class="label">Preset Report Options:</label>
@@ -87,9 +89,9 @@ check_login('report');
 <br>
 <button id="show_data_cols" type="button" onclick="show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',true,false);">Show Data Selection Columns</button> 
 <button id="show_employee_table" type="button" onclick="report_emp_table('1','emp_last_name','ASC',true);">Show Employee Table</button>
-<button id="get_emp_data" type="button" name="get_emp_data" onclick="create_report('report_emp_data','report_data_div','','')">Get All Employee Data</button>
-<button id="get_emp_data_all" type="button" class="hidden-elm" name="get_emp_data_all" onclick="create_report('report_emp_data','report_data_div','',''); add_class('hidden-elm','get_emp_data_all');">Get All Employee Data</button>
-<input type="button" onclick="printDiv('printableArea')" value="Print" />
+<button id="get_emp_data" type="button" name="get_emp_data" onclick="create_production_report('report_emp_data','report_data_div','','')">Get All Employee Data</button>
+<button id="get_emp_data_all" type="button" class="hidden-elm" name="get_emp_data_all" onclick="create_production_report('report_emp_data','report_data_div','',''); add_class('hidden-elm','get_emp_data_all');">Get All Employee Data</button>
+<input type="button" onclick="print_page('report_data_div')" value="Print" />
 <div id="data_sel_cols" class="hidden-elm"></div>
 <br>
 <h4 id="emp-table-header" class="hidden-elm">Click on an employee to generate a report for them.</h4>
@@ -97,23 +99,9 @@ check_login('report');
 <br>
 </form>
 <br>
-<!--Printing Div-->
-<div id="printableArea">
-     <div id="report_data_div" class="report-data-div "></div>
-</div>
+<div id="report_data_div" class="report-data-div "></div>
 </div> <!-- Closing main-container div -->
-<!--Print JavaScript-->
 <script language="javascript">
-function printDiv(printableArea) {
-     var printContents = document.getElementById(printableArea).innerHTML;
-     var originalContents = document.body.innerHTML;
-
-     document.body.innerHTML = printContents;
-     // this is where CSV export logic can go as well I think
-     window.print();
-
-     document.body.innerHTML = originalContents;
-}
 //
 var input_args = {
     output_id : 'time-range-inputs',

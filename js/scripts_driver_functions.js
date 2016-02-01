@@ -51,7 +51,7 @@ function enter_data_emp_table(page,sort_col,sort_dir,department) {
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     //
     //
-    create_sortable_table(emp_table_args);
+    create_standard_table(emp_table_args);
 }
 //
 // this creates and populates the data form for the data entry pages 
@@ -205,7 +205,7 @@ function view_emp_table(page,sort_col,sort_dir) {
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
     emp_table_args.add_callback = function(){store_session("emp_table_page,"+page+",emp_table_sort_col,"+sort_col+",emp_table_sort_dir,"+sort_dir);}
     //
-    create_sortable_table(emp_table_args);
+    create_standard_table(emp_table_args);
 }
 //
 // this function creates the data table for the view_employee page
@@ -284,7 +284,7 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
         curr_adj_button.parentNode.replaceChild(adj_button,curr_adj_button);
         // getting specific columns now for output
         data_table_args.meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','employee_data_table']];
-        create_sortable_table(data_table_args);
+        create_standard_table(data_table_args);
     }
     var meta_sql = gen_sql(data_table_args.meta_sql_args);
     ajax_fetch_db(meta_sql,'',callback);
@@ -564,7 +564,7 @@ function edit_data_emp_table(page,sort_col,sort_dir) {
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     //
-    create_sortable_table(emp_table_args);
+    create_standard_table(emp_table_args);
 }
 //
 // adds emp_id to employee table dataset
@@ -642,7 +642,7 @@ function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
     data_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     data_table_args.add_callback = function() { document.getElementById(data_table_args.table_id).dataset.empId = emp_id; }
     //
-    create_sortable_table(data_table_args);
+    create_standard_table(data_table_args);
 }
 //
 // defining the row onclick for the edit data entry table
@@ -1006,7 +1006,7 @@ function mod_dbuser_table(page,sort_col,sort_dir) {
     dbuser_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     dbuser_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";    
     //
-    create_sortable_table(dbuser_table_args)   
+    create_standard_table(dbuser_table_args)   
 }
 //
 // defining the row onclick for the employee table
@@ -1170,7 +1170,7 @@ function mod_emp_table(page,sort_col,sort_dir) {
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     //
-    create_sortable_table(emp_table_args);
+    create_standard_table(emp_table_args);
 }
 //
 // defining the row onclick for the employee table
@@ -1394,7 +1394,7 @@ function create_table(page,sort_col,sort_dir) {
         document.getElementById('table-div').innerHTML += button;
     }
     //
-    create_sortable_table(table_args);
+    create_standard_table(table_args);
 }
 //
 // gets all of the entry data to generate the form with

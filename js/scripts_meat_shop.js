@@ -160,7 +160,7 @@ function gen_item_table(page,sort_col,sort_dir) {
     item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = table_callback;
     //
-    create_sortable_table(item_table_args);
+    create_standard_table(item_table_args);
 }
 //
 // This function handles the modifcation of an item
@@ -277,7 +277,7 @@ function gen_stock_table(page,sort_col,sort_dir) {
     item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = ''; 
     //
-    create_sortable_table(item_table_args);
+    create_standard_table(item_table_args);
 }
 //
 // this creates an entry to update the stock in the items table
@@ -458,7 +458,7 @@ function meat_shop_inventory_report() {
     item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = mod_inventory_report_table;
     //
-    create_sortable_table(item_table_args);
+    create_standard_table(item_table_args);
     
 }
 //
@@ -612,5 +612,5 @@ function create_change_report() {
             add_class('hidden-elm','report-page-nav');
     }; 
     //
-    create_sortable_table(item_table_args);
+    create_standard_table(item_table_args);
 }

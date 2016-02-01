@@ -143,6 +143,166 @@ function total_fields(id_arr_str,out_id) {
     document.getElementById(out_id).value = total
 }
 //
+// function to generate a standard table 
+function create_standard_table(table_args) {
+    //
+    var sql_args = {};
+    var data_sql = '';
+    var meta_sql = '';
+    var department = '.'
+    var add_callback = false;
+    var sortable = true;
+    //
+    // getting callback if it exists
+    if (!!(table_args.add_callback)) {add_callback = table_args.add_callback;}
+    //
+    // results per page
+    if (!(table_args.num_per_page)) {
+        table_args.num_per_page = 10;
+    }
+    //
+    // determing if its sortable or not
+    if (table_args.hasOwnProperty('sortable')) {sortable = table_args.sortable;}
+    //
+    if (table_args.data_sql) { data_sql = table_args.data_sql;}
+    else { data_sql = gen_sql(table_args.data_sql_args);}
+    //
+    if (table_args.meta_sql) { meta_sql = table_args.meta_sql;}
+    else { meta_sql = gen_sql(table_args.meta_sql_args);}
+    //
+    // rearranging table args to proper form
+    var page_nav_args = {};
+    page_nav_args.curr_page = table_args.page;
+    page_nav_args.tot_pages_shown = table_args.tot_pages_shown;
+    page_nav_args.id_prefix = table_args.page_nav_id_prefix;
+    page_nav_args.class_str = table_args.page_class_str;
+    page_nav_args.onclick_str = table_args.page_onclick.replace('%sort_dir%',"'"+table_args.sort_dir+"'");
+    page_nav_args.onclick_str = page_nav_args.onclick_str.replace('%sort_col%',"'"+table_args.sort_col+"'"); 
+    page_nav_args.onmouse_str = table_args.page_onmouse_str; 
+    if (!!(table_args.page_nav_args)) { 
+        for (var arg in table_args.page_nav_args) { page_nav_args[arg] = table_args.page_nav_args[arg];}
+    } 
+    //
+    var head_row_args = {};
+    head_row_args.class_str = "default-table-header";
+    head_row_args.sort_onclick_str = table_args.sort_onclick;
+    if (!!(table_args.head_row_args)) { 
+        for (var arg in table_args.head_row_args) { head_row_args[arg] = table_args.head_row_args[arg];}
+    }
+    //
+    var sort_data  = {};
+    sort_data.sort_col = table_args.sort_col;
+    sort_data.sort_dir = table_args.sort_dir;
+    //
+    table_args.page_nav_args = page_nav_args;
+    table_args.head_row_args = head_row_args;
+    if (sortable) { table_args.sort_data = sort_data;}
+    //
+    var callback = function(response) {
+        table_args.data_arr = response.data;
+        table_args.col_meta_data = response.meta_data;
+        //
+        var output_table = make_standard_table(table_args);
+        document.getElementById(table_args.table_output_id).innerHTML = output_table;
+        add_class("page_nav_link_curr",table_args.page_nav_id_prefix+"-page_nav_"+table_args.page);
+        //
+        if (add_callback) {add_callback(response);}
+    }
+    ajax_multi_fetch([data_sql,meta_sql],['data','meta_data'],callback) 
+}
+//
+// makes the employee table itself
+function make_standard_table(table_args) {   
+    var output = '';
+    var table_row_appended_cells = '';
+    var row_onclick = '';
+    var row_onmouseenter = '';
+    var row_onmouseleave = '';
+    var page_nav_args = {};
+    var head_row_args = {};
+    //
+    // putting function arguments into variables 
+    var data_arr = table_args.data_arr;
+    var col_meta_data = table_args.col_meta_data;
+    var page_nav_args = table_args.page_nav_args;
+    if (!!(table_args.page_nav_args)) { 
+        for (var arg in table_args.page_nav_args) { page_nav_args[arg] = table_args.page_nav_args[arg];}
+    }
+    var head_row_args = table_args.head_row_args;
+    if (!!(table_args.head_row_args)) { 
+        for (var arg in table_args.head_row_args) { head_row_args[arg] = table_args.head_row_args[arg];}
+    }
+    head_row_args.sort_data = table_args.sort_data;
+    //
+    // putting standard argument properities into variables 
+    var page = table_args.page;
+    var sort_col = table_args.sort_col;
+    var sort_dir = table_args.sort_dir;
+    var num_per_page = table_args.num_per_page;
+    if (!!(table_args.table_row_appended_cells)) {
+        table_row_appended_cells = table_args.table_row_appended_cells;
+    }
+    if (!!(table_args.row_onclick)) {
+        row_onclick = table_args.row_onclick;
+    }
+    if (!!(table_args.row_onmouseenter)) {
+        row_onmouseenter = table_args.row_onmouseenter;
+    }
+    if (!!(table_args.row_onmouseleave)) {
+        row_onmouseleave = table_args.row_onmouseleave;
+    }
+    //
+    // calculating number of pages and what to display
+    var start_index = 0;
+    var end_index = data_arr.length; 
+    if (!(table_args.no_page_nav)) {
+        page_nav_args.num_pages = Math.ceil(data_arr.length/num_per_page)
+        start_index = (page - 1)*num_per_page;
+        end_index = page * num_per_page; 
+        if (end_index > data_arr.length) {end_index = data_arr.length;};
+        //
+        var page_nav = create_page_links(page_nav_args);
+        output +="<div id=\""+table_args.page_nav_div_id+"\" class=\""+table_args.page_nav_class+"\" data-curr-page=\""+page+"\" data-sort-col=\""+sort_col+"\" data-sort-dir=\""+sort_dir+"\">Pages: "+page_nav+"</div>";
+    }
+    //
+    output += "<table id=\""+table_args.table_id+"\" class=\""+table_args.table_class+"\">";
+    //
+    // creating column head rows 
+    var head = make_head_rows(col_meta_data,head_row_args)    
+    output += head;
+    //
+    // populating row data  
+    for (var i = start_index; i < end_index; i++) {
+        var row_id = table_args.row_id_prefix+i;
+        var td_str = '';
+        var this_table_row_appended_cells = table_row_appended_cells.replace(/%row_id%/g,row_id); 
+        var this_row_onclick = row_onclick.replace(/%row_id%/g,row_id);
+        var this_row_onmouseenter = row_onmouseenter.replace(/%row_id%/g,row_id);
+        var this_row_onmouseleave = row_onmouseleave.replace(/%row_id%/g,row_id);
+        for (var prop in data_arr[i]) {
+            var pat = new RegExp("%"+prop+"%","g");
+            this_row_onclick = this_row_onclick.replace(pat,data_arr[i][prop]);
+            this_table_row_appended_cells = this_table_row_appended_cells.replace(pat,data_arr[i][prop]);
+        }
+        var table_row = "<tr id=\""+row_id+"\" onmouseenter=\""+this_row_onmouseenter+"\" onmouseleave=\""+this_row_onmouseleave+"\" ";
+        table_row += "onclick=\""+this_row_onclick+"\">";
+        // creating table data cells
+        for (var c = 0; c < col_meta_data.length; c++) {
+            var innerHTML = data_arr[i][col_meta_data[c].column_name];
+            if ((col_meta_data[c].data_type.match(/text/)) && (innerHTML.length > CONSTANTS.MAX_STR_LENGTH)) {
+                innerHTML = '<span id="'+col_meta_data[c].column_name+'-'+i+'" class="edit_link" onclick="toggle_innerHTML(this.id,\''+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...\',\''+innerHTML+'\')">'+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...</span>'
+            }
+            td_str += "<td id = \""+row_id+"-"+col_meta_data[c].column_name+"\" class=\""+table_args.table_data_cell_class+"\">"+innerHTML+"</td>";
+        }
+        table_row += td_str+this_table_row_appended_cells;
+        table_row += "</tr>";
+        output += table_row;
+    }
+    output += "</table>";
+    //
+    return output;
+}
+//
 // creates page link line
 function create_page_links(page_nav_args) {
     //
@@ -204,7 +364,6 @@ function create_page_links(page_nav_args) {
 //
 // creates the header rows for a table
 function make_head_rows(col_data,head_rows_props) { 
-    console.log(head_rows_props)
     //
     // getting properties table header rows
     var col_meta_data = JSON.parse(JSON.stringify(col_data));
@@ -303,7 +462,8 @@ function make_head_rows(col_data,head_rows_props) {
             // initializing colspan
             col_obj.colspan = 1;
             col_obj.innerHTML = col_name_arr[lvl];
-            col_obj.id = col_name_arr.slice(0,lvl+1).join('-')
+            col_obj.id = col_name_arr.slice(0,lvl+1).join('-');
+            col_obj.id = col_obj.id.replace(/\s+/g,'_');
             //
             // adding object to row for current teir
             row_cells[cell] = col_obj;
@@ -368,166 +528,6 @@ function make_head_rows(col_data,head_rows_props) {
     }
     //
     return head;
-}
-//
-// function to generate sortable employee table 
-function create_sortable_table(table_args) {
-    //
-    var sql_args = {};
-    var data_sql = '';
-    var meta_sql = '';
-    var department = '.'
-    var add_callback = false;
-    var sortable = true;
-    //
-    // getting callback if it exists
-    if (!!(table_args.add_callback)) {add_callback = table_args.add_callback;}
-    //
-    // results per page
-    if (!(table_args.num_per_page)) {
-        table_args.num_per_page = 10;
-    }
-    //
-    // determing if its sortable or not
-    if (table_args.hasOwnProperty('sortable')) {sortable = table_args.sortable;}
-    //
-    if (table_args.data_sql) { data_sql = table_args.data_sql;}
-    else { data_sql = gen_sql(table_args.data_sql_args);}
-    //
-    if (table_args.meta_sql) { meta_sql = table_args.meta_sql;}
-    else { meta_sql = gen_sql(table_args.meta_sql_args);}
-    //
-    // rearranging table args to proper form
-    var page_nav_args = {};
-    page_nav_args.curr_page = table_args.page;
-    page_nav_args.tot_pages_shown = table_args.tot_pages_shown;
-    page_nav_args.id_prefix = table_args.page_nav_id_prefix;
-    page_nav_args.class_str = table_args.page_class_str;
-    page_nav_args.onclick_str = table_args.page_onclick.replace('%sort_dir%',"'"+table_args.sort_dir+"'");
-    page_nav_args.onclick_str = page_nav_args.onclick_str.replace('%sort_col%',"'"+table_args.sort_col+"'"); 
-    page_nav_args.onmouse_str = table_args.page_onmouse_str; 
-    if (!!(table_args.page_nav_args)) { 
-        for (var arg in table_args.page_nav_args) { page_nav_args[arg] = table_args.page_nav_args[arg];}
-    } 
-    //
-    var head_row_args = {};
-    head_row_args.class_str = "default-table-header";
-    head_row_args.sort_onclick_str = table_args.sort_onclick;
-    if (!!(table_args.head_row_args)) { 
-        for (var arg in table_args.head_row_args) { head_row_args[arg] = table_args.head_row_args[arg];}
-    }
-    //
-    var sort_data  = {};
-    sort_data.sort_col = table_args.sort_col;
-    sort_data.sort_dir = table_args.sort_dir;
-    //
-    table_args.page_nav_args = page_nav_args;
-    table_args.head_row_args = head_row_args;
-    if (sortable) { table_args.sort_data = sort_data;}
-    //
-    var callback = function(response) {
-        table_args.data_arr = response.data;
-        table_args.col_meta_data = response.meta_data;
-        //
-        var output_table = make_sortable_table(table_args);
-        document.getElementById(table_args.table_output_id).innerHTML = output_table;
-        add_class("page_nav_link_curr",table_args.page_nav_id_prefix+"-page_nav_"+table_args.page);
-        //
-        if (add_callback) {add_callback(response);}
-    }
-    ajax_multi_fetch([data_sql,meta_sql],['data','meta_data'],callback) 
-}
-//
-// makes the employee table itself
-function make_sortable_table(table_args) {   
-    var output = '';
-    var table_row_appended_cells = '';
-    var row_onclick = '';
-    var row_onmouseenter = '';
-    var row_onmouseleave = '';
-    var page_nav_args = {};
-    var head_row_args = {};
-    //
-    // putting function arguments into variables 
-    var data_arr = table_args.data_arr;
-    var col_meta_data = table_args.col_meta_data;
-    var page_nav_args = table_args.page_nav_args;
-    if (!!(table_args.page_nav_args)) { 
-        for (var arg in table_args.page_nav_args) { page_nav_args[arg] = table_args.page_nav_args[arg];}
-    }
-    var head_row_args = table_args.head_row_args;
-    if (!!(table_args.head_row_args)) { 
-        for (var arg in table_args.head_row_args) { head_row_args[arg] = table_args.head_row_args[arg];}
-    }
-    head_row_args.sort_data = table_args.sort_data;
-    //
-    // putting standard argument properities into variables 
-    var page = table_args.page;
-    var sort_col = table_args.sort_col;
-    var sort_dir = table_args.sort_dir;
-    var num_per_page = table_args.num_per_page;
-    if (!!(table_args.table_row_appended_cells)) {
-        table_row_appended_cells = table_args.table_row_appended_cells;
-    }
-    if (!!(table_args.row_onclick)) {
-        row_onclick = table_args.row_onclick;
-    }
-    if (!!(table_args.row_onmouseenter)) {
-        row_onmouseenter = table_args.row_onmouseenter;
-    }
-    if (!!(table_args.row_onmouseleave)) {
-        row_onmouseleave = table_args.row_onmouseleave;
-    }
-    //
-    // calculating number of pages and what to display
-    var start_index = 0;
-    var end_index = data_arr.length; 
-    if (!(table_args.no_page_nav)) {
-        page_nav_args.num_pages = Math.ceil(data_arr.length/num_per_page)
-        start_index = (page - 1)*num_per_page;
-        end_index = page * num_per_page; 
-        if (end_index > data_arr.length) {end_index = data_arr.length;};
-        //
-        var page_nav = create_page_links(page_nav_args);
-        output +="<div id=\""+table_args.page_nav_div_id+"\" class=\""+table_args.page_nav_class+"\" data-curr-page=\""+page+"\" data-sort-col=\""+sort_col+"\" data-sort-dir=\""+sort_dir+"\">Pages: "+page_nav+"</div>";
-    }
-    //
-    output += "<table id=\""+table_args.table_id+"\" class=\""+table_args.table_class+"\">";
-    //
-    // creating column head rows 
-    var head = make_head_rows(col_meta_data,head_row_args)    
-    output += head;
-    //
-    // populating row data  
-    for (var i = start_index; i < end_index; i++) {
-        var row_id = table_args.row_id_prefix+i;
-        var td_str = '';
-        var this_table_row_appended_cells = table_row_appended_cells.replace(/%row_id%/g,row_id); 
-        var this_row_onclick = row_onclick.replace(/%row_id%/g,row_id);
-        var this_row_onmouseenter = row_onmouseenter.replace(/%row_id%/g,row_id);
-        var this_row_onmouseleave = row_onmouseleave.replace(/%row_id%/g,row_id);
-        for (var prop in data_arr[i]) {
-            var pat = new RegExp("%"+prop+"%","g");
-            this_row_onclick = this_row_onclick.replace(pat,data_arr[i][prop]);
-            this_table_row_appended_cells = this_table_row_appended_cells.replace(pat,data_arr[i][prop]);
-        }
-        var table_row = "<tr id=\""+row_id+"\" onmouseenter=\""+this_row_onmouseenter+"\" onmouseleave=\""+this_row_onmouseleave+"\" ";
-        table_row += "onclick=\""+this_row_onclick+"\">";
-        // creating table data cells
-        for (var c = 0; c < col_meta_data.length; c++) {
-            var innerHTML = data_arr[i][col_meta_data[c].column_name];
-            if ((col_meta_data[c].data_type.match(/text/)) && (innerHTML.length > CONSTANTS.MAX_STR_LENGTH)) {
-                innerHTML = '<span id="'+col_meta_data[c].column_name+'-'+i+'" class="edit_link" onclick="toggle_innerHTML(this.id,\''+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...\',\''+innerHTML+'\')">'+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...</span>'
-            }
-            td_str += "<td id = \""+row_id+"-"+col_meta_data[c].column_name+"\" class=\""+table_args.table_data_cell_class+"\">"+innerHTML+"</td>";
-        }
-        table_row += td_str+this_table_row_appended_cells;
-        table_row += "</tr>";
-        output += table_row;
-    }
-    output += "</table>";
-    //
-    return output;
 }
 //
 // this function handles the data types of various cells in the database for reports

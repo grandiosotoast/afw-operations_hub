@@ -236,6 +236,7 @@ input[type="text"]:read-only {
 .report-spacer-td { 
     display: inline-block;
     width: 20px;
+    white-space: nowrap;
 }
 .report-table {
     border: solid 1px rgb(0,0,0);

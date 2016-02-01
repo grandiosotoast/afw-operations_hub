@@ -310,7 +310,7 @@ function create_rep_table(page,sort_col,sort_dir) {
     rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
     //
-    create_sortable_table(rep_table_args);
+    create_standard_table(rep_table_args);
 }
 //
 // this function creates the sales rep table
@@ -373,7 +373,7 @@ function create_customer_table(page,sort_col,sort_dir) {
     customer_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     customer_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
     //
-    create_sortable_table(customer_table_args);
+    create_standard_table(customer_table_args);
 }
 //
 // sets the page to modify a rep's information
@@ -896,7 +896,7 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
         document.getElementById('table-div').insertBefore(header,document.getElementById('table-div').childNodes[0]);
     };
     //
-    create_sortable_table(rep_table_args);
+    create_standard_table(rep_table_args);
     //
     if (toggle == true) {
         toggle_view_element_button('create-rep-table','table-div','Hide Sales Rep Table','Show Sales Rep Table');
@@ -1153,6 +1153,6 @@ function build_rep_report(args) {
         class_str : 'default-table-header'
     };
     //
-    var output_table = make_sortable_table(table_args)
+    var output_table = make_standard_table(table_args)
     document.getElementById(table_args.table_output_id).innerHTML = output_table;
 }

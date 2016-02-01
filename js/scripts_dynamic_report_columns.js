@@ -101,7 +101,7 @@ function output_simple_totals(total_args,report_args) {
             } //end data loop
             if (avg) { section_value = section_value/section_counts;}
             section_value = round(section_value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
-            document.getElementById('section-'+section_ids[id]+'-'+col).innerHTML = section_value;
+            document.getElementById('section-total-'+section_ids[id]+'-'+col).innerHTML = section_value;
         } //end emp loop
         if (avg) { overall_value = overall_value/overall_counts;}
         overall_value = round(overall_value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
@@ -128,7 +128,7 @@ function output_simple_totals(total_args,report_args) {
             //
             if (avg) { value_obj[section] = value_obj[section]/count_obj[section];}
             value_obj[section] = round(value_obj[section],CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
-            document.getElementById('section-'+section+'-'+col).innerHTML = value_obj[section];
+            document.getElementById('section-total-'+section+'-'+col).innerHTML = value_obj[section];
         } //end section loop
         if (avg) { overall_value = overall_value/overall_counts;}
         overall_value = round(overall_value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
@@ -174,8 +174,7 @@ function calc_total_avg_hourly_rate(col_name,report_args) {
     //
     // updating the section totals
     for (var i = 0; i < section_ids.length; i++) {
-        var prefix = 'section-'+section_ids[i];
-        if (section_ids[i] == 'overall') { prefix = 'overall'}
+        var prefix = section_ids[i];
         var hours = parseFloat(document.getElementById(prefix+'-span-hours').innerHTML);
         var total = parseFloat(document.getElementById(prefix+'-span-total').innerHTML);
         //
@@ -274,11 +273,14 @@ function calc_percent_ot(col_name,report_args) {
     check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
     //
     var dynamic_cols = report_args.dynamic_cols;
-    var section_ids = report_args.section_ids;
+    //var section_ids = report_args.section_ids;
     var sect_col = report_args.prime_sort;
     var data_arr = report_args.data;
     var overtimeHours = {};
     var regularHours = {};
+    var section_ids = {};
+    var total_id_format_str = 'section-total';
+    if (report_args.total_id_format_str) { total_id_format_str = report_args.total_id_format_str;}
     //
     // getting all of the data into a section object
     var overallHours = 0.0;
@@ -287,6 +289,10 @@ function calc_percent_ot(col_name,report_args) {
         if (!(overtimeHours.hasOwnProperty(data_arr[i][sect_col]))) {
             overtimeHours[data_arr[i][sect_col]] = 0.0;
             regularHours[data_arr[i][sect_col]] = 0.0;
+            //
+            var total_id = total_id_format_str
+            for (var prop in data_arr[i]) { total_id = total_id.replace('%'+prop+'%',data_arr[i][prop]);}
+            section_ids[data_arr[i][sect_col]] = total_id;
         }
         overtimeHours[data_arr[i][sect_col]] += parseFloat(data_arr[i]['dailyOT']);
         regularHours[data_arr[i][sect_col]] += parseFloat(data_arr[i]['true_hours']);
@@ -300,7 +306,8 @@ function calc_percent_ot(col_name,report_args) {
         //
         perc = overtimeHours[section]/regularHours[section] * 100.0;
         perc = round(perc,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
-        document.getElementById('section-'+section+'-'+col_name).innerHTML = report_args.col_name_meta[col_name].column_nickname+' '+perc+' %';
+        total_id = section_ids[section];
+        document.getElementById(total_id+'-'+col_name).innerHTML = report_args.col_name_meta[col_name].column_nickname+' '+perc+' %';
     } //end section loop
     perc = overallOT/overallHours * 100.0;
     perc = round(perc,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
