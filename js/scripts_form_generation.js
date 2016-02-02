@@ -121,6 +121,67 @@ var add_employee = ""+
     "</form>";
 //
 //
+var general_data_form = ''+
+    '<form id="input-emp-data" method="POST">'+
+    '<fieldset class="fieldset-default">'+
+    '<legend>Employee Information</legend>'+
+    '<label class="label">Employee ID:</label><input id="emp-id" type="text" name="emp_id" value="" readonly>'+
+    '<br>'+
+    '<label class="label">Employee First Name: </label><input id="emp-first-name" type="text" name="emp_first_name" value="" readonly>'+
+    '<br>'+
+    '<label class="label">Employee Last Name: </label><input id="emp-last-name" type="text" name="emp_last_name" value="" readonly>'+
+    '</fieldset>'+
+    '<br>'+
+    '<fieldset class="fieldset-default">'+
+    '<legend>Date &amp; Time Information</legend>'+
+    '<label class="label">Date:</label><input id="date" type="text" name="date" value="" maxlength="10" onkeyup="check_date_str(this.id,false,false); onblur="check_date_str(this.id,false,false); recalc_general_form(true);" readonly>'+
+    '&nbsp&nbsp&nbsp<label class="label-5em">Edit Date:</label><input id="edit-date" type="checkbox"onclick="toggle_readonly(\'date\')"></input>'+
+    '<br>'+
+    '<label class="label">Paid Hours:</label><input id="hours" type="text" name="hours" placeholder="00.00" value="" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,\'\',\'\');">'+
+    '<br>'+
+    '<label class="label">Attendance Error:</label>'+
+    '<select id="attendance-select" name="attendance_error" onchange="show_if_val(\'attendance-select\',\'attendance-input\',\'other\');" onblur="">'+
+    '</select>'+
+    '<label class="label" style="text-align: center;"></label>'+ 
+    '<input id="attendance-input" type="text" class="text-input hidden-elm" name="attendance_error" placeholder="Attendance Error" onkeyup="remove_class(\'invalid-field\',\'attendance-input\');" disabled></input>'+
+    '</fieldset>'+
+    '<br>'+
+    '<fieldset class="fieldset-default">'+
+    '<legend>Shift Information</legend>'+
+    '<label class="label">Error Code:</label>'+
+    '<select id="error-code" name="error_code" onchange="show_if_val(\'error-code\',\'other-error-code-msg\',\'99\')">'+
+    '</select>'+
+    '&nbsp&nbsp&nbsp<label id="other-error-code-msg" class="hidden-elm">Enter Error Description in Comments Section</label>'+
+    '<br>'+
+    '<br>'+
+    '<label class="label">Hourly Pay Rate:</label><input id="hourly-pay-rate" type="text" name="hourly_pay_rate" value="0.0" onkeyup="check_num_str(this.id,false,false);" onblur="check_num_str(this.id,false,false); recalc_general_form(true)" readonly>'+
+    '&nbsp&nbsp&nbsp<label class="label-7em">Edit Pay Rate:</label><input id="edit-hourly-pay" type="checkbox"onclick="toggle_readonly(\'hourly-pay-rate\'); recalc_general_form(true);"></input>'+
+    '<br>'+
+    '<br>'+
+    '<label class="label">Additional Pay:</label><input id="add-pay" type="text" name="additional_pay" value="0.00" onkeyup="check_num_str(this.id,false,false);" onblur="check_num_str(this.id,false,false); recalc_general_form(true);">'+
+    '&nbsp&nbsp&nbsp<label class="label">No Additonal Pay:</label><input id="no-add-pay" type="checkbox" onclick="toggle_readonly(\'add-pay\'); document.getElementById(\'add-pay\').value = \'0.00\'; recalc_general_form(true);">'+
+    '<br>'+
+    '<label class="label">Pay Deductions:</label><input id="deduc-pay" type="text" name="pay_deductions" value="0.00" style="color:red;" onkeyup="check_num_str(this.id,false,false);" onblur="check_num_str(this.id,false,false); recalc_general_form(true);">'+
+    '&nbsp&nbsp&nbsp<label class="label">No Deductions:</label><input id="no-deduc-pay" type="checkbox" onclick="toggle_readonly(\'deduc-pay\'); document.getElementById(\'deduc-pay\').value = \'0.00\'; recalc_general_form(true);">'+
+    '<br>'+
+    '<br>'+
+    '<label class="label">Hourly Pay:</label><input id="hourly-pay" type="text" value="0.0" readonly>'+
+    '<br>'+
+    '<label class="label">Total Pay:</label><input id="total-pay" type="text" name="total" value="0.00" onblur="recalc_general_form(true);" readonly><br>'+
+    '<br>'+
+    '<label class="label">Comments:</label><textarea id = "comments" name="comments" rows="4" cols="60" value="" onkeyup="remove_class(\'invalid-field\',this.id);"></textarea>'+
+    '</fieldset>'+
+    '<input id="department" type="hidden" name="department" value="general">'+
+    '<input id="entering-user" type="hidden" name="entering_user" value="">'+
+    '<input id="entry-status" type="hidden" name="entry_status" value="submitted">'+
+    '<input id="entry-id" type="hidden" name="entry_id" value="">'+
+    '<input id="admin-fix" type="hidden" name="admin_fix" value="">'+
+    '<input id="admin-fix-timestamp" type="hidden" name="admin_fix_timestamp" value="">'+
+    '<label id="form-errors" class="error-msg hidden-elm">Form errors are highlighted in red</label><br>'+
+    '<button id="submit-data-button" type="button">Submit Shift Information</button>'+
+    '</form>';
+//
+//
 var receiving_data = ''+
     '<form id="input-emp-data" method="POST">'+
     '<fieldset class="fieldset-default">'+
@@ -573,6 +634,7 @@ function create_form(form_name,out_id) {
     forms.receiving_data = receiving_data;
     forms.transportation_data = transportation_data;
     forms.backhaul_form = backhaul_form;
+    forms.general_data_form = general_data_form;
     forms.warehouse_data = warehouse_data;
     forms.meat_shop_item = meat_shop_item;
     forms.stock_change_form = stock_change_form;

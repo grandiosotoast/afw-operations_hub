@@ -32,6 +32,9 @@ check_login('administration');
 preg_match('/(\d)(\d)(\d)/',$_SESSION["permissions"],$user_perm_arr);
 //
 // creating buttons based on user perms 
+if (check_perms($_SESSION["permissions"],$page_perms["general_entry"])) {
+    echo '<span class="nav-span"><button id="general_entry" type="button" class="big-button" onclick="goto_link(this.id);">General Data Entry</button></span>';
+}
 if (check_perms($_SESSION["permissions"],$page_perms["transportation"])) {
     echo '<span class="nav-span"><button id="transportation" type="button" class="big-button" onclick="goto_link(this.id);">Drivers Data Entry</button></span>';
 }

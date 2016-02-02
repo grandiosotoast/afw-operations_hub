@@ -25,6 +25,7 @@ $page_perms = array(
     "administration" => '0000', 
     "edit_emp_data" => '1000', 
     "freight_backhaul" => '2000',
+    "general_entry" => '2000',
     "marketing" => '0040',
     "meat_shop" => '0400',
     "mod_dbuser" => '0001', 

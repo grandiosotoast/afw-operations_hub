@@ -1026,9 +1026,10 @@ function rep_report_get_data(args) {
     // determining start and end dates for YTD and LYTD totals
     var date_arr = args.end_date.split('-');
     for (var i = 0; i < date_arr.length; i++) {date_arr[i] = Number(date_arr[i]);}
-    date_arr[0] = date_arr[0] - 1;
     var curr_date = args.end_date;
-    var last_year_date = date_arr.join('-');
+    var date = new Date(date_arr[0],date_arr[1]-1,date_arr[2]);
+    var lyd = new Date(date.getFullYear(),date.getMonth(),date.getDate()-7*52);
+    var last_year_date = lyd.yyyymmdd();
     //
     // setting up sql statements 
     var LYTD_sql = 'SELECT sales_rep_table.rep_id, SUM(sales_data.amount) lytd_total FROM sales_data ';

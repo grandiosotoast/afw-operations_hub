@@ -19,24 +19,28 @@ var CONSTANTS =  {
 
     },
     DEPT_TABLES : {
+        "general"          : "none",
         "freight_backhaul" : "employee_data_freight_backhaul",
         "transportation"   : "employee_data_transportation",
         "warehouse_receiving" : "employee_data_receiving",
         "warehouse_shipping" : "employee_data_shipping"
     },
     DEPT_FORMS : {
+        "general"          : "general_data_form",
         "freight_backhaul" : "backhaul_form",
         "transportation"  : "transportation_data",
         "warehouse_receiving" : "receiving_data",
         "warehouse_shipping" : "warehouse_data"
     },
     DEPT_MOD_FUNS : { 
+        "general"  : mod_regular_data_form,
         "freight_backhaul" : mod_backhaul_form,
         "transportation"  : mod_regular_data_form,
         "warehouse_receiving" : mod_regular_data_form,
         "warehouse_shipping" : mod_regular_data_form
     },
     DEPT_VAL_FUNS : {
+        "general" : init_data_form_validation,
         "freight_backhaul" : init_backhaul_form_validation,
         "transportation"  : init_data_form_validation,
         "warehouse_receiving" : init_data_form_validation,

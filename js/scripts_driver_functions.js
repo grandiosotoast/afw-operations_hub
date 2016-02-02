@@ -11,7 +11,9 @@ function enter_data_emp_table(page,sort_col,sort_dir,department) {
     var emp_table_args = {};
     var data_sql_args = {};
     var meta_sql_args = {};
-    var row_onclick = "remove_class_all('selected-field'); add_class('selected-field','%row_id%'); get_data_entry_form('%emp_id%','"+department+"','data-entry-form-div',false)";
+    var form_department = department;
+    if (department == '.') { form_department = 'general';} 
+    var row_onclick = "remove_class_all('selected-field'); add_class('selected-field','%row_id%'); get_data_entry_form('%emp_id%','"+form_department+"','data-entry-form-div',false)";
     //
     // sql argument objects
     data_sql_args.cmd = 'SELECT';

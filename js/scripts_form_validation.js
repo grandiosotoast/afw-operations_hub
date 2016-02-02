@@ -595,6 +595,60 @@ function submit_employee_form(arg_object) {
     ajax_exec_db(sql,callback)
 }
 //
+// this recalculates all of the fields on the general form 
+function recalc_general_form(truncate) { 
+    //
+    var sql_args = {};
+    var data_sql = '';
+    var precision = 9;
+    if (truncate) { precision = CONSTANTS.STD_PRECISION;}
+    //
+    // performing validation steps 
+    remove_class_all('invalid-field');
+    check_date_str('date','',false);
+    //
+    // getting form values to calculate pay and production rates
+    var hours = +document.getElementById('hours').value;
+    if (hours != hours) {hours = 0.0;}
+    var pay_rate = +document.getElementById('hourly-pay-rate').value;
+    if (pay_rate != pay_rate) {pay_rate = 0.0; add_class('invalid-field','hourly-pay-rate');}
+    var add_pay = +document.getElementById('add-pay').value;
+    if (add_pay != add_pay) {add_pay = 0.0; add_class('invalid-field','add-pay');}
+    var deduc_pay = +document.getElementById('deduc-pay').value;
+    if (deduc_pay != deduc_pay) {deduc_pay = 0.0; add_class('invalid-field','deduc-pay');}
+    //
+    var tot_pay = 0.0;
+    deduc_pay = deduc_pay * -1;
+    tot_pay = (add_pay + deduc_pay);
+    //
+    document.getElementById('hours').value = round(document.getElementById('hours').value,precision).toFixed(precision);
+    document.getElementById('hourly-pay-rate').value = round(document.getElementById('hourly-pay-rate').value,precision).toFixed(precision);
+    document.getElementById('add-pay').value = round(document.getElementById('add-pay').value,precision).toFixed(precision);
+    document.getElementById('deduc-pay').value = round(document.getElementById('deduc-pay').value,precision).toFixed(precision);
+    document.getElementById('total-pay').value = tot_pay;
+    //
+    var date_arr = document.getElementById('date').value.split('-');
+    var curr_date = new Date(date_arr[0],date_arr[1]-1,date_arr[2]);
+    var wk_start = new Date(curr_date.getFullYear(),curr_date.getMonth(),(curr_date.getDate()-curr_date.getDay()))
+    var from_ts = wk_start.getFullYear()+'-'+(wk_start.getMonth()+1)+'-'+wk_start.getDate();
+    var to_ts = curr_date.getFullYear()+'-'+(curr_date.getMonth()+1)+'-'+(curr_date.getDate()-1); // excluding the entry date
+    //
+    sql_args.cmd = 'SELECT';
+    sql_args.table = 'employee_data';
+    sql_args.cols = ['emp_id','date','hours'];
+    sql_args.where = [['emp_id','LIKE',document.getElementById('emp-id').value],['date','BETWEEN',from_ts+"' AND '"+to_ts],['entry_status','LIKE','submitted']];
+    data_sql = gen_sql(sql_args);
+    //
+    // defining the callback to calculate OT
+    var callback = function(response) {
+        response.wk_data.tot_pay = tot_pay;
+        calc_overtime(hours,pay_rate,response.wk_data);
+        document.getElementById('total-pay').value = round(response.wk_data.tot_pay,precision).toFixed(precision);
+    }
+    //
+    ajax_multi_fetch([data_sql],['wk_data'],callback);
+}
+//
 // this recalculates all of the fields on the receving form 
 function recalc_receving_form(truncate) { 
     //
@@ -970,7 +1024,11 @@ function init_data_form_validation(department,action) {
     var attendance = document.getElementById('attendance-select').value;
     //
     // calculating unrounded values for data entry forms
-    if (department == 'transportation') {
+    if (department == 'general') {
+        recalc_general_form(false);
+        department = document.getElementById('department').value;
+    }
+    else if (department == 'transportation') {
         recalc_transportation_form(false);
     }
     else if (department == 'warehouse_receiving') {
@@ -1011,6 +1069,7 @@ function init_data_form_validation(department,action) {
     }
     //
     // determining department and creating meta_sql statment
+    console.log(department);
     if (CONSTANTS.DEPT_TABLES.hasOwnProperty(department)) { var dept_table = CONSTANTS.DEPT_TABLES[department];}
     else { console.log(' Department has no set table: '+department); return;}
     if (CONSTANTS.DEPT_FORMS.hasOwnProperty(department)) { var data_form = CONSTANTS.DEPT_FORMS[department];}
