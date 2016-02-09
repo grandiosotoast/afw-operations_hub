@@ -1234,6 +1234,7 @@ function submit_data_entry_fom(submit_args) {
     }
     var main_sql = gen_sql(main_sql_args);
     var dept_sql = gen_sql(dept_sql_args);
+    if (dept_table == 'none') { dept_sql = false;}
     var sql = 'BEGIN;'
     if (!!(main_sql)) sql += main_sql+'; '
     if (!!(dept_sql)) sql += dept_sql+'; '

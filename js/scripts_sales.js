@@ -228,9 +228,9 @@ function rep_report() {
         //
         {'elm' : 'button', 'id' : 'create-rep-table', 'textNode' : 'Show Sales Rep Table', 'events' : [{'event' : 'click', 'function' : function(){ report_rep_table(1,'rep_id','ASC',true);}}]},
         //
-        {'elm' : 'button', 'id' : 'create-rep-report', 'textNode' : 'Create Report', 'events' : [{'event' : 'click', 'function' : function(){ create_rep_report('.');}}]},
+        {'elm' : 'button', 'id' : 'create-rep-report', 'textNode' : 'Create Report', 'events' : [{'event' : 'click', 'function' : function(){ create_rep_report('.+');}}]},
         //
-        {'elm' : 'button', 'id' : 'create-all-rep-report', 'textNode' : 'Create All Rep Report', 'className' : 'hidden-elm', 'events' : [{'event' : 'click', 'function' : function(){ create_rep_report('.'); add_class('hidden-elm',this.id);}}]},
+        {'elm' : 'button', 'id' : 'create-all-rep-report', 'textNode' : 'Create All Rep Report', 'className' : 'hidden-elm', 'events' : [{'event' : 'click', 'function' : function(){ create_rep_report('.+'); add_class('hidden-elm',this.id);}}]},
         //
         {'elm' : 'button', 'id' : 'print-rep-report', 'textNode' : 'Print', 'events' : [{'event' : 'click', 'function' : function(){ print_page('content-div');}}]},
         //
@@ -301,11 +301,11 @@ function create_rep_table(page,sort_col,sort_dir) {
     rep_table_args.num_per_page = 15;
     rep_table_args.tot_pages_shown = 9;
     rep_table_args.page_onmouse_str = '';
-    rep_table_args.page_onclick = 'create_rep_table(%%,%sort_col%,%sort_dir%)';
+    rep_table_args.page_onclick = "create_rep_table(%%,'%sort_col%','%sort_dir%')";
     rep_table_args.head_row_class_str = 'default-table-header';
     rep_table_args.sort_col = sort_col;
     rep_table_args.sort_dir = sort_dir;
-    rep_table_args.sort_onclick = 'create_rep_table(%%,%column_name%,%sort_dir%)';
+    rep_table_args.sort_onclick = "create_rep_table(%%,'%column_name%','%sort_dir%')";
     rep_table_args.row_onclick = "modify_rep_form('%dbuser_internal_id%','%row_id%')";
     rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
@@ -364,11 +364,11 @@ function create_customer_table(page,sort_col,sort_dir) {
     customer_table_args.num_per_page = 15;
     customer_table_args.tot_pages_shown = 9;
     customer_table_args.page_onmouse_str = '';
-    customer_table_args.page_onclick = 'create_customer_table(%%,%sort_col%,%sort_dir%)';
+    customer_table_args.page_onclick = "create_customer_table(%%,'%sort_col%','%sort_dir%')";
     customer_table_args.head_row_class_str = 'default-table-header';
     customer_table_args.sort_col = sort_col;
     customer_table_args.sort_dir = sort_dir;
-    customer_table_args.sort_onclick = 'create_customer_table(%%,%column_name%,%sort_dir%)';
+    customer_table_args.sort_onclick = "create_customer_table(%%,'%column_name%','%sort_dir%')";
     customer_table_args.row_onclick = "modify_customer_form('%customer_internal_id%','%row_id%')";
     customer_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     customer_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
@@ -881,11 +881,11 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
     rep_table_args.num_per_page = 15;
     rep_table_args.tot_pages_shown = 9;
     rep_table_args.page_onmouse_str = '';
-    rep_table_args.page_onclick = 'report_rep_table(%%,%sort_col%,%sort_dir%,false)';
+    rep_table_args.page_onclick = "report_rep_table(%%,'%sort_col%','%sort_dir%',false)";
     rep_table_args.head_row_class_str = 'default-table-header';
     rep_table_args.sort_col = sort_col;
     rep_table_args.sort_dir = sort_dir;
-    rep_table_args.sort_onclick = 'report_rep_table(%%,%column_name%,%sort_dir%,false)';
+    rep_table_args.sort_onclick = "report_rep_table(%%,'%column_name%','%sort_dir%',false)";
     rep_table_args.row_onclick = "create_rep_report('%rep_id%')";
     rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')"; 
@@ -1035,15 +1035,15 @@ function rep_report_get_data(args) {
     var LYTD_sql = 'SELECT sales_rep_table.rep_id, SUM(sales_data.amount) lytd_total FROM sales_data ';
     LYTD_sql += 'INNER JOIN sales_customer_table ON sales_data.customer_id=sales_customer_table.customer_id ';
     LYTD_sql += 'INNER JOIN sales_rep_table ON sales_customer_table.rep_id = sales_rep_table.rep_id ';
-    LYTD_sql += "WHERE sales_data.date BETWEEN '"+CONSTANTS.LY_FIRST_BUSINESS_DAY.join('-')+"' AND '"+last_year_date+"' GROUP BY sales_rep_table.rep_id";
+    LYTD_sql += "WHERE sales_data.date BETWEEN '"+CONSTANTS.LY_FIRST_BUSINESS_DAY.join('-')+"' AND '"+last_year_date+"' AND sales_rep_table.rep_id REGEXP '^\s*"+args.rep_id+"\s*$' GROUP BY sales_rep_table.rep_id";
     //
     var YTD_sql  = 'SELECT sales_rep_table.rep_id, SUM(sales_data.amount) ytd_total FROM sales_data ';
     YTD_sql  += 'INNER JOIN sales_customer_table ON sales_data.customer_id=sales_customer_table.customer_id ';
     YTD_sql  += 'INNER JOIN sales_rep_table ON sales_customer_table.rep_id = sales_rep_table.rep_id ';
-    YTD_sql  += "WHERE sales_data.date BETWEEN '"+CONSTANTS.FIRST_BUSINESS_DAY.join('-')+"' AND '"+curr_date+"' GROUP BY sales_rep_table.rep_id";
+    YTD_sql  += "WHERE sales_data.date BETWEEN '"+CONSTANTS.FIRST_BUSINESS_DAY.join('-')+"' AND '"+curr_date+"' AND sales_rep_table.rep_id REGEXP '^\s*"+args.rep_id+"\s*$' GROUP BY sales_rep_table.rep_id";
     //
     var rep_data_sql = 'SELECT * FROM sales_rep_data INNER JOIN sales_rep_table ON sales_rep_data.rep_id = sales_rep_table.rep_id ';
-    rep_data_sql += "WHERE sales_rep_data.date LIKE '"+curr_date+"' ORDER BY "+args.sort_col+" "+args.sort_dir;
+    rep_data_sql += "WHERE sales_rep_data.date LIKE '"+curr_date+"' AND sales_rep_data.rep_id REGEXP '^\s*"+args.rep_id+"\s*$' ORDER BY "+args.sort_col+" "+args.sort_dir;
     //
     var dyn_cols_sql = "SELECT * FROM `report_dynamic_columns` WHERE `department` REGEXP '(^|%)sales_rep(%|$)'";
     //
@@ -1144,14 +1144,13 @@ function build_rep_report(args) {
     table_args.row_id_prefix = 'reports-row-';
     table_args.table_data_cell_class = 'default-table-td';  
     table_args.no_page_nav = true;
-    table_args.sortable = false;
     table_args.data_arr = args.rep_data;
     table_args.col_meta_data = args.meta_data;
-    table_args.sort_data = false;
     table_args.page_nav_args = {};
     table_args.head_row_args = {
         head_row_class_str : 'default-table-header',
-        class_str : 'default-table-header'
+        class_str : 'default-table-header',
+        sortable  : false
     };
     //
     var output_table = make_standard_table(table_args)

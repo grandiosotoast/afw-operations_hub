@@ -53,8 +53,8 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
     emp_table_args.head_row_class_str = 'default-table-header';
     emp_table_args.sort_col = sort_col;
     emp_table_args.sort_dir = sort_dir;
-    emp_table_args.page_onclick = 'report_emp_table(%%,%sort_col%,%sort_dir%,false)';
-    emp_table_args.sort_onclick = 'report_emp_table(%%,%column_name%,%sort_dir%,false)';
+    emp_table_args.page_onclick = "report_emp_table(%%,'%sort_col%','%sort_dir%',false)";
+    emp_table_args.sort_onclick = "report_emp_table(%%,'%column_name%','%sort_dir%',false)";
     emp_table_args.row_onclick = "create_production_report('report_emp_data','report_data_div','%department%','%emp_id%'); ";
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
@@ -290,6 +290,10 @@ function make_data_sql(report_args) {
     //manually creating multi-table select statement
     data_sql = 'SELECT * ';
     data_sql += 'FROM employee_data INNER JOIN '+report_args.dept_table+' ON employee_data.entry_id='+report_args.dept_table+'.entry_id ';
+    if (report_args.dept_table == 'none') { 
+        data_sql = 'SELECT * FROM employee_data ';
+        sql_args.where.push(['department','LIKE',report_args.department])
+    }
     //
     //adding in the WHERE clause
     if (sql_args.where.length > 0) {
@@ -395,15 +399,18 @@ function make_report(report_args) {
     }
     //
     // making table header rows
-    var table = '<table id="report-table" class="report-table">'
+    head_row_args.sortable = false;
     head_row_args.id_prefix = "report-";
     head_row_args.class_str = "report-column-header";
     head_row_args.leading_cells = "<td class=\"report-spacer-td\"></td>";
     head_row_args.skip_cols = sect_cols.slice(0);
+    for (var prop in report_args.head_row_args) { head_row_args[prop] = report_args.head_row_args[prop];}
+    //
     for (var i = 0; i < col_meta_data.length; i++) {
         if (col_meta_data[i].column_type.match(/total/)) {head_row_args.skip_cols.push(col_meta_data[i].column_name)}
     }
     var table_head = make_head_rows(col_meta_data,head_row_args)
+    var table = '<table id="report-table" class="report-table">'
     table += table_head;
     //
     // initializing the totals objects

@@ -43,11 +43,11 @@ function enter_data_emp_table(page,sort_col,sort_dir,department) {
     emp_table_args.page = page;
     emp_table_args.tot_pages_shown = 9;
     emp_table_args.page_onmouse_str = '';
-    emp_table_args.page_onclick = "enter_data_emp_table(%%,%sort_col%,%sort_dir%,'"+department+"');";
+    emp_table_args.page_onclick = "enter_data_emp_table(%%,'%sort_col%','%sort_dir%','"+department+"');";
     emp_table_args.head_row_class_str = 'default-table-header';
     emp_table_args.sort_col = sort_col;
     emp_table_args.sort_dir = sort_dir;
-    emp_table_args.sort_onclick = "enter_data_emp_table(%%,%column_name%,%sort_dir%,'"+department+"');";
+    emp_table_args.sort_onclick = "enter_data_emp_table(%%,'%column_name%','%sort_dir%','"+department+"');";
     emp_table_args.row_onclick = row_onclick;
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
@@ -91,7 +91,7 @@ function get_data_entry_form(emp_id,department,form_div_id,update) {
         populate_form_args.unique_data = emp_id;
         populate_form_args.skip_fields_str = 'comments';
         populate_form_args.form_id = 'input-emp-data';
-        populate_form_args.add_callback_funs = '';
+        populate_form_args.add_callback_funs = function() { document.getElementById('department').value = department;};
         populate_form(populate_form_args)
     }
     // defining add_args for error code dropbox
@@ -197,11 +197,11 @@ function view_emp_table(page,sort_col,sort_dir) {
     emp_table_args.page = page;
     emp_table_args.tot_pages_shown = 9;
     emp_table_args.page_onmouse_str = '';
-    emp_table_args.page_onclick = 'view_emp_table(%%,%sort_col%,%sort_dir%)';
+    emp_table_args.page_onclick = "view_emp_table(%%,'%sort_col%','%sort_dir%')";
     emp_table_args.head_row_class_str = 'default-table-header';
     emp_table_args.sort_col = sort_col;
     emp_table_args.sort_dir = sort_dir;
-    emp_table_args.sort_onclick = 'view_emp_table(%%,%column_name%,%sort_dir%)';
+    emp_table_args.sort_onclick = "view_emp_table(%%,'%column_name%','%sort_dir%')";
     emp_table_args.row_onclick = "view_emp_data_table(1,'date','DESC','%emp_id%','%department%')";
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
@@ -258,8 +258,8 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     data_table_args.head_row_class_str = 'default-table-header';
     data_table_args.sort_col = sort_col;
     data_table_args.sort_dir = sort_dir;
-    data_table_args.page_onclick = "view_emp_data_table(%%,%sort_col%,%sort_dir%,'"+emp_id+"','"+department+"')";
-    data_table_args.sort_onclick = "view_emp_data_table(%%,%column_name%,%sort_dir%,'"+emp_id+"','"+department+"')";
+    data_table_args.page_onclick = "view_emp_data_table(%%,'%sort_col%','%sort_dir%','"+emp_id+"','"+department+"')";
+    data_table_args.sort_onclick = "view_emp_data_table(%%,'%column_name%','%sort_dir%','"+emp_id+"','"+department+"')";
     data_table_args.row_onclick = "view_employee_data_entry('%entry_id%','%department%','%row_id%')";
     data_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     data_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
@@ -560,8 +560,8 @@ function edit_data_emp_table(page,sort_col,sort_dir) {
     emp_table_args.head_row_class_str = 'default-table-header';
     emp_table_args.sort_col = sort_col;
     emp_table_args.sort_dir = sort_dir;
-    emp_table_args.page_onclick = 'edit_data_emp_table(%%,%sort_col%,%sort_dir%)';
-    emp_table_args.sort_onclick = 'edit_data_emp_table(%%,%column_name%,%sort_dir%)';
+    emp_table_args.page_onclick = "edit_data_emp_table(%%,'%sort_col%','%sort_dir%')";
+    emp_table_args.sort_onclick = "edit_data_emp_table(%%,'%column_name%','%sort_dir%')";
     emp_table_args.row_onclick = "mod_emp_data_table(1,'date','DESC',%emp_id%); remove_class('hidden-elm','edit-emp-data-div'); add_emp_id('%emp_id%','employee_table');";
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
@@ -637,8 +637,8 @@ function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
     data_table_args.head_row_class_str = 'default-table-header';
     data_table_args.sort_col = sort_col;
     data_table_args.sort_dir = sort_dir;
-    data_table_args.page_onclick = "mod_emp_data_table(%%,%sort_col%,%sort_dir%,'"+emp_id+"')";
-    data_table_args.sort_onclick = "mod_emp_data_table(%%,%column_name%,%sort_dir%,'"+emp_id+"')";
+    data_table_args.page_onclick = "mod_emp_data_table(%%,'%sort_col%','%sort_dir%','"+emp_id+"')";
+    data_table_args.sort_onclick = "mod_emp_data_table(%%,'%column_name%','%sort_dir%','"+emp_id+"')";
     data_table_args.row_onclick = "mod_employee_data_entry('%entry_id%','%department%','%row_id%')";
     data_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     data_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
@@ -914,6 +914,7 @@ function mod_regular_data_form(args) {
         var event = document.createEvent("HTMLEvents");
         event.initEvent("blur",true,false);
         document.getElementById('total-pay').dispatchEvent(event);
+        document.getElementById('department').value = department;
         // 
         if (document.getElementById('entry-status').value == 'submitted') {
             add_class('hidden-elm','restore-entry');
@@ -936,6 +937,7 @@ function mod_regular_data_form(args) {
         // populating form based on department specific table
         populate_form_args = {};
         populate_form_args.table = table;
+        if (table == 'none') { populate_form_args.table = 'employee_data';} // allows the button function to execute as usual instead of adding extra logic
         populate_form_args.unique_col = 'entry_id';
         populate_form_args.unique_data = entry_id;
         populate_form_args.form_id = 'input-emp-data';
@@ -998,12 +1000,12 @@ function mod_dbuser_table(page,sort_col,sort_dir) {
     dbuser_table_args.page = page;
     dbuser_table_args.tot_pages_shown = 9;
     dbuser_table_args.num_per_page = 10;
-    dbuser_table_args.page_onclick = 'mod_dbuser_table(%%,%sort_col%,%sort_dir%,false)';
+    dbuser_table_args.page_onclick = "mod_dbuser_table(%%,'%sort_col%','%sort_dir%',false)";
     dbuser_table_args.page_onmouse_str = '';
     dbuser_table_args.head_row_class_str = 'default-table-header';  
     dbuser_table_args.sort_col = sort_col;
     dbuser_table_args.sort_dir = sort_dir;
-    dbuser_table_args.sort_onclick = 'mod_dbuser_table(%%,%column_name%,%sort_dir%,false)';                                                                                                                                                                                              
+    dbuser_table_args.sort_onclick = "mod_dbuser_table(%%,'%column_name%','%sort_dir%',false)";                                                                                                                                                                                              
     dbuser_table_args.row_onclick = "remove_class_all('selected-field'); add_class('selected-field','%row_id%'); mod_dbuser_info('%dbuser_internal_id%','%row_id%');";
     dbuser_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     dbuser_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";    
@@ -1166,8 +1168,8 @@ function mod_emp_table(page,sort_col,sort_dir) {
     emp_table_args.head_row_class_str = 'default-table-header';
     emp_table_args.sort_col = sort_col;
     emp_table_args.sort_dir = sort_dir;
-    emp_table_args.page_onclick = 'mod_emp_table(%%,%sort_col%,%sort_dir%,false)';
-    emp_table_args.sort_onclick = 'mod_emp_table(%%,%column_name%,%sort_dir%,false)';                                                                                                                                                                                              
+    emp_table_args.page_onclick = "mod_emp_table(%%,'%sort_col%','%sort_dir%',false)";
+    emp_table_args.sort_onclick = "mod_emp_table(%%,'%column_name%','%sort_dir%',false)";                                                                                                                                                                                              
     emp_table_args.row_onclick = "remove_class_all('selected-field'); add_class('selected-field','%row_id%'); mod_employee_info('%emp_id%');";
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
@@ -1374,8 +1376,8 @@ function create_table(page,sort_col,sort_dir) {
     };
     table_args.sort_col = sort_col;
     table_args.sort_dir = sort_dir;
-    table_args.page_onclick = 'create_table(%%,%sort_col%,%sort_dir%,false)';
-    table_args.sort_onclick = 'create_table(%%,%column_name%,%sort_dir%,false)';                                                                                                                                                                                              
+    table_args.page_onclick = "create_table(%%,'%sort_col%','%sort_dir%',false)";
+    table_args.sort_onclick = "create_table(%%,'%column_name%','%sort_dir%',false)";                                                                                                                                                                                              
     table_args.row_onclick = "mod_table_entry('"+table_name+"','%row_id%');";
     table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";

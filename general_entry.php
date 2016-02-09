@@ -39,7 +39,7 @@ check_login('warehouse');
 </div>
 </body>
 <script>
-enter_data_emp_table(1,'emp_last_name','ASC','.')
+enter_data_emp_table(1,'emp_last_name','ASC','general')
 </script>
 </html>
 

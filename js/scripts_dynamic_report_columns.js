@@ -521,7 +521,9 @@ function calc_credit_percentage(col_name,report_args) {
     var data = report_args.rep_data;
     for (var i = 0; i < data.length; i++) {
         var perc_credits = 0.0
-        perc_credits = data[i]['total_credits']/data[i]['total_sales'];
+        perc_credits = -data[i]['total_credits']/data[i]['total_sales'];
+        console.log(perc_credits*100.0,data[i]['total_credits'],data[i]['total_sales'])
+        perc_credits = floor(perc_credits,3)
         if (isNaN(perc_credits)) { perc_credits = 0.0;}
         data[i]['percent_credits'] = perc_credits;
     }
@@ -573,6 +575,7 @@ function calc_growth(col_name,report_args) {
     for (var i = 0; i < data.length; i++) {
         var growth = 0.0
         growth = data[i]['ytd_total']/data[i]['lytd_total'] - 1.0; 
+        if (data[i]['lytd_total'] == 0.0) { growth = 0.0;}
         if (isNaN(growth)) { growth = 0.0;}
         data[i]['growth'] = growth;
     }
