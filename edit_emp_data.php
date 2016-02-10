@@ -38,8 +38,8 @@ check_login('edit_emp_data');
 <label class="label">Employee Department</label>
 <select id="department" class="dropbox-input" name="department" onchange="show_update_button('update-employee-table','employee_table','Update Employee Table'); show_update_button('update-employee-data-table','employee-data-table','Update Employee Data Table');">
     <option value="all" selected>All</option>
-    <option value="freight_backhaul">Freight Savings</option>
-    <option value="general">General</option>
+    <option value="freight_backhaul">Freight Logistics</option>
+    <option value="general">Occupancy</option>
     <option value="transportation">Transportation</option>
     <option value="warehouse_receiving">Warehouse Receiving</option>
     <option value="warehouse_shipping">Warehouse Shipping</option>

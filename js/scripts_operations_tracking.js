@@ -539,6 +539,10 @@ function process_data_type(value,data_type) {
         value = round(Number(value),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
         value = right_align.replace(/%value%/,value)
     }
+    else if (trim(data_type).match(/(^|%)int(%|$)/)) {
+        value = round(Number(value),0).toFixed(0);
+        value = right_align.replace(/%value%/,value)
+    }
     else if (trim(data_type).match(/(^|%)percent(%|$)/)) {
         value = 100 * Number(value);
         value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
@@ -550,13 +554,16 @@ function process_data_type(value,data_type) {
 }
 //
 // creates the table that allows the user to select viewable columns and totalling type
-function make_data_columns_table(args) {
-    
+function make_data_columns_table(args) {   
     //
     // variable definitions 
     var col_meta_data = args.data;  
     var preset_data = args.preset_data;
     var checked_cols = [];
+    var all_onclick_fun = '';
+    //
+    // additional argument parameters
+    if (args.hasOwnProperty('all_onclick_fun')) { all_onclick_fun = args.all_onclick_fun;}
     //
     // making an array to track columns that should be checked
     if (preset_data.data_columns.match(/\*/)) {
@@ -573,7 +580,6 @@ function make_data_columns_table(args) {
     var view_col_tr = "<tr id=\"data_sel_cols_checkbox_tr\"><td class=\"report-data-td\">Show Column:</td>";
     var total_type_tr = "<tr id=\"data_sel_cols_radio_tr\"><td class=\"report-data-td\">Sum:<br>or<br>Average:</td>";
     var sort_by_tr = "<tr id=\"sort-by-col-tr\" ><td class=\"report-data-td\">Sort by Column:</td>";
-    var all_onclick_fun = "show_update_button('get_emp_data','report-table','Show Changes'); remove_class('hidden-elm','restore-data-col-defaults');";
     //
     // making header rows
     var head_rows_props = {};

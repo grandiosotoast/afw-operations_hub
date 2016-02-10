@@ -14,8 +14,11 @@ var REPORT_FUNCTIONS = {
     'calc_percent_ot' : calc_percent_ot,
     'calc_transportation_incentive' : calc_transportation_incentive,
     'calc_receiving_incentive' : calc_receiving_incentive,
+    'calc_total_moves_hour' : calc_total_moves_hour,
+    'calc_total_units_hour' : calc_total_units_hour,
     'calc_warehouse_incentive' : calc_warehouse_incentive,
-    'calc_amount_to_pay' : calc_amount_to_pay,
+    'calc_total_cases_hr' : calc_total_cases_hr,
+    'calc_amount_to_pay'  : calc_amount_to_pay,
     'calc_cost_per_case'  : calc_cost_per_case,
     'calc_cost_per_mile'  : calc_cost_per_mile,
     'calc_cost_per_move'  : calc_cost_per_move,
@@ -164,8 +167,6 @@ function calc_total_avg_hourly_rate(col_name,report_args) {
     if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
     //
     check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
-    //
-    // check col_name_meta to see if avg_hourly_rate is suppose to be averaged
     //
     var dynamic_cols = report_args.dynamic_cols;
     var section_ids = report_args.section_ids;
@@ -477,6 +478,56 @@ function calc_cost_per_unit(col_name,data_row,dynamic_cols) {
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
 //
+// this updates the moves per hour in the totals row if 'avg' is selected in the meta data
+function calc_total_moves_hour(col_name,report_args) {
+    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    //
+    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
+    //
+    var dynamic_cols = report_args.dynamic_cols;
+    var section_ids = report_args.section_ids;
+    var sect_col = report_args.prime_sort;
+    var data_arr = report_args.data;
+    //
+    // updating the section totals
+    for (var i = 0; i < section_ids.length; i++) {
+        var prefix = section_ids[i];
+        var prod_time = Number(document.getElementById(prefix+'-span-prod_time').innerHTML);
+        var moves = Number(document.getElementById(prefix+'-span-total_moves').innerHTML);
+        //
+        var moves_hour = ceiling((moves/prod_time),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
+        if (!(isFinite(moves_hour))) { moves_hour = 0;}
+        document.getElementById(prefix+'-span-moves_hour').innerHTML = moves_hour;       
+    }
+    //
+    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true;  
+}
+//
+// this updates the units per hour in the totals row if 'avg' is selected in the meta data
+function calc_total_units_hour(col_name,report_args) {
+    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    //
+    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
+    //
+    var dynamic_cols = report_args.dynamic_cols;
+    var section_ids = report_args.section_ids;
+    var sect_col = report_args.prime_sort;
+    var data_arr = report_args.data;
+    //
+    // updating the section totals
+    for (var i = 0; i < section_ids.length; i++) {
+        var prefix = section_ids[i];
+        var prod_time = Number(document.getElementById(prefix+'-span-prod_time').innerHTML);
+        var units = Number(document.getElementById(prefix+'-span-total_units').innerHTML);
+        //
+        var units_hour = round((units/prod_time),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
+        if (!(isFinite(units_hour))) { units_hour = 0;}
+        document.getElementById(prefix+'-span-units_hour').innerHTML = units_hour;       
+    }
+    //
+    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true;  
+}
+//
 ////////////////////////////////////////////////////////////////////////////////
 //////////////               Warehouse Shipping Functions            ///////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -489,6 +540,31 @@ function calc_warehouse_incentive(col_name,data_row,dynamic_cols) {
     // calulating value
     data_row[col_name] = parseFloat(data_row['sel_rate'])*parseFloat(data_row['num_cases']);
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
+}
+//
+// this updates the cases per hour in the totals row if 'avg' is selected in the meta data
+function calc_total_cases_hr(col_name,report_args) {
+    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    //
+    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
+    //
+    var dynamic_cols = report_args.dynamic_cols;
+    var section_ids = report_args.section_ids;
+    var sect_col = report_args.prime_sort;
+    var data_arr = report_args.data;
+    //
+    // updating the section totals
+    for (var i = 0; i < section_ids.length; i++) {
+        var prefix = section_ids[i];
+        var prod_time = Number(document.getElementById(prefix+'-span-prod_time').innerHTML);
+        var num_cases = Number(document.getElementById(prefix+'-span-num_cases').innerHTML);
+        //
+        var cases_hr = ceiling((num_cases/prod_time),0).toFixed(0);
+        if (!(isFinite(cases_hr))) { cases_hr = 0;}
+        document.getElementById(prefix+'-span-cases_hr').innerHTML = cases_hr;       
+    }
+    //
+    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true;  
 }
 ////////////////////////////////////////////////////////////////////////////////
 //////////////              Sales Rep Report Functions               ///////////
@@ -504,7 +580,7 @@ function calc_dso(col_name,report_args) {
     for (var i = 0; i < data.length; i++) {
         var dso = 0.0
         dso = data[i]['total_ar']/data[i]['total_ar_sales'];
-        if (isNaN(dso)) { dso = 0.0;}
+        if (!(isFinite(dso))) { dso = 0.0;}
         data[i]['dso'] = dso;
     }
     
@@ -522,9 +598,8 @@ function calc_credit_percentage(col_name,report_args) {
     for (var i = 0; i < data.length; i++) {
         var perc_credits = 0.0
         perc_credits = -data[i]['total_credits']/data[i]['total_sales'];
-        console.log(perc_credits*100.0,data[i]['total_credits'],data[i]['total_sales'])
         perc_credits = floor(perc_credits,3)
-        if (isNaN(perc_credits)) { perc_credits = 0.0;}
+        if (!(isFinite(perc_credits))) { perc_credits = 0.0;}
         data[i]['percent_credits'] = perc_credits;
     }
     //
@@ -541,7 +616,7 @@ function calc_profit_margin(col_name,report_args) {
     for (var i = 0; i < data.length; i++) {
         var profit_margin = 0.0
         profit_margin = data[i]['profit']/data[i]['total_sales'];
-        if (isNaN(profit_margin)) { profit_margin = 0.0;}
+        if (!(isFinite(profit_margin))) { profit_margin = 0.0;}
         data[i]['profit_margin'] = profit_margin;
     }
     //
@@ -558,7 +633,7 @@ function calc_base_commission(col_name,report_args) {
     for (var i = 0; i < data.length; i++) {
         var base_comm = 0.0
         base_comm = data[i]['profit']*0.16;
-        if (isNaN(base_comm)) { base_comm = 0.0;}
+        if (!(isFinite(base_comm))) { base_comm = 0.0;}
         data[i]['base_commission'] = base_comm;
     }
     //
@@ -575,8 +650,7 @@ function calc_growth(col_name,report_args) {
     for (var i = 0; i < data.length; i++) {
         var growth = 0.0
         growth = data[i]['ytd_total']/data[i]['lytd_total'] - 1.0; 
-        if (data[i]['lytd_total'] == 0.0) { growth = 0.0;}
-        if (isNaN(growth)) { growth = 0.0;}
+        if (!(isFinite(growth))) { growth = 0.0;}
         data[i]['growth'] = growth;
     }
     //
@@ -593,18 +667,19 @@ function calc_total_commission(col_name,report_args) {
     var data = report_args.rep_data;
     for (var i = 0; i < data.length; i++) {
         var total_comm = data[i]['base_commission']; 
+        var profit = Number(data[i]['profit']);
         //
         // growth bonuses
-        if (data[i]['growth'] >= 0.049) { total_comm += data[i]['profit']*0.01;}
-        if (data[i]['growth'] >= 0.10) { total_comm += data[i]['profit']*0.01;}
+        if (data[i]['growth'] >= 0.049) { total_comm += profit*0.01;}
+        if (data[i]['growth'] >= 0.10) { total_comm += profit*0.01;}
         //
         // DSO bonus
-        if (data[i]['dso'] <= 0.20) { total_comm += data[i]['profit']*0.0075;}
+        if (data[i]['dso'] <= 0.20) { total_comm += profit*0.0075;}
         //
         // credits bonus
-        if (data[i]['credits'] <= 0.01) { total_comm += data[i]['profit']*0.0075;}        
+        if (data[i]['percent_credits'] <= 0.01) { total_comm += profit*0.0075;}
         //
-        if (isNaN(total_comm)) { total_comm = 0.0;}
+        if (!(isFinite(total_comm))) { total_comm = 0.0;}
         data[i]['total_commission'] = total_comm;
     }
     //

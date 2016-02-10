@@ -100,9 +100,9 @@ function show_data_columns(department,out_id,button_id,toggle,reset) {
     var button = "<br><button id=\"restore-data-col-defaults\" type=\"button\" class=\"hidden-elm\" onclick=\""+reset_onclick+"\">Restore Defaults</button><br>";
     //
     var callback = function(response) {
-        arg_object.department = department;
         arg_object.data = response.data;
         arg_object.preset_data = response.meta_data[0];
+        arg_object.all_onclick_fun = "show_update_button('get_emp_data','report-table','Show Changes'); remove_class('hidden-elm','restore-data-col-defaults');";
         var table = make_data_columns_table(arg_object)
         //
         // shows or hides the data column div
@@ -528,6 +528,7 @@ function make_report(report_args) {
     // handling post calculations that require the table to exist
     for (var col in report_args.dynamic_cols) {
         col = report_args.dynamic_cols[col];
+        if (!(report_args.col_name_meta[col.column_name])) { continue;}
         if ((col.column_type != 'total') && (col.column_type != 'special')){ continue;}
         if ((no_totals) && (col.column_type == 'total')) { continue;}
         //
@@ -587,9 +588,11 @@ function make_report_data_tr(row_args,totals_obj) {
             }
         }
         var td = '';
-        if ((col == 'comments') && (data_entry[col] != '')) {data_entry[col] = '<span id="comments-'+data_entry.entry_id+'" class="edit_link" onclick="toggle_innerHTML(this.id,\'C\',\''+data_entry[col]+'\');">C</span>'} 
-        if (col_meta_data[i].data_type.match(/float/)) { data_entry[col] = round(data_entry[col],CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);}
-        td = '<td id="data-entry-'+data_entry.entry_id+'-'+col+'" class="report-data-td">'+data_entry[col]+'</td>';
+        var innerHTML = data_entry[col];
+        if ((col == 'comments') && (data_entry[col] != '')) { innerHTML = '<span id="comments-'+data_entry.entry_id+'" class="edit_link" onclick="toggle_innerHTML(this.id,\'C\',\''+data_entry[col]+'\');">C</span>'} 
+        else if (col_meta_data[i].data_type.match(/float/)) { innerHTML = round(Number(data_entry[col]),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);}
+        else if (col_meta_data[i].data_type.match(/int/))   { innerHTML = round(Number(data_entry[col]),0).toFixed(0);} 
+        td = '<td id="data-entry-'+data_entry.entry_id+'-'+col+'" class="report-data-td">'+innerHTML+'</td>';
         row += td;
     }
     //
@@ -623,12 +626,14 @@ function make_report_total_tr(total_args,totals_obj,col_meta_data) {
         var reset = '&nbsp;'
         if (col.total_type == 'avg') {
             value = totals_obj[total_name+'_total'][col.column_name]/totals_obj[total_name+'_count'][col.column_name];
-            value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
+            if (col.data_type.match(/float/)) { value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);}
+            else if (col.data_type.match(/int/))   { value = round(value,0).toFixed(0);} 
             reset = 0;
         }
         else if (col.total_type == 'sum'){
             value = totals_obj[total_name+'_total'][col.column_name];
-            value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
+            if (col.data_type.match(/float/)) { value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);}
+            else if (col.data_type.match(/int/))   { value = round(value,0).toFixed(0);} 
             reset = 0;
         }
         //
@@ -648,7 +653,7 @@ function make_report_total_tr(total_args,totals_obj,col_meta_data) {
         dynamic_row += '<td class="report-data-td" colspan="'+regular+'">'
         for (var i = 0; i < col_meta_data.length; i++) {
             if (col_meta_data[i].column_type.match(/^dynamic-total$/)) {
-                dynamic_row += '<span id="'+total_args.total_id+'-'+col_meta_data[i].column_name+'" style="display: inline-block; width: '+(100/dynamic)+'%">TEST</span>';
+                dynamic_row += '<span id="'+total_args.total_id+'-'+col_meta_data[i].column_name+'" style="display: inline-block; width: '+(100/dynamic)+'%">X</span>';
             }
         }
         dynamic_row += '</tr>';

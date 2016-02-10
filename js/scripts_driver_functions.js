@@ -387,6 +387,31 @@ function view_employee_data_entry(entry_id,department,row_id) {
         }
         ajax_multi_fetch([data_sql],['data'],callback);
     }
+    else if (department == 'general') {
+        //
+        // nesting this in a callback so populate form can never execute before dropboxes are populated
+        var callback = function() {
+            // populating form from main employee data table
+            populate_form_args.table = 'employee_data';
+            populate_form_args.unique_col = 'entry_id';
+            populate_form_args.unique_data = entry_id;
+            populate_form_args.form_id = 'input-emp-data';
+            populate_form_args.trigger_events = false;
+            populate_form(populate_form_args)
+        }
+        //
+        // setting up add_args for error code dropbox
+        var add_args = {
+            place_holder_value : '0',
+            place_holder_status : 'selected',
+            add_opts_val : ['99'],
+            add_opts_text : ['OTHER'],
+            add_callback : callback
+        };
+        // populating dropbox
+        populate_dropbox_options('attendance-select','attendance','absence_value','absence_kind','','');
+        populate_dropbox_options('error-code','error_codes','reason','description','NO ERRORS',add_args)
+    }
     else {
         //
         // nesting this in a callback so populate form can never execute before dropboxes are populated
@@ -1303,13 +1328,14 @@ function pop_add_dbuser_dropdowns(args) {
 //
 // this creates the table select box on te table_maintenance page 
 function list_all_tables() {
-    
     //
     var sql = "SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA` LIKE 'afwl3_operations' AND `TABLE_TYPE` LIKE 'BASE TABLE'";
+    var onchange_fun = "reset_table_maintence_inputs(); create_table(1,'','');";
+    //
     //
     var callback = function(response) {
         var tables = response.tables
-        var select_element = '<select id="table-select" class="multi-line-dropbox-input" multiple="mulitple" style="height: 10em;" onchange="create_table(1,\'\',\'\');">';
+        var select_element = '<select id="table-select" class="multi-line-dropbox-input" multiple="mulitple" style="height: 10em;" onchange="'+onchange_fun+'">';
         select_element += "<option value=\"\" disabled selected>Select a Table</option>"
         for (var i = 0; i < tables.length; i++) {
             var table = tables[i];
@@ -1321,6 +1347,17 @@ function list_all_tables() {
     }
     //
     ajax_multi_fetch([sql],['tables'],callback)
+}
+//
+// this function clears the table maintenance inputs
+function reset_table_maintence_inputs() {
+    //
+    document.getElementById('column-name-1').value = '';
+    document.getElementById('match-type-1').value = 'REGEXP';
+    document.getElementById('column-value-1').value = '';
+    document.getElementById('column-name-2').value = '';
+    document.getElementById('match-type-2').value = 'REGEXP';
+    document.getElementById('column-value-2').value = '';
 }
 //
 // creates the selected table using the meta_data and its data

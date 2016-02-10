@@ -200,6 +200,11 @@ function rep_report() {
         {'elm' : 'br'},
         {'elm' : 'br'},
         //
+        {'elm' : 'label', 'className' : 'label', 'textNode' : 'Sales Reps to Show:'},
+        {'elm' : 'select', 'id' : 'rep-status', 'className' : 'dropbox-input', 'name' : 'rep-status' , 'events' : [{'event' : 'change', 'function' : function(){ show_update_button('create-rep-report','sales-rep-report','Show Changes');}}]},        
+        //
+        {'elm' : 'br'},
+        //
         {'elm' : 'label', 'className' : 'label', 'textNode' : 'Preset Report Options:'},
         {'elm' : 'select', 'id' : 'preset-report', 'className' : 'dropbox-input', 'name' : 'preset-report' , 'events' : [{'event' : 'change', 'function' : function(){ show_update_button('create-rep-report','sales-rep-report','Show Changes'); remove_class('hidden-elm','sel-cols-div'); rep_report_data_columns('sel-cols-div','show-data-sel-cols',false,true);}}]},
         //
@@ -213,6 +218,13 @@ function rep_report() {
         {'elm' : 'select', 'id' : 'sort-direction', 'className' : 'dropbox-input', 'name' : 'sort-direction', 'events' : [{'event' : 'change', 'function' : update_fun}]}
         );
     addChildren(fieldset,elements);
+    //
+    elements = Array(
+        {'elm' : 'option', 'textNode' : 'Active', 'value' : 'active'},
+        {'elm' : 'option', 'textNode' : 'All', 'value' : '.+'},
+        {'elm' : 'option', 'textNode' : 'Inactive', 'value' : 'inactive'}
+        );
+    addChildren(document.getElementById('rep-status'),elements);
     //
     elements = Array(
         {'elm' : 'option', 'textNode' : 'Ascending', 'value' : 'ASC'},
@@ -845,12 +857,6 @@ function submit_sales_customer_form(args) {
 }
 //
 //
-function report_show_cols() {
-    //
-    alert('WIP');
-}
-//
-//
 function report_rep_table(page,sort_col,sort_dir,toggle) {   
     //
     // initializating argument objects
@@ -910,8 +916,6 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
     }
 }
 //
-// this makes the data selection columns for the report
-//
 // creates the data columns table for the report page
 function rep_report_data_columns(out_id,button_id,toggle,reset) { 
     var sql = "";
@@ -937,6 +941,7 @@ function rep_report_data_columns(out_id,button_id,toggle,reset) {
         args.preset_data = response.meta_data[0];
         args.hide_sort_row = true;
         args.hide_totals_row = true;
+        args.all_onclick_fun = "show_update_button('create-rep-report','sales-rep-report','Show Changes'); remove_class('hidden-elm','restore-data-col-defaults');";
         var table = make_data_columns_table(args)
         //
         // shows or hides the data column div
@@ -979,6 +984,7 @@ function create_rep_report(rep_id) {
     //
     // getting report args from form
     var report_args = {};
+    report_args.name_val_obj = name_val_obj;
     report_args.rep_id = rep_id;
     report_args.preset = name_val_obj['preset-report'];
     report_args.sort_col = name_val_obj['sort-column'];
@@ -1043,14 +1049,16 @@ function rep_report_get_data(args) {
     YTD_sql  += "WHERE sales_data.date BETWEEN '"+CONSTANTS.FIRST_BUSINESS_DAY.join('-')+"' AND '"+curr_date+"' AND sales_rep_table.rep_id REGEXP '^\s*"+args.rep_id+"\s*$' GROUP BY sales_rep_table.rep_id";
     //
     var rep_data_sql = 'SELECT * FROM sales_rep_data INNER JOIN sales_rep_table ON sales_rep_data.rep_id = sales_rep_table.rep_id ';
-    rep_data_sql += "WHERE sales_rep_data.date LIKE '"+curr_date+"' AND sales_rep_data.rep_id REGEXP '^\s*"+args.rep_id+"\s*$' ORDER BY "+args.sort_col+" "+args.sort_dir;
+    rep_data_sql += 'INNER JOIN dbUsers ON sales_rep_table.dbuser_internal_id = dbUsers.dbuser_internal_id ';
+    rep_data_sql += "WHERE sales_rep_data.date LIKE '"+curr_date+"' AND sales_rep_data.rep_id REGEXP '^\s*"+args.rep_id+"\s*$' AND dbUsers.dbuser_status REGEXP '^"+args.name_val_obj['rep-status']+"$' "
+    rep_data_sql += 'ORDER BY '+args.sort_col+' '+args.sort_dir;
     //
     var dyn_cols_sql = "SELECT * FROM `report_dynamic_columns` WHERE `department` REGEXP '(^|%)sales_rep(%|$)'";
     //
     var meta_args = {
         'cmd'   : 'SELECT',
         'table' : 'table_meta_data',
-        'where' : [['in_tables','REGEXP','(^|%)sales_rep_data(%|$)'],
+        'where' : [['in_tables','REGEXP','(^|%)sales_rep_data(%|$)|(^|%)sales_rep_table(%|$)'],
                    ['use_on_pages','REGEXP','(^|%)sales_reporting(%|$)'],
                    ['use_in_html_tables','REGEXP','(^|%)sales_rep_report(%|$)']],
         'orderBy' : [['order_index','ASC']]

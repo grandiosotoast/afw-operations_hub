@@ -31,8 +31,8 @@ check_login('report');
 <legend>Report Data Parameters</legend>
 <label class="label">Employee Department</label>
 <select id="department" class="dropbox-input" name="department" onchange="report_emp_table('1','emp_last_name','ASC',false); show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',false,true); show_update_button('get_emp_data','report-table','Show Changes'); show_if_val('department','crew-size-input','warehouse_receiving');">
-    <option value="freight_backhaul">Freight Savings</option>
-    <option value="general">General</option>
+    <option value="freight_backhaul">Freight Logistics</option>
+    <option value="general">Occupancy</option>
     <option value="transportation">Transportation</option>
     <option value="warehouse_receiving">Warehouse Receiving</option>
     <option value="warehouse_shipping">Warehouse Shipping</option>

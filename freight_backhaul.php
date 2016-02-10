@@ -8,7 +8,7 @@ require 'operations_tracking.php';
 <head>
 <meta charset="utf-8">
 
-<title>Wendlings Operation Tracking - Freight Backhauls</title>
+<title>Wendlings Operation Tracking - Freight Logistics</title>
 
 <?php
 link_external_files();
@@ -24,7 +24,7 @@ check_login('freight_backhaul');
 ?>
 </div>
 <div id = "main-container" class = "main-container">
-<h2>Freight Backhaul</h2>
+<h2>Freight Logistics</h2>
 <br>
 <div id='data-entry-form-div'>
 </div>
