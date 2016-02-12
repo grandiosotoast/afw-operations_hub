@@ -76,6 +76,7 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
 // creates the data columns table for the report page
 function show_data_columns(department,out_id,button_id,toggle,reset) { 
     var arg_object = {};
+    var sql_args = {};
     var sql = "";
     var preset_sql = '';
     var preset = document.getElementById('preset-report').value;
@@ -87,13 +88,20 @@ function show_data_columns(department,out_id,button_id,toggle,reset) {
     preset_sql = gen_sql(sql_args);
     //
     if (CONSTANTS.DEPT_TABLES.hasOwnProperty(department)) {
-        sql = "SELECT * FROM `table_meta_data` WHERE `in_tables` REGEXP '(^|%)employee_data(%|$)|(^|%)"+CONSTANTS.DEPT_TABLES[department]+"(%|$)' ";
+        sql_args = {};
+        sql_args.cmd = 'SELECT';
+        sql_args.table = 'table_meta_data';
+        sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)|(^|%)'+CONSTANTS.DEPT_TABLES[department]+'(%|$)']];
+        sql_args.where.push(['use_on_pages','REGEXP','(^|%)report(%|$)']);
+        sql_args.where.push(['use_in_html_tables','REGEXP','(^|%)report_'+department+'(%|$)']);
+        sql_args.where.push(['use_in_html_tables','REGEXP','(^|%)column_selection_table(%|$)']);
+        sql_args.orderBy = [['order_index','ASC']];  
+        sql = gen_sql(sql_args);
     }
     else {
         console.log('invalid department: '+department);
         return;
     }
-    sql += "AND `use_on_pages` REGEXP 'report' AND `use_in_html_tables` REGEXP 'report' ORDER BY `order_index` ASC"
     //
     // creating reset button
     var reset_onclick = "show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',false,true); show_update_button('get_emp_data','report-table','Show Changes'); add_class('hidden-elm','restore-data-col-defaults');";
@@ -172,7 +180,7 @@ function create_production_report(parent_form_id,report_div_id,department,emp_id
             if (all_children[i].checked == false) {continue;}
             //
             var id_arr = all_children[i].id.split('-');
-            if (all_children[i].id.match('-viewcol-')) {var obj = {}; obj.column_name = id_arr[0]; obj.total_type = 'none'; col_objs[id_arr[0]] = obj; sel_cols.push(id_arr[0]);}
+            if (all_children[i].id.match('-viewcol-')) {var obj = {}; obj.column_name = id_arr[0]; col_objs[id_arr[0]] = obj; sel_cols.push(id_arr[0]);}
             if (all_children[i].id.match('-sortby-')) {name_val_obj['secd-sort'] = id_arr[0];}
             if (all_children[i].id.match('-totaltype-')) {
                 if (!!(col_objs[id_arr[0]])) {col_objs[id_arr[0]].total_type = id_arr[2];}
@@ -371,24 +379,46 @@ function make_report(report_args) {
     var no_sect_headers = false;
     var head_row_args = {};
     var sect_cols = [];
+    var report_id = 'report-table'
     var total_id_format_str = 'section-total';
     var report_head_function = false;
     var report_section_head_function = false;
     //
-    // processing additional report arguments
+    //// processing additional report arguments
     if (report_args.sect_cols) { sect_cols = report_args.sect_cols;}
+    else { report_args.sect_cols = sect_cols;}
+    //
+    if (report_args.report_id) { report_id = report_args.report_id;}
+    else { report_args.report_id = report_id;}
+    //
     if (report_args.total_id_format_str) { total_id_format_str = report_args.total_id_format_str;}
+    else { report_args.total_id_format_str = total_id_format_str;}
+    //
     if (report_args.report_head_function) { report_head_function = report_args.report_head_function;}
+    else { report_args.report_head_function = report_head_function;}
+    //
     if (report_args.report_section_head_function) { report_section_head_function = report_args.report_section_head_function;}
+    else { report_args.report_section_head_function = report_section_head_function;}  
+    //
     if (report_args.report_type.match(/(^|%)no_totals(%|$)/)) { no_totals = true;}
+    else { report_args.no_totals = no_totals;}    
+    //
     if (report_args.report_type.match(/(^|%)summary(%|$)/)) { summary = true;}
+    else { report_args.summary = summary;}   
+    //
     if (report_args.report_type.match(/(^|%)no_sect_heads(%|$)/)) { no_sect_headers = true;}
+    else { report_args.no_sect_headers = no_sect_headers;}
+    ////
+    //
+    if (no_sect_headers) { sect_cols = [];}
     //
     // updating col_meta_data with col_objs data
     // converting meta_data array to be an object indexed by column_name
     report_args.col_name_meta = {};
     for (var i = 0; i < col_meta_data.length; i++) {
-        if (col_objs) { col_meta_data[i].total_type = col_objs[col_meta_data[i].column_name].total_type; }
+        if (col_objs.hasOwnProperty(col_meta_data[i].column_name)) { 
+            for (var prop in col_objs[col_meta_data[i].column_name]) { col_meta_data[i][prop] = col_objs[col_meta_data[i].column_name][prop];}
+        }
         report_args.col_name_meta[col_meta_data[i].column_name] = col_meta_data[i];
     }
     //
@@ -410,7 +440,7 @@ function make_report(report_args) {
         if (col_meta_data[i].column_type.match(/total/)) {head_row_args.skip_cols.push(col_meta_data[i].column_name)}
     }
     var table_head = make_head_rows(col_meta_data,head_row_args)
-    var table = '<table id="report-table" class="report-table">'
+    var table = '<table id="'+report_id+'" class="report-table">'
     table += table_head;
     //
     // initializing the totals objects
@@ -429,14 +459,15 @@ function make_report(report_args) {
     for (var total in totals_obj) {
         for (var i = 0; i < col_meta_data.length; i++) {
             var col = col_meta_data[i];
-            if (sect_cols.indexOf(col.column_name) >= 0) {totals_obj[total][col.column_name] = '&nbsp;'; continue;}
+            if (sect_cols.indexOf(col.column_name) >= 0) {totals_obj[total][col.column_name] = ''; continue;}
             if (col.total_type.match(/avg|sum/)) { totals_obj[total][col.column_name] = 0; skip = false;}
             else { 
-                totals_obj[total][col.column_name] = '&nbsp;';
+                totals_obj[total][col.column_name] = '';
                 if (skip) {total_args.skip_cols.push(col.column_name);}
             }
         }
     }
+    report_args.skip_cols = total_args.skip_cols.slice(0);
     //
     // initializing report body arguments  
     var sect_head_args = {}
@@ -525,17 +556,37 @@ function make_report(report_args) {
     table += '</table>';
     document.getElementById(output_id).innerHTML = head+table+'</div>';
     //
-    // handling post calculations that require the table to exist
+    // handling total and special cols
     for (var col in report_args.dynamic_cols) {
+        //
         col = report_args.dynamic_cols[col];
-        if (!(report_args.col_name_meta[col.column_name])) { continue;}
-        if ((col.column_type != 'total') && (col.column_type != 'special')){ continue;}
-        if ((no_totals) && (col.column_type == 'total')) { continue;}
+        // handling cases when totals need to be skipped
+        if (col.column_type == 'total') {
+            if (!(report_args.col_name_meta[col.column_name])) { continue;}
+            if (no_totals) { continue;}
+        }
+        // skipping everything that isn't a total or a special
+        else if (col.column_type != 'special') {
+            continue;
+        }
         //
         var col_funct = REPORT_FUNCTIONS[col.col_function]
         if (!(col_funct)) {console.log('Error: No function for column: '+col.column_name); continue;}
         col_funct(col.column_name,report_args);
-    }    
+    }  
+    //
+    // handling async columns
+    for (var col in report_args.dynamic_cols) {
+        //
+        col = report_args.dynamic_cols[col];
+        // handling cases when totals need to be skipped
+        if (col.column_type != 'async') { continue;}
+        //
+        var col_funct = REPORT_FUNCTIONS[col.col_function]
+        if (!(col_funct)) {console.log('Error: No function for column: '+col.column_name); continue;}
+        col_funct(col.column_name,report_args);
+    } 
+    console.log(report_args);
 }
 //
 // this creates the section header for the report
@@ -561,7 +612,7 @@ function make_report_data_tr(row_args,totals_obj) {
     for (var i = 0; i < col_meta_data.length; i++) {
         if (dynamic_cols.hasOwnProperty(col_meta_data[i].column_name)){
             var col = dynamic_cols[col_meta_data[i].column_name];
-            if (col.column_type == 'regular') { 
+            if (col.column_type == 'regular') {
                 var col_funct = REPORT_FUNCTIONS[col.col_function]
                 if (!(col_funct)) {console.log('Error: No function for column: '+col.column_name); continue;}
                 col_funct(col.column_name,data_entry,dynamic_cols);
@@ -584,9 +635,19 @@ function make_report_data_tr(row_args,totals_obj) {
         if (col_meta_data[i].total_type.match(/avg|sum/)) {
             for (var total in totals_obj) {
                 if (total.match(/count$/)) {totals_obj[total][col] += 1;}
-                else { totals_obj[total][col] += parseFloat(data_entry[col]);}
+                else { totals_obj[total][col] += Number(data_entry[col]);}
             }
         }
+        else if (col_meta_data[i].total_type.match(/flag/)) {
+            var flag = true
+            if (data_entry[col] == '') { flag = false;}
+            if (data_entry[col] == '0') { flag = false;}
+            if (data_entry[col] == 'none') { flag = false;}
+            for (var total in totals_obj) {
+                if (flag) { totals_obj[total][col] = 'X';}
+            }
+        }
+        //
         var td = '';
         var innerHTML = data_entry[col];
         if ((col == 'comments') && (data_entry[col] != '')) { innerHTML = '<span id="comments-'+data_entry.entry_id+'" class="edit_link" onclick="toggle_innerHTML(this.id,\'C\',\''+data_entry[col]+'\');">C</span>'} 
@@ -603,6 +664,7 @@ function make_report_data_tr(row_args,totals_obj) {
 // this outputs a total row for the report
 function make_report_total_tr(total_args,totals_obj,col_meta_data) {
     //
+    var dynamic_cols = total_args.dynamic_cols;
     var sect_cols = total_args.sect_cols;
     var total_name = total_args.total_name;
     var disp_name = total_args.total_name.replace('_',' ');
@@ -618,20 +680,24 @@ function make_report_total_tr(total_args,totals_obj,col_meta_data) {
     for (var i = 0; i < col_meta_data.length; i++) {
         if (total_args.skip_cols.indexOf(col_meta_data[i].column_name) >= 0) {continue;}
         if (sect_cols.indexOf(col_meta_data[i].column_name) >= 0) {continue;}
-        if (col_meta_data[i].column_type.match(/total/)) { dynamic += 1; continue;}
-        else { regular += 1;}
+        if (col_meta_data[i]['column_type'].match(/dynamic/)) { 
+            if (dynamic_cols[col_meta_data[i]['column_name']]['column_type'].match(/special/)) { continue;}
+            else if (dynamic_cols[col_meta_data[i]['column_name']]['column_type'].match(/total/)) { dynamic += 1; continue;}
+        }
+        regular += 1;
+        //
         var col = col_meta_data[i];
         var td = '';
-        var value = '&nbsp;'
-        var reset = '&nbsp;'
+        var innerHTML = ''
+        var value = totals_obj[total_name+'_total'][col.column_name]
+        var reset = ''
         if (col.total_type == 'avg') {
-            value = totals_obj[total_name+'_total'][col.column_name]/totals_obj[total_name+'_count'][col.column_name];
+            value = value/totals_obj[total_name+'_count'][col.column_name];
             if (col.data_type.match(/float/)) { value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);}
             else if (col.data_type.match(/int/))   { value = round(value,0).toFixed(0);} 
             reset = 0;
         }
         else if (col.total_type == 'sum'){
-            value = totals_obj[total_name+'_total'][col.column_name];
             if (col.data_type.match(/float/)) { value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);}
             else if (col.data_type.match(/int/))   { value = round(value,0).toFixed(0);} 
             reset = 0;
@@ -639,7 +705,8 @@ function make_report_total_tr(total_args,totals_obj,col_meta_data) {
         //
         totals_obj[total_name+'_total'][col.column_name] = reset;
         totals_obj[total_name+'_count'][col.column_name] = reset;
-        td = '<td id="'+total_args.total_id+'-'+col.column_name+'" class="report-data-td"><span id="'+total_args.total_id+'-span-'+col.column_name+'" class="report-data-span-'+col.total_type+'">'+value+'</span></td>';
+        if (value != '') { innerHTML = '<span id="'+total_args.total_id+'-span-'+col.column_name+'" class="report-data-span-'+col.total_type+'">'+value+'</span>';}
+        td = '<td id="'+total_args.total_id+'-'+col.column_name+'" class="report-data-td">'+innerHTML+'</td>';
         row += td;
     }
     //

@@ -6,29 +6,37 @@
 //
 // this holds references to pre-made functions 
 var REPORT_FUNCTIONS = {
+    // general production functions
     'calc_hourly' : calc_hourly,
     'calc_avg_hourly_rate' : calc_avg_hourly_rate,
-    'calc_total_avg_hourly_rate' : calc_total_avg_hourly_rate,
     'calc_true_hours' : calc_true_hours,
-    'calc_overtime' : calc_overtime,
+    'calc_overtime'   : calc_overtime,
     'calc_percent_ot' : calc_percent_ot,
-    'calc_transportation_incentive' : calc_transportation_incentive,
-    'calc_receiving_incentive' : calc_receiving_incentive,
-    'calc_total_moves_hour' : calc_total_moves_hour,
-    'calc_total_units_hour' : calc_total_units_hour,
-    'calc_warehouse_incentive' : calc_warehouse_incentive,
-    'calc_total_cases_hr' : calc_total_cases_hr,
     'calc_amount_to_pay'  : calc_amount_to_pay,
+    // driver functions
+    'calc_transportation_incentive' : calc_transportation_incentive,
     'calc_cost_per_case'  : calc_cost_per_case,
     'calc_cost_per_mile'  : calc_cost_per_mile,
-    'calc_cost_per_move'  : calc_cost_per_move,
     'calc_cost_per_route' : calc_cost_per_route,
     'calc_cost_per_stop'  : calc_cost_per_stop,
+    'recalc_transportation_totals' : recalc_transportation_totals,
+    // logistics functions
+    'calc_freight_backhaul_ytd_savings' : calc_freight_backhaul_ytd_savings,
+    // general employee functions
+    'recalc_general_totals' : recalc_general_totals,
+    // receiving functions
+    'calc_receiving_incentive' : calc_receiving_incentive,
+    'calc_cost_per_move'  : calc_cost_per_move,
     'calc_cost_per_unit'  : calc_cost_per_unit,
+    'recalc_receiving_totals' : recalc_receiving_totals,
+    // shipping functions
+    'calc_warehouse_incentive'   : calc_warehouse_incentive,
+    'calc_shipping_supervisor_incentive' : calc_shipping_supervisor_incentive,
+    'recalc_shipping_totals' : recalc_shipping_totals,
     // sales functions
     'calc_dso' : calc_dso,
     'calc_credit_percentage' : calc_credit_percentage,
-    'calc_profit_margin' : calc_profit_margin,
+    'calc_profit_margin'   : calc_profit_margin,
     'calc_base_commission' : calc_base_commission,
     'calc_growth' : calc_growth,
     'calc_total_commission' : calc_total_commission
@@ -56,7 +64,8 @@ function check_dependency_bulk(col_name,report_args,dynamic_cols) {
     for (var i = 0; i < dependents.length; i++) {
         if (dynamic_cols.hasOwnProperty(dependents[i])) {
             var col_funct = REPORT_FUNCTIONS[dynamic_cols[dependents[i]].col_function];
-            if (!(col_funct)) {console.log('Error: No function for column: '+col.column_name); break;}
+            if (!(col_funct)) {console.log('Error: No function for column: '+dependents[i]); break;}
+            if (dynamic_cols[dependents[i]]['column_type'].match(/async/)) { console.log('Warning column: '+col_name+' is dependent on asynchronous column: '+dependents[i]);}
             col_funct(dependents[i],report_args);
         }
     }
@@ -68,10 +77,36 @@ function check_dependency_regular(col_name,data_row,dynamic_cols) {
     for (var i = 0; i < dependents.length; i++) {
         if (dynamic_cols.hasOwnProperty(dependents[i]) && !(data_row.hasOwnProperty(dependents[i]))) {
             var col_funct = REPORT_FUNCTIONS[dynamic_cols[dependents[i]].col_function];
-            if (!(col_funct)) {console.log('Error: No function for column: '+col.column_name); break;}
+            if (!(col_funct)) {console.log('Error: No function for column: '+dependents[i]); break;}
             col_funct(dependents[i],data_row,dynamic_cols);
         }
     }
+}
+//
+// this function performs simple recalculation of totals so they display properly
+function recalc_totals(args) {
+    //
+    var meta_data = args.meta_data;
+    var section_ids = args.section_ids;
+    var numerator_col = args.numerator_col;
+    var divisor_col = args.divisor_col;
+    var output_col = args.output_col;
+    var precision = CONSTANTS.STD_PRECISION
+    //
+    if (meta_data[output_col]['data_type'].match(/int/)) { precision = 0;}
+    //
+    // updating the section totals
+    for (var i = 0; i < section_ids.length; i++) {
+        var prefix = section_ids[i];
+        var numerator = Number(document.getElementById(prefix+'-span-'+numerator_col).innerHTML);
+        var divisor = Number(document.getElementById(prefix+'-span-'+divisor_col).innerHTML);
+        //
+        var value = round((numerator/divisor),precision).toFixed(precision);
+        if (!(isFinite(value))) { value = 0.0;}
+        if (!(document.getElementById(prefix+'-span-'+output_col))) { continue;}
+        document.getElementById(prefix+'-span-'+output_col).innerHTML = value;     
+    }
+
 }
 //
 // this function outputs a simple total eiter average or summing values
@@ -162,31 +197,6 @@ function calc_avg_hourly_rate(col_name,data_row,dynamic_cols) {
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
 //
-// this updates the average hourly pay rate in the totals row if 'avg' is selected in the meta data
-function calc_total_avg_hourly_rate(col_name,report_args) {
-    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
-    //
-    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
-    //
-    var dynamic_cols = report_args.dynamic_cols;
-    var section_ids = report_args.section_ids;
-    var sect_col = report_args.prime_sort;
-    var data_arr = report_args.data;
-    //
-    // updating the section totals
-    for (var i = 0; i < section_ids.length; i++) {
-        var prefix = section_ids[i];
-        var hours = parseFloat(document.getElementById(prefix+'-span-hours').innerHTML);
-        var total = parseFloat(document.getElementById(prefix+'-span-total').innerHTML);
-        //
-        var avg_rate = round((total/hours),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
-        if (!(isFinite(avg_rate))) { avg_rate = 0.0;}
-        document.getElementById(prefix+'-span-avg_hourly_rate').innerHTML = avg_rate;       
-    }
-    //
-    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true;  
-}
-//
 // this adds all of the pay fields except hourly pay into a single value
 function calc_amount_to_pay(col_name,data_row,dynamic_cols) {
     // 
@@ -274,7 +284,6 @@ function calc_percent_ot(col_name,report_args) {
     check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
     //
     var dynamic_cols = report_args.dynamic_cols;
-    //var section_ids = report_args.section_ids;
     var sect_col = report_args.prime_sort;
     var data_arr = report_args.data;
     var overtimeHours = {};
@@ -368,6 +377,108 @@ function calc_cost_per_stop(col_name,data_row,dynamic_cols) {
     //
     data_row[col_name] = (+data_row['total'])/(+data_row['num_stops']);
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
+}
+//
+// this function properly recalculates the required shipping totals
+function recalc_transportation_totals(col_name,report_args) {
+    //
+    var args = {
+        'meta_data' : report_args.col_name_meta,
+        'data' : report_args.data,
+        'section_ids' : report_args.section_ids
+    }
+    //
+    // setting array of column args
+    var cols = {
+        'cost_per_mile' : {'numerator_col' : 'total', 'divisor_col' : 'miles'},
+        'cost_per_route' : {'numerator_col' : 'total', 'divisor_col' : 'num_routes'},
+        'cost_per_stop' : {'numerator_col' : 'total', 'divisor_col' : 'num_stops'},
+        'cost_per_case' : {'numerator_col' : 'total', 'divisor_col' : 'num_cases'},
+        'avg_hourly_rate' : {'numerator_col' : 'total', 'divisor_col' : 'hours'}
+    };
+    //
+    // recalculating columns
+    for (var output_col in cols) {
+        console.log('\n\n')
+        console.log(output_col)
+        args['output_col'] = output_col;
+        args['numerator_col'] = cols[output_col]['numerator_col'];
+        args['divisor_col'] = cols[output_col]['divisor_col'];
+        recalc_totals(args)
+    }
+}
+//
+////////////////////////////////////////////////////////////////////////////////
+//////////////                Freight Logistics Functions               ///////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//
+// this function performs the asynchronous calculation for freight backhaul YTD savings
+function calc_freight_backhaul_ytd_savings(col_name,report_args) {
+    //
+    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
+    //
+    //
+    var report = document.getElementById(report_args.report_id)
+    var start_date = CONSTANTS.FIRST_BUSINESS_DAY.join('-');
+    var end_date = report_args['to_ts'].split(' ')[0];
+    var colspan = report_args.meta_data.length - report_args.skip_cols.length;
+    var sql = "SELECT SUM(employee_data_freight_backhaul.total_savings) total_savings FROM employee_data INNER JOIN employee_data_freight_backhaul ON employee_data.entry_id = employee_data_freight_backhaul.entry_id ";
+    sql += "WHERE employee_data.date BETWEEN '"+start_date+"' AND '"+end_date+"' ";
+    sql += "AND `entry_status` LIKE 'submitted'";
+    //
+    var callback = function(response) {
+        //
+        // defining the savings cell inner html
+        var value = response[0][0]['total_savings'];
+        value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
+        var innerHTML = '<span style="display: inline-block; width: 100%; font-weight: bold;">$ '+value+'</span>';
+        //
+        // setting up child arrays
+        var row   = Array ( {'elm' : 'tr', 'id' : 'freight-logistics-ytd-savings'});
+        var cells = Array (
+                {'elm' : 'td', 'id' : 'report-spacer-td-ytds', 'className' : 'report-spacer-td', 'innerHTML' : '&nbsp;'},
+                {'elm' : 'td', 'id': 'savings-label-td', 'colSpan' : report_args.skip_cols.length, 'className' : 'report-data-td', 'style' : 'font-weight: bold;' , 'innerHTML' : 'Total Year to Date Savings:'},
+                {'elm' : 'td', 'className' : 'report-data-td', 'colSpan' : colspan, 'innerHTML' : innerHTML}
+            );
+        //
+        // adding child nodes
+        addChildren(report,row);
+        addChildren(document.getElementById(row[0]['id']),cells);
+
+    }
+    ajax_multi_fetch([sql],[0],callback);
+    //
+    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true;
+}
+//
+////////////////////////////////////////////////////////////////////////////////
+//////////////                General Employee Functions             ///////////
+////////////////////////////////////////////////////////////////////////////////
+//
+//
+// this function properly recalculates the required general totals
+function recalc_general_totals(col_name,report_args) {
+    //
+    var args = {
+        'meta_data' : report_args.col_name_meta,
+        'data' : report_args.data,
+        'section_ids' : report_args.section_ids
+    }
+    //
+    // setting array of column args
+    var cols = {
+        'avg_hourly_rate' : {'numerator_col' : 'total', 'divisor_col' : 'hours'}
+    };
+    //
+    // recalculating columns
+    for (var output_col in cols) {
+        args['output_col'] = output_col;
+        args['numerator_col'] = cols[output_col]['numerator_col'];
+        args['divisor_col'] = cols[output_col]['divisor_col'];
+        recalc_totals(args)
+    }
 }
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -478,54 +589,31 @@ function calc_cost_per_unit(col_name,data_row,dynamic_cols) {
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
 //
-// this updates the moves per hour in the totals row if 'avg' is selected in the meta data
-function calc_total_moves_hour(col_name,report_args) {
-    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+// this function properly recalculates the required receiving totals
+function recalc_receiving_totals(col_name,report_args) {
     //
-    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
-    //
-    var dynamic_cols = report_args.dynamic_cols;
-    var section_ids = report_args.section_ids;
-    var sect_col = report_args.prime_sort;
-    var data_arr = report_args.data;
-    //
-    // updating the section totals
-    for (var i = 0; i < section_ids.length; i++) {
-        var prefix = section_ids[i];
-        var prod_time = Number(document.getElementById(prefix+'-span-prod_time').innerHTML);
-        var moves = Number(document.getElementById(prefix+'-span-total_moves').innerHTML);
-        //
-        var moves_hour = ceiling((moves/prod_time),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
-        if (!(isFinite(moves_hour))) { moves_hour = 0;}
-        document.getElementById(prefix+'-span-moves_hour').innerHTML = moves_hour;       
+    var args = {
+        'meta_data' : report_args.col_name_meta,
+        'data' : report_args.data,
+        'section_ids' : report_args.section_ids
     }
     //
-    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true;  
-}
-//
-// this updates the units per hour in the totals row if 'avg' is selected in the meta data
-function calc_total_units_hour(col_name,report_args) {
-    if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
+    // setting array of column args
+    var cols = {
+        'moves_hour' : {'numerator_col' : 'total_moves', 'divisor_col' : 'prod_time'},
+        'units_hour' : {'numerator_col' : 'total_units', 'divisor_col' : 'prod_time'},
+        'cost_per_move' : {'numerator_col' : 'total', 'divisor_col' : 'total_moves'},
+        'cost_per_case' : {'numerator_col' : 'total', 'divisor_col' : 'total_units'},
+        'avg_hourly_rate' : {'numerator_col' : 'total', 'divisor_col' : 'hours'}
+    };
     //
-    check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
-    //
-    var dynamic_cols = report_args.dynamic_cols;
-    var section_ids = report_args.section_ids;
-    var sect_col = report_args.prime_sort;
-    var data_arr = report_args.data;
-    //
-    // updating the section totals
-    for (var i = 0; i < section_ids.length; i++) {
-        var prefix = section_ids[i];
-        var prod_time = Number(document.getElementById(prefix+'-span-prod_time').innerHTML);
-        var units = Number(document.getElementById(prefix+'-span-total_units').innerHTML);
-        //
-        var units_hour = round((units/prod_time),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
-        if (!(isFinite(units_hour))) { units_hour = 0;}
-        document.getElementById(prefix+'-span-units_hour').innerHTML = units_hour;       
+    // recalculating columns
+    for (var output_col in cols) {
+        args['output_col'] = output_col;
+        args['numerator_col'] = cols[output_col]['numerator_col'];
+        args['divisor_col'] = cols[output_col]['divisor_col'];
+        recalc_totals(args)
     }
-    //
-    report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true;  
 }
 //
 ////////////////////////////////////////////////////////////////////////////////
@@ -538,33 +626,111 @@ function calc_warehouse_incentive(col_name,data_row,dynamic_cols) {
     check_dependency_regular(col_name,data_row,dynamic_cols);
     //
     // calulating value
+    var supervisor_id = CONSTANTS.SHIPPING_SUPERVISOR_ID;
+    if (data_row['emp_id'] == supervisor_id) { return;}
+    //
     data_row[col_name] = parseFloat(data_row['sel_rate'])*parseFloat(data_row['num_cases']);
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
 //
-// this updates the cases per hour in the totals row if 'avg' is selected in the meta data
-function calc_total_cases_hr(col_name,report_args) {
+// this calculates the special icentive for james smith
+function calc_shipping_supervisor_incentive(col_name,report_args) {
     if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
     //
     check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
     //
-    var dynamic_cols = report_args.dynamic_cols;
-    var section_ids = report_args.section_ids;
-    var sect_col = report_args.prime_sort;
-    var data_arr = report_args.data;
+    var data_arr = [];
+    var supervisor_entries = [];
+    var supervisor_id = CONSTANTS.SHIPPING_SUPERVISOR_ID;
+    var total_cases = 0;
+    var case_bonus = 0.005;
+    var total_bonus = 0.0;
+    var bonus_per_entry = 0.0;
     //
-    // updating the section totals
-    for (var i = 0; i < section_ids.length; i++) {
-        var prefix = section_ids[i];
-        var prod_time = Number(document.getElementById(prefix+'-span-prod_time').innerHTML);
-        var num_cases = Number(document.getElementById(prefix+'-span-num_cases').innerHTML);
+    // creating a new data array to preserve order of original but still update objects
+    for (var i = 0; i < report_args.data.length; i++) {
+        data_arr[i] = report_args.data[i]
+    }
+    //
+    // sorting report data by date
+    data_arr.sort(function(a, b) {
+            var d1 = new Date(a.date);
+            var d2 = new Date(b.date);
+            return (d1 - d2);
+    });
+    //
+    // stepping over all of the entries to determine if the supervisor gets an incentive for a given week
+    var entry_date = new Date(data_arr[0].date.split('-')[0],data_arr[0].date.split('-')[1]-1,data_arr[0].date.split('-')[2]);
+    var exit_date = new Date(entry_date.getFullYear(),entry_date.getMonth(),(entry_date.getDate()+6-entry_date.getDay()));
+    //
+    for (var i = 0; i < data_arr.length; i++) {
+        var entry_date = new Date(data_arr[i].date.split('-')[0],data_arr[i].date.split('-')[1]-1,data_arr[i].date.split('-')[2]);
+        data_arr[i]['incentive_pay'] = 0.0
         //
-        var cases_hr = ceiling((num_cases/prod_time),0).toFixed(0);
-        if (!(isFinite(cases_hr))) { cases_hr = 0;}
-        document.getElementById(prefix+'-span-cases_hr').innerHTML = cases_hr;       
+        //
+        // outputting incentive if sunday is crossed
+        if (entry_date > exit_date) {
+            outputIncentive()
+            //
+            // resetting weekly totals
+            supervisor_entries = [];
+            total_cases = 0;
+            case_bonus = 0.005;
+            total_bonus = 0.0;
+            bonus_per_entry = 0.0;
+            exit_date = new Date(entry_date.getFullYear(),entry_date.getMonth(),(entry_date.getDate()+6-entry_date.getDay()) );
+        }
+        //
+        if (data_arr[i]['emp_id'] == supervisor_id) { 
+            supervisor_entries.push(i);
+            if (data_arr[i]['attendance_error'] != 'none') { case_bonus = 0.0;}
+        }
+        if (data_arr[i]['error_code'] != '0') { case_bonus = 0.0;}
+        total_cases += Number(data_arr[i]['num_cases']);
+    }
+    outputIncentive()
+    //
+    // local function to output incentive pay for the supervisor
+    function outputIncentive() {
+        //
+        total_bonus = ceiling(case_bonus * total_cases,2);
+        bonus_per_entry = total_bonus/supervisor_entries.length
+        if (!(isFinite(bonus_per_entry))) { bonus_per_entry = 0.0;}
+        //
+        // putting smiths bonus in the incentive field
+        for (var i = 0; i < supervisor_entries.length; i++) {
+            data_arr[supervisor_entries[i]]['sel_rate'] = 0.0;
+            data_arr[supervisor_entries[i]]['incentive_pay'] = bonus_per_entry;
+            data_arr[supervisor_entries[i]]['total'] = Number(data_arr[supervisor_entries[i]]['total']) +  bonus_per_entry
+        }
     }
     //
     report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true;  
+}
+//
+// this function properly recalculates the required shipping totals
+function recalc_shipping_totals(col_name,report_args) {
+    //
+    var args = {
+        'meta_data' : report_args.col_name_meta,
+        'data' : report_args.data,
+        'section_ids' : report_args.section_ids
+    }
+    //
+    // setting array of column args
+    var cols = {
+        'cases_hr' : {'numerator_col' : 'num_cases', 'divisor_col' : 'prod_time'},
+        'cost_per_case' : {'numerator_col' : 'total', 'divisor_col' : 'num_cases'},
+        'avg_hourly_rate' : {'numerator_col' : 'total', 'divisor_col' : 'hours'}
+    };
+    //
+    // recalculating columns
+    for (var output_col in cols) {
+        args['output_col'] = output_col;
+        args['numerator_col'] = cols[output_col]['numerator_col'];
+        args['divisor_col'] = cols[output_col]['divisor_col'];
+        recalc_totals(args)
+    }
 }
 ////////////////////////////////////////////////////////////////////////////////
 //////////////              Sales Rep Report Functions               ///////////
@@ -582,8 +748,7 @@ function calc_dso(col_name,report_args) {
         dso = data[i]['total_ar']/data[i]['total_ar_sales'];
         if (!(isFinite(dso))) { dso = 0.0;}
         data[i]['dso'] = dso;
-    }
-    
+    }  
     //
     report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true; 
 }
