@@ -154,55 +154,16 @@ function create_standard_table(table_args) {
     var sql_args = {};
     var data_sql = '';
     var meta_sql = '';
-    var department = '.'
     var add_callback = false;
-    var sortable = true;
     //
     // getting callback if it exists
-    if (!!(table_args.add_callback)) {add_callback = table_args.add_callback;}
-    //
-    // results per page
-    if (!(table_args.num_per_page)) { table_args.num_per_page = 10;}
-    //
-    // determing if its sortable or not
-    if (table_args.hasOwnProperty('sortable')) { sortable = table_args.sortable;}
+    if (table_args.hasOwnProperty('add_callback')) {add_callback = table_args.add_callback;}
     //
     if (table_args.data_sql) { data_sql = table_args.data_sql;}
     else { data_sql = gen_sql(table_args.data_sql_args);}
     //
     if (table_args.meta_sql) { meta_sql = table_args.meta_sql;}
     else { meta_sql = gen_sql(table_args.meta_sql_args);}
-    //
-    // rearranging table args to proper form
-    var page_nav_args = {};
-    page_nav_args.curr_page = table_args.page;
-    page_nav_args.num_per_page = table_args.num_per_page;
-    page_nav_args.page_nav_div_id = table_args.page_nav_div_id
-    page_nav_args.page_nav_class = table_args.page_nav_class
-    page_nav_args.sort_col = table_args.sort_col;
-    page_nav_args.sort_dir = table_args.sort_dir;
-    page_nav_args.tot_pages_shown = table_args.tot_pages_shown;
-    page_nav_args.id_prefix = table_args.page_nav_id_prefix;
-    page_nav_args.class_str = table_args.page_class_str;
-    page_nav_args.onclick_str = table_args.page_onclick.replace('%sort_dir%',table_args.sort_dir);
-    page_nav_args.onclick_str = page_nav_args.onclick_str.replace('%sort_col%',table_args.sort_col); 
-    page_nav_args.onmouse_str = table_args.page_onmouse_str; 
-    if (!!(table_args.page_nav_args)) { 
-        for (var arg in table_args.page_nav_args) { page_nav_args[arg] = table_args.page_nav_args[arg];}
-    } 
-    //
-    var head_row_args = {};
-    head_row_args.class_str = "default-table-header";
-    head_row_args.sort_onclick_str = table_args.sort_onclick;
-    head_row_args.sortable = sortable;
-    head_row_args.sort_col = table_args.sort_col;
-    head_row_args.sort_dir = table_args.sort_dir;
-    if (!!(table_args.head_row_args)) { 
-        for (var arg in table_args.head_row_args) { head_row_args[arg] = table_args.head_row_args[arg];}
-    }
-    //
-    table_args.page_nav_args = page_nav_args;
-    table_args.head_row_args = head_row_args;
     //
     var callback = function(response) {
         table_args.data_arr = response.data;
@@ -213,7 +174,7 @@ function create_standard_table(table_args) {
         //
         if (add_callback) {add_callback(response);}
     }
-    ajax_multi_fetch([data_sql,meta_sql],['data','meta_data'],callback) 
+    ajax_fetch([data_sql,meta_sql],['data','meta_data'],callback) 
 }
 //
 // makes the employee table itself
@@ -242,7 +203,7 @@ function make_standard_table(table_args) {
     if (table_args.hasOwnProperty('row_onmouseleave')) { row_onmouseleave = table_args.row_onmouseleave;}
     //
     // calculating number of pages and what to display
-    var page = table_args.page;
+    var page = page_nav_args.curr_page;
     var start_index = 0;
     var end_index = data_arr.length; 
     if (!(table_args.no_page_nav)) {
@@ -278,7 +239,7 @@ function make_standard_table(table_args) {
         for (var c = 0; c < col_meta_data.length; c++) {
             var innerHTML = data_arr[i][col_meta_data[c].column_name];
             if ((col_meta_data[c].data_type.match(/text/)) && (innerHTML.length > CONSTANTS.MAX_STR_LENGTH)) {
-                var td_onlick = "toggle_innerHTML(this.id,'"+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+"'...','"+innerHTML+"');"
+                var td_onlick = "toggle_innerHTML(this.id,'"+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+"...','"+innerHTML+"');"
                 innerHTML = '<span id="'+col_meta_data[c].column_name+'-'+i+'" class="edit_link" onclick="'+td_onlick+'">'+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...</span>'
             }
             td_str += '<td id = "'+row_id+'-'+col_meta_data[c].column_name+'" class="'+table_args.table_data_cell_class+'">'+innerHTML+'</td>';
@@ -369,7 +330,7 @@ function make_head_rows(col_data,head_rows_props) {
     var col_meta_data = JSON.parse(JSON.stringify(col_data));
     var row_id = 'table-header';
     var id_prefix = '';
-    var class_str = '';
+    var class_str = 'default-table-header';
     var leading_cells = '';
     var sortable = true;
     var sort_col = '';

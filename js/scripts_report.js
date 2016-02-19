@@ -25,14 +25,14 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'employee_info';
     data_sql_args.where = [['department','REGEXP',department]];
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     if (!(emp_table_args.show_inactive)) {
         data_sql_args.where.push(['emp_status','LIKE','active'])
     }
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_info(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','employee_table']];
-    meta_sql_args.orderBy = [['order_index','ASC']];
+    meta_sql_args.order_by = [['order_index','ASC']];
     emp_table_args.data_sql_args = data_sql_args;
     emp_table_args.meta_sql_args = meta_sql_args;
     //
@@ -43,21 +43,28 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
     emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
     emp_table_args.table_data_cell_class = 'default-table-td'; 
-    emp_table_args.page_nav_div_id = 'emp-table-page-nav';
-    emp_table_args.page_nav_class = 'page_nav';
-    emp_table_args.page_nav_id_prefix = 'emp';
-    emp_table_args.page_class_str = 'page_nav_link';
-    emp_table_args.page_onmouse_str = '';
-    emp_table_args.tot_pages_shown = 9;
-    emp_table_args.page = page;
-    emp_table_args.head_row_class_str = 'default-table-header';
-    emp_table_args.sort_col = sort_col;
-    emp_table_args.sort_dir = sort_dir;
-    emp_table_args.page_onclick = "report_emp_table(%%,'%sort_col%','%sort_dir%',false)";
-    emp_table_args.sort_onclick = "report_emp_table(%%,'%column_name%','%sort_dir%',false)";
     emp_table_args.row_onclick = "create_production_report('report_emp_data','report_data_div','%department%','%emp_id%'); ";
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
+    emp_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "report_emp_table(%%,'%column_name%','%sort_dir%',false)"
+    };
+    emp_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 10,
+        'page_nav_div_id' : 'emp-table-page-nav',
+        'id_prefix' : 'emp',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "report_emp_table(%%,'"+sort_col+"','"+sort_dir+"',false);",
+        'onmouse_str' : ''
+    };
     //
     // creating employee table
     create_standard_table(emp_table_args);
@@ -77,7 +84,7 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
 function show_data_columns(department,out_id,button_id,toggle,reset) { 
     var arg_object = {};
     var sql_args = {};
-    var sql = "";
+    var meta_sql = "";
     var preset_sql = '';
     var preset = document.getElementById('preset-report').value;
     //
@@ -95,8 +102,8 @@ function show_data_columns(department,out_id,button_id,toggle,reset) {
         sql_args.where.push(['use_on_pages','REGEXP','(^|%)report(%|$)']);
         sql_args.where.push(['use_in_html_tables','REGEXP','(^|%)report_'+department+'(%|$)']);
         sql_args.where.push(['use_in_html_tables','REGEXP','(^|%)column_selection_table(%|$)']);
-        sql_args.orderBy = [['order_index','ASC']];  
-        sql = gen_sql(sql_args);
+        sql_args.order_by = [['order_index','ASC']];  
+        meta_sql = gen_sql(sql_args);
     }
     else {
         console.log('invalid department: '+department);
@@ -108,8 +115,8 @@ function show_data_columns(department,out_id,button_id,toggle,reset) {
     var button = "<br><button id=\"restore-data-col-defaults\" type=\"button\" class=\"hidden-elm\" onclick=\""+reset_onclick+"\">Restore Defaults</button><br>";
     //
     var callback = function(response) {
-        arg_object.data = response.data;
-        arg_object.preset_data = response.meta_data[0];
+        arg_object.data = response.meta_data;
+        arg_object.preset_data = response.preset_data[0];
         arg_object.all_onclick_fun = "show_update_button('get_emp_data','report-table','Show Changes'); remove_class('hidden-elm','restore-data-col-defaults');";
         var table = make_data_columns_table(arg_object)
         //
@@ -135,7 +142,7 @@ function show_data_columns(department,out_id,button_id,toggle,reset) {
         document.getElementById(int_secd_sort+'-sortby-radio').checked = true;
     }
     //
-    ajax_fetch_db(sql,preset_sql,callback)
+    ajax_fetch([meta_sql,preset_sql],['meta_data','preset_data'],callback)
 }
 //
 // function to get data and create a data report
@@ -239,7 +246,7 @@ function create_production_report(parent_form_id,report_div_id,department,emp_id
     sql_args.cmd = 'SELECT';
     sql_args.table = 'table_meta_data';
     sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)|(^|%)'+report_args.dept_table+'(%|$)'],['use_on_pages','REGEXP','(^|%)report(%|$)'],['use_in_html_tables','REGEXP','(^|%)report_'+report_args.department+'(%|$)']];
-    sql_args.orderBy = [['order_index','ASC']];    
+    sql_args.order_by = [['order_index','ASC']];    
     if (!!(report_args.sel_cols)) {
         sql_args.where.push(['column_name','REGEXP',report_args.sel_cols.join('$|')]); sql_args.where[sql_args.where.length-1][2] += '$';
     }
@@ -252,7 +259,7 @@ function create_production_report(parent_form_id,report_div_id,department,emp_id
     var calc_cols_sql = 'SELECT * FROM `report_dynamic_columns` WHERE `department` REGEXP \'(^|%)'+report_args.department+'(%|$)\'';
     var sql_arr = [preset_sql,meta_sql,calc_cols_sql];
     var name_arr = ['preset_data','meta_data','dynamic_array'];
-    ajax_multi_fetch(sql_arr,name_arr,callback)
+    ajax_fetch(sql_arr,name_arr,callback)
 }
 //
 // handles the report preset information and inputs
@@ -272,11 +279,15 @@ function make_data_sql(report_args) {
     delete report_args.data.dynamic_array;
     report_args.dynamic_cols = dynamic_cols;
     //
-    // setting data sql properties 
+    // setting data sql arguments 
     var sql_args = {};
     sql_args.cmd = 'SELECT';
     sql_args.table = 'employee_data';
+    if (report_args.dept_table != 'none') { 
+        sql_args.inner_join = [[report_args.dept_table,'employee_data.entry_id',report_args.dept_table+'.entry_id']]
+    }
     sql_args.where = [['date','BETWEEN',report_args.from_ts+"' AND '"+report_args.to_ts],['entry_status','LIKE','submitted']];
+    sql_args.where.push(['department','LIKE',report_args.department]);
     if (report_args.emp_id != '') {sql_args.where.push(['emp_id','LIKE',report_args.emp_id]);}
     if (preset_data.preset_where != 'null') {
         //
@@ -294,24 +305,8 @@ function make_data_sql(report_args) {
             alert('Error parsing report preset "where" information, check console.');
         }            
     }
-    //
-    //manually creating multi-table select statement
-    data_sql = 'SELECT * ';
-    data_sql += 'FROM employee_data INNER JOIN '+report_args.dept_table+' ON employee_data.entry_id='+report_args.dept_table+'.entry_id ';
-    if (report_args.dept_table == 'none') { 
-        data_sql = 'SELECT * FROM employee_data ';
-        sql_args.where.push(['department','LIKE',report_args.department])
-    }
-    //
-    //adding in the WHERE clause
-    if (sql_args.where.length > 0) {
-        data_sql += "WHERE `"+sql_args.where[0][0]+"` "+sql_args.where[0][1]+" '"+sql_args.where[0][2]+"' ";
-        for (var i = 1; i < sql_args.where.length; i++) {
-            data_sql += "AND `"+sql_args.where[i][0]+"` "+sql_args.where[i][1]+" '"+sql_args.where[i][2]+"' ";
-        }
-    }
-    //
-    data_sql += 'ORDER BY `'+report_args.prime_sort+'` '+report_args.prime_sort_dir+', `'+report_args.secd_sort+'` '+report_args.secd_sort_dir;
+    sql_args.order_by = [[report_args.prime_sort,report_args.prime_sort_dir],[report_args.secd_sort,report_args.secd_sort_dir]];
+    data_sql = gen_sql(sql_args);
     //
     // getting data and making report
     var callback = function(response) {
@@ -321,7 +316,7 @@ function make_data_sql(report_args) {
     }
     var sql_arr = [data_sql];
     var name_arr = ['data'];
-    ajax_multi_fetch(sql_arr,name_arr,callback)
+    ajax_fetch(sql_arr,name_arr,callback)
 }
 //
 // this function handles creation of the report header for production reports 

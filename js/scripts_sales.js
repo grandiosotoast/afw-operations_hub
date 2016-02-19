@@ -258,7 +258,7 @@ function rep_report() {
     dropbox_args = {
         sql_args : {
             where : [['column_type','LIKE','static'],['in_tables','REGEXP','(^|%)sales_rep_data(%|$)'],['use_on_pages','REGEXP','(^|%)sales_reporting(%|$)'],['use_in_html_tables','REGEXP','(^|%)sales_rep_report(%|$)']],
-            orderBy : [['order_index','ASC']]
+            order_by : [['order_index','ASC']]
         },
         value_format : 'sales_rep_data.%column_name%'
     };
@@ -294,7 +294,7 @@ function create_rep_table(page,sort_col,sort_dir) {
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)sales_rep_table(%|$)|(^|%)dbusers(%|$)'],['use_on_pages','REGEXP','sales_maintenance|sales_reporting'],['use_in_html_tables','REGEXP','sales_rep_table']];
-    meta_sql_args.orderBy = [['order_index','ASC']]
+    meta_sql_args.order_by = [['order_index','ASC']]
     
     rep_table_args.data_sql = "SELECT * FROM sales_rep_table INNER JOIN dbUsers ON sales_rep_table.dbuser_internal_id=dbUsers.dbuser_internal_id "+where+" ORDER BY sales_rep_table."+sort_col+" "+sort_dir;
     rep_table_args.meta_sql = gen_sql(meta_sql_args);
@@ -305,22 +305,28 @@ function create_rep_table(page,sort_col,sort_dir) {
     rep_table_args.table_class = 'default-table';
     rep_table_args.row_id_prefix = 'rep-row-';
     rep_table_args.table_data_cell_class = 'default-table-td';  
-    rep_table_args.page_nav_div_id = 'rep-table-page-nav';
-    rep_table_args.page_nav_class = 'page_nav';
-    rep_table_args.page_nav_id_prefix = 'rep';
-    rep_table_args.page_class_str = 'page_nav_link';
-    rep_table_args.page = page;
-    rep_table_args.num_per_page = 15;
-    rep_table_args.tot_pages_shown = 9;
-    rep_table_args.page_onmouse_str = '';
-    rep_table_args.page_onclick = "create_rep_table(%%,'%sort_col%','%sort_dir%')";
-    rep_table_args.head_row_class_str = 'default-table-header';
-    rep_table_args.sort_col = sort_col;
-    rep_table_args.sort_dir = sort_dir;
-    rep_table_args.sort_onclick = "create_rep_table(%%,'%column_name%','%sort_dir%')";
     rep_table_args.row_onclick = "modify_rep_form('%dbuser_internal_id%','%row_id%')";
     rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
-    rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
+    rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')"; 
+    rep_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "create_rep_table(%%,'%column_name%','%sort_dir%')"
+    }; 
+    rep_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 15,
+        'page_nav_div_id' : 'rep-table-page-nav',
+        'id_prefix' : 'rep',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "create_rep_table(%%,'"+sort_col+"','"+sort_dir+"');",
+        'onmouse_str' : ''
+    };
     //
     create_standard_table(rep_table_args);
 }
@@ -344,7 +350,7 @@ function create_customer_table(page,sort_col,sort_dir) {
     meta_sql_args.where.push(['in_tables','REGEXP','(^|%)sales_customer_table(%|$)|(^|%)dbusers(%|$)']);
     meta_sql_args.where.push(['use_on_pages','REGEXP','sales_maintenance|sales_reporting']);
     meta_sql_args.where.push(['use_in_html_tables','REGEXP','sales_customer_table']);
-    meta_sql_args.orderBy = [['order_index','ASC']]
+    meta_sql_args.order_by = [['order_index','ASC']]
     //
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'sales_customer_table';
@@ -357,7 +363,7 @@ function create_customer_table(page,sort_col,sort_dir) {
     data_sql_args.where.push(['rep_id',document.getElementById('rid-match-type').value,ref_rep_id]);
     data_sql_args.where.push(['customer_name',document.getElementById('name-match-type').value,ref_customer_name]);
     data_sql_args.where.push(['customer_status',document.getElementById('status-match-type').value,ref_customer_status]);
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     //
     customer_table_args.data_sql = gen_sql(data_sql_args);
     customer_table_args.meta_sql = gen_sql(meta_sql_args);
@@ -368,22 +374,28 @@ function create_customer_table(page,sort_col,sort_dir) {
     customer_table_args.table_class = 'default-table';
     customer_table_args.row_id_prefix = 'customer-row-';
     customer_table_args.table_data_cell_class = 'default-table-td';  
-    customer_table_args.page_nav_div_id = 'customer-table-page-nav';
-    customer_table_args.page_nav_class = 'page_nav';
-    customer_table_args.page_nav_id_prefix = 'customer';
-    customer_table_args.page_class_str = 'page_nav_link';
-    customer_table_args.page = page;
-    customer_table_args.num_per_page = 15;
-    customer_table_args.tot_pages_shown = 9;
-    customer_table_args.page_onmouse_str = '';
-    customer_table_args.page_onclick = "create_customer_table(%%,'%sort_col%','%sort_dir%')";
-    customer_table_args.head_row_class_str = 'default-table-header';
-    customer_table_args.sort_col = sort_col;
-    customer_table_args.sort_dir = sort_dir;
-    customer_table_args.sort_onclick = "create_customer_table(%%,'%column_name%','%sort_dir%')";
     customer_table_args.row_onclick = "modify_customer_form('%customer_internal_id%','%row_id%')";
     customer_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
-    customer_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
+    customer_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
+    customer_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "create_customer_table(%%,'%column_name%','%sort_dir%')"
+    }; 
+    customer_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 15,
+        'page_nav_div_id' : 'customer-table-page-nav',
+        'id_prefix' : 'customer',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "create_customer_table(%%,'"+sort_col+"','"+sort_dir+"');",
+        'onmouse_str' : ''
+    };  
     //
     create_standard_table(customer_table_args);
 }
@@ -541,7 +553,7 @@ function init_rep_form_valiation(action) {
         rep_form_valiation(args);
     }
     //
-    ajax_multi_fetch([meta_sql,rep_id_sql,username_sql],['meta_data','rep_id_test','username_test'],callback);
+    ajax_fetch([meta_sql,rep_id_sql,username_sql],['meta_data','rep_id_test','username_test'],callback);
 }
 //
 // finishes form valiation after database query
@@ -736,7 +748,7 @@ function init_customer_form_valiation(action) {
         customer_form_valiation(args);
     }
     //
-    ajax_multi_fetch([customer_id_sql],['customer_id_test'],callback);
+    ajax_fetch([customer_id_sql],['customer_id_test'],callback);
 }
 //
 // this finishes form validation after the database query
@@ -864,13 +876,15 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
     var data_sql_args = {};
     var meta_sql_args = {};
     //
+    var status = document.getElementById('rep-status').value;
+    //
     // creating sql statements
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)sales_rep_table(%|$)|(^|%)dbusers(%|$)'],['use_on_pages','REGEXP','sales_maintenance|sales_reporting'],['use_in_html_tables','REGEXP','sales_rep_table']];
-    meta_sql_args.orderBy = [['order_index','ASC']]
+    meta_sql_args.order_by = [['order_index','ASC']]
     
-    rep_table_args.data_sql = "SELECT * FROM sales_rep_table INNER JOIN dbUsers ON sales_rep_table.dbuser_internal_id=dbUsers.dbuser_internal_id WHERE dbUsers.dbuser_status LIKE 'active' ORDER BY sales_rep_table."+sort_col+" "+sort_dir;
+    rep_table_args.data_sql = "SELECT * FROM sales_rep_table INNER JOIN dbUsers ON sales_rep_table.dbuser_internal_id=dbUsers.dbuser_internal_id WHERE dbUsers.dbuser_status REGEXP '^"+status+"$' ORDER BY sales_rep_table."+sort_col+" "+sort_dir;
     rep_table_args.meta_sql = gen_sql(meta_sql_args);
     //
     // creating table argument object   
@@ -879,22 +893,28 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
     rep_table_args.table_class = 'default-table';
     rep_table_args.row_id_prefix = 'rep-row-';
     rep_table_args.table_data_cell_class = 'default-table-td';  
-    rep_table_args.page_nav_div_id = 'rep-table-page-nav';
-    rep_table_args.page_nav_class = 'page_nav';
-    rep_table_args.page_nav_id_prefix = 'rep';
-    rep_table_args.page_class_str = 'page_nav_link';
-    rep_table_args.page = page;
-    rep_table_args.num_per_page = 15;
-    rep_table_args.tot_pages_shown = 9;
-    rep_table_args.page_onmouse_str = '';
-    rep_table_args.page_onclick = "report_rep_table(%%,'%sort_col%','%sort_dir%',false)";
-    rep_table_args.head_row_class_str = 'default-table-header';
-    rep_table_args.sort_col = sort_col;
-    rep_table_args.sort_dir = sort_dir;
-    rep_table_args.sort_onclick = "report_rep_table(%%,'%column_name%','%sort_dir%',false)";
     rep_table_args.row_onclick = "create_rep_report('%rep_id%')";
     rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')"; 
+    rep_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "report_rep_table(%%,'%column_name%','%sort_dir%')"
+    }; 
+    rep_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 15,
+        'page_nav_div_id' : 'rep-table-page-nav',
+        'id_prefix' : 'rep',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "report_rep_table(%%,'"+sort_col+"','"+sort_dir+"',false);",
+        'onmouse_str' : ''
+    };
     rep_table_args.add_callback = function() { 
         if (document.getElementById('rep-table-header')) { return;}
         var header = document.createElement('H4');
@@ -918,7 +938,7 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
 //
 // creates the data columns table for the report page
 function rep_report_data_columns(out_id,button_id,toggle,reset) { 
-    var sql = "";
+    var meta_sql = "";
     var preset_sql = '';
     var preset = document.getElementById('preset-report').value;
     //
@@ -928,8 +948,8 @@ function rep_report_data_columns(out_id,button_id,toggle,reset) {
     sql_args.where = [['preset_index','LIKE',preset]]
     preset_sql = gen_sql(sql_args);
     //
-    sql = "SELECT * FROM `table_meta_data` WHERE `in_tables` REGEXP '(^|%)sales_rep_data(%|$)|(^|%)sales_rep_table(%|$)' ";
-    sql += "AND `use_on_pages` REGEXP 'sales_reporting' AND `use_in_html_tables` REGEXP 'sales_rep_report' ORDER BY `order_index` ASC"
+    meta_sql = "SELECT * FROM `table_meta_data` WHERE `in_tables` REGEXP '(^|%)sales_rep_data(%|$)|(^|%)sales_rep_table(%|$)' ";
+    meta_sql += "AND `use_on_pages` REGEXP 'sales_reporting' AND `use_in_html_tables` REGEXP 'sales_rep_report' ORDER BY `order_index` ASC"
     //
     // creating reset button
     var reset_onclick = "rep_report_data_columns('"+out_id+"','"+button_id+"',false,true); show_update_button('create-rep-report','sales-rep-report','Show Changes'); add_class('hidden-elm','restore-data-col-defaults');";
@@ -937,8 +957,8 @@ function rep_report_data_columns(out_id,button_id,toggle,reset) {
     //
     var callback = function(response) {
         var args = {};
-        args.data = response.data;
-        args.preset_data = response.meta_data[0];
+        args.data = response.meta_data;
+        args.preset_data = response.preset_data[0];
         args.hide_sort_row = true;
         args.hide_totals_row = true;
         args.all_onclick_fun = "show_update_button('create-rep-report','sales-rep-report','Show Changes'); remove_class('hidden-elm','restore-data-col-defaults');";
@@ -962,7 +982,7 @@ function rep_report_data_columns(out_id,button_id,toggle,reset) {
         document.getElementById(out_id).innerHTML = button+table;
     }
     //
-    ajax_fetch_db(sql,preset_sql,callback)
+    ajax_fetch([meta_sql,preset_sql],['meta_data','preset_data'],callback)
     //
 }
 //
@@ -1012,7 +1032,7 @@ function create_rep_report(rep_id) {
         'table' : 'sales_rep_data',
         'cols' : ['date'],
         'where' : [['date', '<=',ts_obj.to_ts]],
-        'orderBy' : [['date','DESC']],
+        'order_by' : [['date','DESC']],
         'limit' : [0,1]
     };
     var sql = gen_sql(sql_args);
@@ -1023,7 +1043,7 @@ function create_rep_report(rep_id) {
         rep_report_get_data(report_args);
     }
     //
-    ajax_multi_fetch([sql],[0],callback);
+    ajax_fetch([sql],[0],callback);
 }
 //
 // this function uses the inputs from the previous function to fetch the required data 
@@ -1038,16 +1058,29 @@ function rep_report_get_data(args) {
     var last_year_date = lyd.yyyymmdd();
     //
     // setting up sql statements 
-    var LYTD_sql = 'SELECT sales_rep_table.rep_id, SUM(sales_data.amount) lytd_total FROM sales_data ';
-    LYTD_sql += 'INNER JOIN sales_customer_table ON sales_data.customer_id=sales_customer_table.customer_id ';
-    LYTD_sql += 'INNER JOIN sales_rep_table ON sales_customer_table.rep_id = sales_rep_table.rep_id ';
-    LYTD_sql += "WHERE sales_data.date BETWEEN '"+CONSTANTS.LY_FIRST_BUSINESS_DAY.join('-')+"' AND '"+last_year_date+"' AND sales_rep_table.rep_id REGEXP '^\s*"+args.rep_id+"\s*$' GROUP BY sales_rep_table.rep_id";
+    var LYTD_sql = '';
+    var YTD_sql  = '';
+    var rep_data_sql = '';
+    var sql_args = {};
+    sql_args.cmd = 'SELECT';
+    sql_args.table = 'sales_data';
+    sql_args.cols = ['sales_rep_table.rep_id', 'SUM(sales_data.amount) lytd_total'];
+    sql_args.inner_join = [['sales_customer_table','sales_data.customer_id','sales_customer_table.customer_id']];
+    sql_args.inner_join.push(['sales_rep_table','sales_customer_table.rep_id','sales_rep_table.rep_id']);
+    sql_args.where = [['sales_data.date','BETWEEN',CONSTANTS.LY_FIRST_BUSINESS_DAY.join('-')+"' AND '"+last_year_date]];
+    sql_args.group_by = 'sales_rep_table.rep_id';
+    LYTD_sql = gen_sql(sql_args);
     //
-    var YTD_sql  = 'SELECT sales_rep_table.rep_id, SUM(sales_data.amount) ytd_total FROM sales_data ';
-    YTD_sql  += 'INNER JOIN sales_customer_table ON sales_data.customer_id=sales_customer_table.customer_id ';
-    YTD_sql  += 'INNER JOIN sales_rep_table ON sales_customer_table.rep_id = sales_rep_table.rep_id ';
-    YTD_sql  += "WHERE sales_data.date BETWEEN '"+CONSTANTS.FIRST_BUSINESS_DAY.join('-')+"' AND '"+curr_date+"' AND sales_rep_table.rep_id REGEXP '^\s*"+args.rep_id+"\s*$' GROUP BY sales_rep_table.rep_id";
+    sql_args.cols = ['sales_rep_table.rep_id', 'SUM(sales_data.amount) ytd_total'];
+    sql_args.where = [['sales_data.date','BETWEEN',CONSTANTS.FIRST_BUSINESS_DAY.join('-')+"' AND '"+curr_date]];
+    YTD_sql = gen_sql(sql_args);
     //
+    sql_args = {
+        'cmd' : 'SELECT',
+        'table' : 'sales_rep_data',
+        'inner_join' : [['sales_rep_table','sales_rep_data.rep_id','sales_rep_table.rep_id'],
+                        ['dbUsers','sales_rep_table.dbuser_internal_id','dbUsers.dbuser_internal_id']]
+    };
     var rep_data_sql = 'SELECT * FROM sales_rep_data INNER JOIN sales_rep_table ON sales_rep_data.rep_id = sales_rep_table.rep_id ';
     rep_data_sql += 'INNER JOIN dbUsers ON sales_rep_table.dbuser_internal_id = dbUsers.dbuser_internal_id ';
     rep_data_sql += "WHERE sales_rep_data.date LIKE '"+curr_date+"' AND sales_rep_data.rep_id REGEXP '^\s*"+args.rep_id+"\s*$' AND dbUsers.dbuser_status REGEXP '^"+args.name_val_obj['rep-status']+"$' "
@@ -1061,7 +1094,7 @@ function rep_report_get_data(args) {
         'where' : [['in_tables','REGEXP','(^|%)sales_rep_data(%|$)|(^|%)sales_rep_table(%|$)'],
                    ['use_on_pages','REGEXP','(^|%)sales_reporting(%|$)'],
                    ['use_in_html_tables','REGEXP','(^|%)sales_rep_report(%|$)']],
-        'orderBy' : [['order_index','ASC']]
+        'order_by' : [['order_index','ASC']]
     };
     if (args.sel_cols) { meta_args.where.push(['column_name','REGEXP',args.sel_cols.join('$|')+'$']);}
     var meta_sql = gen_sql(meta_args);
@@ -1079,7 +1112,7 @@ function rep_report_get_data(args) {
     //
     var sql_arr =  [LYTD_sql,YTD_sql,rep_data_sql,meta_sql,dyn_cols_sql];
     var name_arr = ['LYTD_data','YTD_data','rep_data','meta_data','dynamic_cols'];
-    ajax_multi_fetch(sql_arr,name_arr,callback);
+    ajax_fetch(sql_arr,name_arr,callback);
 }
 //
 // this function pre-processes the data for the table
@@ -1140,7 +1173,7 @@ function rep_report_process_data(args) {
     build_rep_report(args);
 }
 //
-// uses the data arrays to build the report it self
+// uses the data arrays to build the report itself
 function build_rep_report(args) {
     //
     var table_args = {};
@@ -1151,9 +1184,9 @@ function build_rep_report(args) {
     table_args.table_class = 'default-table';
     table_args.row_id_prefix = 'reports-row-';
     table_args.table_data_cell_class = 'default-table-td';  
-    table_args.no_page_nav = true;
     table_args.data_arr = args.rep_data;
     table_args.col_meta_data = args.meta_data;
+    table_args.no_page_nav = true;
     table_args.page_nav_args = {};
     table_args.head_row_args = {
         head_row_class_str : 'default-table-header',

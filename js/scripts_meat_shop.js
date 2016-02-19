@@ -109,11 +109,11 @@ function gen_item_table(page,sort_col,sort_dir) {
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)meat_shop_stock(%|$)'],['use_on_pages','REGEXP','(^|%)meat_shop(%|$)']];
-    meta_sql_args.orderBy = [['order_index','ASC']];
+    meta_sql_args.order_by = [['order_index','ASC']];
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'meat_shop_stock';
     data_sql_args.where = [['item_status','LIKE','active']]
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     if (!!(document.getElementById('show-inactive'))) {
         if (document.getElementById('show-inactive').checked) {data_sql_args.where = [];}
     }
@@ -134,7 +134,6 @@ function gen_item_table(page,sort_col,sort_dir) {
         item_table_args.row_onclick = 'update_item_stock(\'%row_id%\');'; // this will be a gen stock report onclick
     }
     //
-    console.log(data_sql_args);
     item_table_args.meta_sql_args = meta_sql_args;
     item_table_args.data_sql_args = data_sql_args;
     //
@@ -144,14 +143,6 @@ function gen_item_table(page,sort_col,sort_dir) {
     item_table_args.table_class = 'default-table';
     item_table_args.row_id_prefix = 'item-row';
     item_table_args.table_data_cell_class = 'default-table-td';
-    item_table_args.page_nav_div_id = 'item-table-page-nav';
-    item_table_args.page_nav_class = 'page_nav';
-    item_table_args.page_nav_id_prefix = 'item';
-    item_table_args.page_class_str = 'page_nav_link';
-    item_table_args.page_onmouse_str = '';
-    item_table_args.page_onclick = "gen_item_table(%%,'%sort_col%','%sort_dir%');";
-    item_table_args.tot_pages_shown = 9;
-    item_table_args.page = page;
     item_table_args.head_row_class_str = 'default-table-header';
     item_table_args.sort_col = sort_col;
     item_table_args.sort_dir = sort_dir;
@@ -159,6 +150,25 @@ function gen_item_table(page,sort_col,sort_dir) {
     item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = table_callback;
+    item_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "gen_item_table(%%,'%column_name%','%sort_dir%')"
+    }
+    item_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 10,
+        'page_nav_div_id' : 'item-table-page-nav',
+        'id_prefix' : 'item',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "gen_item_table(%%,'"+sort_col+"','"+sort_dir+"');",
+        'onmouse_str' : ''
+    }; 
     //
     create_standard_table(item_table_args);
 }
@@ -236,7 +246,7 @@ function mod_item(item_number) {
 // generates the table for modifying a stock change record 
 function gen_stock_table(page,sort_col,sort_dir) {
     //
-    var item_table_args = {};
+    var records_table_args = {};
     var data_sql_args = {};
     var meta_sql_args = {};
     //
@@ -244,40 +254,47 @@ function gen_stock_table(page,sort_col,sort_dir) {
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)meat_shop_stock_changes(%|$)'],['use_on_pages','REGEXP','(^|%)meat_shop(%|$)']];
-    meta_sql_args.orderBy = [['order_index','ASC']];
+    meta_sql_args.order_by = [['order_index','ASC']];
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'meat_shop_stock_changes';
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     if (!(document.getElementById('show-deleted').checked)) {data_sql_args.where = [['entry_status','LIKE','submitted']];}
     if (trim(document.getElementById('search-item-number').value) != '') {data_sql_args.where = [['item_number','REGEXP',trim(document.getElementById('search-item-number').value)]];}
     //
-    item_table_args.meta_sql_args = meta_sql_args;
-    item_table_args.data_sql_args = data_sql_args;
+    records_table_args.meta_sql_args = meta_sql_args;
+    records_table_args.data_sql_args = data_sql_args;
     //
     // setting up the item table arguments
-    item_table_args.table_output_id = 'item-table-div';
-    item_table_args.table_id = 'meat-shop-records';
-    item_table_args.table_class = 'default-table';
-    item_table_args.row_id_prefix = 'record-row';
-    item_table_args.table_data_cell_class = 'default-table-td';
-    item_table_args.page_nav_div_id = 'records-table-page-nav';
-    item_table_args.page_nav_class = 'page_nav';
-    item_table_args.page_nav_id_prefix = 'item';
-    item_table_args.page_class_str = 'page_nav_link';
-    item_table_args.page_onmouse_str = '';
-    item_table_args.page_onclick = "gen_stock_table(%%,'%sort_col%','%sort_dir%');";
-    item_table_args.tot_pages_shown = 9;
-    item_table_args.page = page;
-    item_table_args.head_row_class_str = 'default-table-header';
-    item_table_args.sort_col = sort_col;
-    item_table_args.sort_dir = sort_dir;
-    item_table_args.sort_onclick = "gen_stock_table(%%,'%column_name%','%sort_dir%');";
-    item_table_args.row_onclick = "mod_stock_change_record('%entry_id%')"; 
-    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
-    item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
-    item_table_args.add_callback = ''; 
+    records_table_args.table_output_id = 'item-table-div';
+    records_table_args.table_id = 'meat-shop-records';
+    records_table_args.table_class = 'default-table';
+    records_table_args.row_id_prefix = 'record-row';
+    records_table_args.table_data_cell_class = 'default-table-td';
+    records_table_args.row_onclick = "mod_stock_change_record('%entry_id%')"; 
+    records_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    records_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
+    records_table_args.add_callback = ''; 
+    records_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "gen_stock_table(%%,'%column_name%','%sort_dir%')"
+    }
+    records_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 10,
+        'page_nav_div_id' : 'record-table-page-nav',
+        'id_prefix' : 'item-record',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "gen_stock_table(%%,'"+sort_col+"','"+sort_dir+"');",
+        'onmouse_str' : ''
+    }; 
     //
-    create_standard_table(item_table_args);
+    create_standard_table(records_table_args);
 }
 //
 // this creates an entry to update the stock in the items table
@@ -383,7 +400,7 @@ function mod_stock_change_record(entry_id) {
     // fetching data
     var sql_arr = [data_sql];
     var name_arr = ['data'];
-    ajax_multi_fetch(sql_arr,name_arr,callback)
+    ajax_fetch(sql_arr,name_arr,callback)
     //
     // adding event handlers
     var quantity_change = function() {
@@ -423,11 +440,11 @@ function meat_shop_inventory_report() {
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)'+table+'(%|$)'],['use_on_pages','REGEXP','(^|%)meat_shop(%|$)']];
     meta_sql_args.where.push(['use_in_html_tables','REGEXP','(^|%)'+report_type+'(%|$)']);
-    meta_sql_args.orderBy = [['order_index','ASC']];
+    meta_sql_args.order_by = [['order_index','ASC']];
     //
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = table;
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     if (table == 'meat_shop_stock') { data_sql_args.where = [['item_status','LIKE','active']];}
     //
     item_table_args.meta_sql_args = meta_sql_args;
@@ -439,24 +456,15 @@ function meat_shop_inventory_report() {
     item_table_args.table_class = 'default-table';
     item_table_args.row_id_prefix = 'report-row';
     item_table_args.table_data_cell_class = 'default-table-td';
-    item_table_args.page_nav_div_id = 'report-page-nav';
-    item_table_args.page_nav_class = 'page_nav';
-    item_table_args.page_nav_id_prefix = report_type;
-    item_table_args.page_class_str = 'page_nav_link';
-    item_table_args.page_onmouse_str = '';
-    item_table_args.page_onclick = '';
-    item_table_args.tot_pages_shown = 1;
-    item_table_args.page = 1;
-    item_table_args.num_per_page = 1000000; //preventing mulitple pags
-    item_table_args.head_row_class_str = 'default-table-header';
-    item_table_args.sort_col = sort_col;
-    item_table_args.sort_dir = sort_dir;
-    item_table_args.sortable = false;
-    item_table_args.sort_onclick = '';
     item_table_args.row_onclick = ''; 
     item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = mod_inventory_report_table;
+    item_table_args.no_page_nav = true;
+    item_table_args.head_row_args = {
+        sortable : false
+    }
+    item_table_args.page_nav_args = {};
     //
     create_standard_table(item_table_args);
     
@@ -575,11 +583,11 @@ function create_change_report() {
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)meat_shop_stock_changes(%|$)'],['use_on_pages','REGEXP','(^|%)meat_shop(%|$)']];
-    meta_sql_args.orderBy = [['order_index','ASC']];
+    meta_sql_args.order_by = [['order_index','ASC']];
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'meat_shop_stock_changes';
     data_sql_args.where = [['date','BETWEEN',ts_obj.from_ts+' 00:00:00\' AND \''+ts_obj.to_ts+' 23:59:59']];
-    data_sql_args.orderBy = [['date','DESC'],['item_number','ASC']];
+    data_sql_args.order_by = [['date','DESC'],['item_number','ASC']];
     if (!(document.getElementById('show-deleted').checked)) {data_sql_args.where.push(['entry_status','LIKE','submitted']);}
     if (trim(document.getElementById('search-item-number').value) != '') {data_sql_args.where.push(['item_number','REGEXP',trim(document.getElementById('search-item-number').value)]);}    //
     item_table_args.meta_sql_args = meta_sql_args;
@@ -591,23 +599,14 @@ function create_change_report() {
     item_table_args.table_class = 'default-table';
     item_table_args.row_id_prefix = 'record-row';
     item_table_args.table_data_cell_class = 'default-table-td';
-    item_table_args.page_nav_div_id = 'report-page-nav';
-    item_table_args.page_nav_class = 'page_nav';
-    item_table_args.page_nav_id_prefix = 'item';
-    item_table_args.page_class_str = 'page_nav_link';
-    item_table_args.page_onmouse_str = '';
-    item_table_args.page_onclick = '';
-    item_table_args.tot_pages_shown = 1;
-    item_table_args.page = 1;
-    item_table_args.num_per_page = 1000000;
-    item_table_args.head_row_class_str = 'default-table-header';
-    item_table_args.sort_col = 'creation_timestamp';
-    item_table_args.sort_dir = 'DESC';
-    item_table_args.sort_onclick = '';
-    item_table_args.sortable = false;
+    item_table_args.no_page_nav = true;
     item_table_args.row_onclick = ''; 
     item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
+    item_table_args.head_row_args = {
+        sortable : false
+    }
+    item_table_args.page_nav_args = {};
     item_table_args.add_callback = function() {
             add_class('hidden-elm','report-page-nav');
     }; 

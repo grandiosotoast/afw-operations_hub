@@ -15,6 +15,9 @@ var REPORT_FUNCTIONS = {
     'calc_amount_to_pay'  : calc_amount_to_pay,
     // driver functions
     'calc_transportation_incentive' : calc_transportation_incentive,
+    'calc_driver_reimbursement' : calc_driver_reimbursement,
+    'calc_driver_amount_to_pay'  : calc_driver_amount_to_pay,
+    'calc_driver_hourly' : calc_driver_hourly,
     'calc_cost_per_case'  : calc_cost_per_case,
     'calc_cost_per_mile'  : calc_cost_per_mile,
     'calc_cost_per_route' : calc_cost_per_route,
@@ -132,8 +135,8 @@ function output_simple_totals(total_args,report_args) {
             var section_value = 0.0;
             var section_counts = 0;
             for (var i = 0; i < data_arr.length; i++) {
-                section_value += parseFloat(data_arr[i][col]);
-                overall_value += parseFloat(data_arr[i][col]);
+                section_value += Number(data_arr[i][col]);
+                overall_value += Number(data_arr[i][col]);
                 section_counts += 1; 
                 overall_counts += 1;
             } //end data loop
@@ -153,11 +156,11 @@ function output_simple_totals(total_args,report_args) {
                 value_obj[data_arr[i][sect_col]] = 0.0;
                 count_obj[data_arr[i][sect_col]] = 0;
             }
-            value_obj[data_arr[i][sect_col]] += parseFloat(data_arr[i][col]);
+            value_obj[data_arr[i][sect_col]] += Number(data_arr[i][col]);
             count_obj[data_arr[i][sect_col]] += 1;   
-            overall_value += parseFloat(data_arr[i][col]);
+            overall_value += Number(data_arr[i][col]);
             overall_counts += 1;
-            console.log(i,overall_value,parseFloat(data_arr[i][col]),data_arr[i]['entry_id']);
+            console.log(i,overall_value,Number(data_arr[i][col]),data_arr[i]['entry_id']);
         }
         //
         // outputting data into table
@@ -180,10 +183,10 @@ function calc_hourly(col_name,data_row,dynamic_cols) {
     check_dependency_regular(col_name,data_row,dynamic_cols);
     //
     // calulating value
-    data_row[col_name] = parseFloat(data_row['total'])
-    data_row[col_name] = data_row[col_name] - parseFloat(data_row['incentive_pay'])
-    data_row[col_name] = data_row[col_name] - parseFloat(data_row['additional_pay'])
-    data_row[col_name] = data_row[col_name] + parseFloat(data_row['pay_deductions']);
+    data_row[col_name] = Number(data_row['total'])
+    data_row[col_name] = data_row[col_name] - Number(data_row['incentive_pay'])
+    data_row[col_name] = data_row[col_name] - Number(data_row['additional_pay'])
+    data_row[col_name] = data_row[col_name] + Number(data_row['pay_deductions']);
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
 //
@@ -193,7 +196,7 @@ function calc_avg_hourly_rate(col_name,data_row,dynamic_cols) {
     check_dependency_regular(col_name,data_row,dynamic_cols);
     //
     // calulating value
-    data_row[col_name] = parseFloat(data_row['total']) / parseFloat(data_row['hours']);
+    data_row[col_name] = Number(data_row['total']) / Number(data_row['hours']);
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
 //
@@ -203,7 +206,7 @@ function calc_amount_to_pay(col_name,data_row,dynamic_cols) {
     check_dependency_regular(col_name,data_row,dynamic_cols);
     //
     // calulating value
-    data_row[col_name] = parseFloat(data_row['additional_pay']) + parseFloat(data_row['incentive_pay']) - parseFloat(data_row['pay_deductions']);
+    data_row[col_name] = Number(data_row['additional_pay']) + Number(data_row['incentive_pay']) - Number(data_row['pay_deductions']);
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
 //
@@ -254,7 +257,7 @@ function calc_overtime(col_name,report_args) {
     for (var i = 0; i < data_arr.length; i++) {
         var emp_id = data_arr[i].emp_id;
         var entry_date = new Date(data_arr[i].date.split('-')[0],data_arr[i].date.split('-')[1]-1,data_arr[i].date.split('-')[2]);
-        var hours = parseFloat(data_arr[i]['true_hours']);
+        var hours = Number(data_arr[i]['true_hours']);
         var dailyOT = 0.0;
         //
         // resetting wk hours object if sunday is crossed
@@ -304,10 +307,10 @@ function calc_percent_ot(col_name,report_args) {
             for (var prop in data_arr[i]) { total_id = total_id.replace('%'+prop+'%',data_arr[i][prop]);}
             section_ids[data_arr[i][sect_col]] = total_id;
         }
-        overtimeHours[data_arr[i][sect_col]] += parseFloat(data_arr[i]['dailyOT']);
-        regularHours[data_arr[i][sect_col]] += parseFloat(data_arr[i]['true_hours']);
-        overallOT += parseFloat(data_arr[i]['dailyOT']);
-        overallHours += parseFloat(data_arr[i]['true_hours']);
+        overtimeHours[data_arr[i][sect_col]] += Number(data_arr[i]['dailyOT']);
+        regularHours[data_arr[i][sect_col]] += Number(data_arr[i]['true_hours']);
+        overallOT += Number(data_arr[i]['dailyOT']);
+        overallHours += Number(data_arr[i]['true_hours']);
     }
     //
     // outputting data into table
@@ -335,14 +338,55 @@ function calc_transportation_incentive(col_name,data_row,dynamic_cols) {
     check_dependency_regular(col_name,data_row,dynamic_cols);
     //
     // calulating value
-    var ovn = parseInt(data_row['over_night']);
-    var base_rate = parseFloat(data_row['base_rate']);
+    var ovn = Number(data_row['over_night']);
+    var base_rate = Number(data_row['base_rate']);
     if (ovn > 0) { base_rate = 2*data_row['base_rate'];}
     data_row[col_name]  = 0;
-    data_row[col_name] += base_rate*parseFloat(data_row['num_routes']);
-    data_row[col_name] += parseFloat(data_row['case_rate'])*parseFloat(data_row['num_cases']);
-    data_row[col_name] += parseFloat(data_row['stop_rate'])*parseFloat(data_row['num_stops']);
-    data_row[col_name] += parseFloat(data_row['per_diem'])  + parseFloat(data_row['pre_inspection']) + parseFloat(data_row['post_inspection']);
+    data_row[col_name] += 10.0 * Number(data_row['num_backhauls']);
+    data_row[col_name] += base_rate * Number(data_row['num_routes']);
+    data_row[col_name] += Number(data_row['case_rate']) * Number(data_row['num_cases']);
+    data_row[col_name] += Number(data_row['stop_rate']) * Number(data_row['num_stops']);
+    data_row[col_name] += Number(data_row['per_diem'])  + Number(data_row['pre_inspection']) + Number(data_row['post_inspection']);
+    if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
+}
+//
+// this calculates the expense reimbursement for drivers
+function calc_driver_reimbursement(col_name,data_row,dynamic_cols) {
+    //
+    check_dependency_regular(col_name,data_row,dynamic_cols);
+    //
+    // calulating value
+    data_row[col_name]  = 0;
+    data_row[col_name] += Number(data_row['hotel_amount']);
+    data_row[col_name] += Number(data_row['toll_amount']);
+    data_row[col_name] += Number(data_row['truck_fuel']) * Number(data_row['cost_per_gallon']);
+    data_row[col_name] += Number(data_row['reefer_fuel']) * Number(data_row['cost_per_gallon']);
+    data_row[col_name] += Number(data_row['fuel_def']) * Number(data_row['def_cost_per_gallon']);
+    if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
+}
+//
+// this calculates the hourly pay for drivers
+function calc_driver_hourly(col_name,data_row,dynamic_cols) {
+    // 
+    check_dependency_regular(col_name,data_row,dynamic_cols);
+    //
+    // calulating value
+    data_row[col_name] = Number(data_row['total'])
+    data_row[col_name] = data_row[col_name] - Number(data_row['incentive_pay']);
+    data_row[col_name] = data_row[col_name] - Number(data_row['additional_pay']);
+    data_row[col_name] = data_row[col_name] + Number(data_row['pay_deductions']);
+    if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
+}
+//
+// this adds all of the pay fields except hourly pay into a single value
+function calc_driver_amount_to_pay(col_name,data_row,dynamic_cols) {
+    // 
+    check_dependency_regular(col_name,data_row,dynamic_cols);
+    //
+    // calulating value
+    data_row[col_name]  = 0;
+    data_row[col_name] += Number(data_row['additional_pay']) - Number(data_row['pay_deductions']);
+    data_row[col_name] += Number(data_row['incentive_pay']);
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
 // 
@@ -399,8 +443,6 @@ function recalc_transportation_totals(col_name,report_args) {
     //
     // recalculating columns
     for (var output_col in cols) {
-        console.log('\n\n')
-        console.log(output_col)
         args['output_col'] = output_col;
         args['numerator_col'] = cols[output_col]['numerator_col'];
         args['divisor_col'] = cols[output_col]['divisor_col'];
@@ -409,7 +451,7 @@ function recalc_transportation_totals(col_name,report_args) {
 }
 //
 ////////////////////////////////////////////////////////////////////////////////
-//////////////                Freight Logistics Functions               ///////////
+//////////////             Freight Logistics Functions               ///////////
 ////////////////////////////////////////////////////////////////////////////////
 //
 //
@@ -448,7 +490,7 @@ function calc_freight_backhaul_ytd_savings(col_name,report_args) {
         addChildren(document.getElementById(row[0]['id']),cells);
 
     }
-    ajax_multi_fetch([sql],[0],callback);
+    ajax_fetch([sql],[0],callback);
     //
     report_args.called_funs[report_args.dynamic_cols[col_name].col_function] = true;
 }
@@ -538,10 +580,10 @@ function calc_receiving_incentive(col_name,report_args) {
             startIndex = i;
             exit_date = new Date(entry_date.getFullYear(),entry_date.getMonth(),(entry_date.getDate()+6-entry_date.getDay()) );
         }
-        weekHours += parseFloat(data_arr[i].true_hours);
-        weekProdTime += parseFloat(data_arr[i].prod_time)
-        weekOvertime += parseFloat(data_arr[i].dailyOT);
-        weekMoves += parseFloat(data_arr[i].total_moves);
+        weekHours += Number(data_arr[i].true_hours);
+        weekProdTime += Number(data_arr[i].prod_time)
+        weekOvertime += Number(data_arr[i].dailyOT);
+        weekMoves += Number(data_arr[i].total_moves);
     }
     outputIncentive();
     //
@@ -569,7 +611,7 @@ function calc_receiving_incentive(col_name,report_args) {
             if (data_arr[j].error_code != '0') { di = 0.0;}
             if (data_arr[j].attendance_error != 'none') { di = 0.0}
             data_arr[j][col_name] = di;
-            data_arr[j]['total'] = parseFloat(data_arr[j]['total']) + data_arr[j][col_name];
+            data_arr[j]['total'] = Number(data_arr[j]['total']) + data_arr[j][col_name];
         }
     }
 }
@@ -629,7 +671,7 @@ function calc_warehouse_incentive(col_name,data_row,dynamic_cols) {
     var supervisor_id = CONSTANTS.SHIPPING_SUPERVISOR_ID;
     if (data_row['emp_id'] == supervisor_id) { return;}
     //
-    data_row[col_name] = parseFloat(data_row['sel_rate'])*parseFloat(data_row['num_cases']);
+    data_row[col_name] = Number(data_row['sel_rate'])*Number(data_row['num_cases']);
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
 //
@@ -641,6 +683,7 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
     //
     var data_arr = [];
     var supervisor_entries = [];
+    var error_dates = [];
     var supervisor_id = CONSTANTS.SHIPPING_SUPERVISOR_ID;
     var total_cases = 0;
     var case_bonus = 0.005;
@@ -674,8 +717,8 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
             //
             // resetting weekly totals
             supervisor_entries = [];
+            error_dates = [];
             total_cases = 0;
-            case_bonus = 0.005;
             total_bonus = 0.0;
             bonus_per_entry = 0.0;
             exit_date = new Date(entry_date.getFullYear(),entry_date.getMonth(),(entry_date.getDate()+6-entry_date.getDay()) );
@@ -683,9 +726,9 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
         //
         if (data_arr[i]['emp_id'] == supervisor_id) { 
             supervisor_entries.push(i);
-            if (data_arr[i]['attendance_error'] != 'none') { case_bonus = 0.0;}
+            if (data_arr[i]['attendance_error'] != 'none') { error_dates.push(data_arr[i]['date']);}
         }
-        if (data_arr[i]['error_code'] != '0') { case_bonus = 0.0;}
+        if (data_arr[i]['error_code'] != '0') { error_dates.push(data_arr[i]['date']);}
         total_cases += Number(data_arr[i]['num_cases']);
     }
     outputIncentive()
@@ -694,11 +737,13 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
     function outputIncentive() {
         //
         total_bonus = ceiling(case_bonus * total_cases,2);
-        bonus_per_entry = total_bonus/supervisor_entries.length
         if (!(isFinite(bonus_per_entry))) { bonus_per_entry = 0.0;}
         //
         // putting smiths bonus in the incentive field
+        console.log(error_dates);
         for (var i = 0; i < supervisor_entries.length; i++) {
+            bonus_per_entry = total_bonus/supervisor_entries.length
+            if (error_dates.indexOf(data_arr[supervisor_entries[i]]['date']) > -1) { bonus_per_entry = 0.0;}
             data_arr[supervisor_entries[i]]['sel_rate'] = 0.0;
             data_arr[supervisor_entries[i]]['incentive_pay'] = bonus_per_entry;
             data_arr[supervisor_entries[i]]['total'] = Number(data_arr[supervisor_entries[i]]['total']) +  bonus_per_entry

@@ -48,7 +48,8 @@ function check_unique(form_id,uni_elm_id,cmpr_elm_id,table,validate_callback_fun
     sql_args.where = [[uni_col,'LIKE',uni_val]];
     var sql = gen_sql(sql_args);
     //
-    var callback = function(data_arr) {
+    var callback = function(response) {
+        var data_arr = response[0];
         //
         // checking values returned 
         if ((cmpr_col == '') && !!(data_arr[0])) {unique_err = true;}
@@ -64,17 +65,37 @@ function check_unique(form_id,uni_elm_id,cmpr_elm_id,table,validate_callback_fun
         return;
     }
     //
-    ajax_fetch_db(sql,'',callback);
+    ajax_fetch([sql],[0],callback);
+}
+//
+// this function calls the respective validation function based on data type
+function check_data_type(input_id,type,ret_val) {
+    //
+    var error = false;
+    //
+    if (type == 'date') {
+        error = check_date_str(input_id,'',true);
+    }
+    else if (type == 'email') {
+        error = check_email_str(input_id,'',true);
+    }
+    else if (type == 'float') {
+        error = check_num_str(input_id,'',true);
+    }
+    else if (type == 'int') {
+        error = check_int_str(input_id,'',true);
+    }
+    if (ret_val) { return error;}
 }
 //
 // this fuction checks if a string is a valid number of any form
 function check_num_str(input_id,unhide_id,ret_val) {
     //
     // getting the input string from the element
-    var input_str = document.getElementById(input_id).value
+    var input_str = trim(document.getElementById(input_id).value);
     var error = false;
     //
-    if (+input_str == +input_str) {
+    if (input_str.match(/^-?\d+$|^-?\d+\.\d+$/)) {
         remove_class('invalid-field',input_id)
         // if an unhide element was provided making it invisible
         if (!!(unhide_id)) {
@@ -97,10 +118,10 @@ function check_num_str(input_id,unhide_id,ret_val) {
 function check_int_str(input_id,unhide_id,ret_val) {    
     //
     // getting the input string from the element
-    var input_str = document.getElementById(input_id).value
+    var input_str = trim(document.getElementById(input_id).value);
     var error = false
     //
-    if (input_str.match(/^\d+$/)) {
+    if (input_str.match(/^-?\d+$/)) {
         error = false
         remove_class('invalid-field',input_id)
         // if an unhide element was provided making it invisible
@@ -125,8 +146,8 @@ function check_int_str(input_id,unhide_id,ret_val) {
 function check_date_str(input_id,err_str_id,ret_val) {    
     //
     // getting the input string from the element
-    var input_str = document.getElementById(input_id).value;
-    var error;
+    var input_str = trim(document.getElementById(input_id).value);
+    var error = false;
     //
     if (input_str.match(/^\d\d\d\d-\d\d-\d\d\s+\d\d\:\d\d\:\d\d$/)) {
         input_str = input_str.split(' ')[0];
@@ -156,13 +177,15 @@ function check_date_str(input_id,err_str_id,ret_val) {
             remove_class('hidden-elm',err_str_id)
         }
     }
+    // if ret_val is true returning the error
+    if (ret_val == true) { return error;}
 }
 //
 // checks if an email appears to have valid formatting text@text.text
 function check_email_str(input_id,err_str_id,ret_val) {    
     //
     // getting the input string from the element
-    var input_str = document.getElementById(input_id).value
+    var input_str = trim(document.getElementById(input_id).value);
     var error
     var email_pat = new RegExp(".*?@.*?\\..+$");
     var match = email_pat.test(input_str);
@@ -646,7 +669,7 @@ function recalc_general_form(truncate) {
         document.getElementById('total-pay').value = round(response.wk_data.tot_pay,precision).toFixed(precision);
     }
     //
-    ajax_multi_fetch([data_sql],['wk_data'],callback);
+    ajax_fetch([data_sql],['wk_data'],callback);
 }
 //
 // this recalculates all of the fields on the receving form 
@@ -721,134 +744,127 @@ function recalc_receving_form(truncate) {
         document.getElementById('total-pay').value = round(response.wk_data.tot_pay,precision).toFixed(precision);
     }
     //
-    ajax_multi_fetch([data_sql],['wk_data'],callback)
+    ajax_fetch([data_sql],['wk_data'],callback)
 }
 //
 // performs some validation and calculates the employee's pay
 // calculates the transport employee's pay
 function recalc_transportation_form(truncate) {
     //
-    // setting inital variables
-    var pay_rate = 0.0;
-    var pre = 0;
-    var post = 0;
-    var prod_time = 0.0;
+    // setting inital values
+    var error = false;
+    var hourly_pay = 0.0;
+    var incentive_pay = 0.0;
+    var reimbursement = 0.0;
+    var tot_pay = 0.0;
+    var pre = 0.0;
+    var post = 0.0;
     var precision = 9;
     if (truncate) {precision = CONSTANTS.STD_PRECISION}
+    var inputs = {
+        'base_rate' : {'id' : 'base-rate', 'value' : '', 'type' : 'float'},
+        'case_rate' : {'id' : 'case-rate', 'value' : '', 'type' : 'float'},
+        'stop_rate' : {'id' : 'stop-rate', 'value' : '', 'type' : 'float'},
+        'date'  : {'id' : 'date', 'value' : '', 'type' : 'date'},
+        'hours' : {'id' : 'hours', 'value' : '', 'type' : 'float'},
+        'num_backhauls' : {'id' : 'num-backhauls', 'value' : '', 'type' : 'int'},
+        'num_cases'   : {'id' : 'num-cases', 'value' : '', 'type' : 'int'},
+        'num_miles'   : {'id' : 'num-miles', 'value' : '', 'type' : 'float'},
+        'num_routes'  : {'id' : 'num-routes', 'value' : '', 'type' : 'int'},
+        'num_stops'   : {'id' : 'num-stops', 'value' : '', 'type' : 'int'},
+        'truck_fuel'  : {'id' : 'truck-fuel', 'value' : '', 'type' : 'float'},
+        'reefer_fuel' : {'id' : 'reefer-fuel', 'value' : '', 'type' : 'float'},
+        'cost_per_gallon' : {'id' : 'cost-per-gallon', 'value' : '', 'type' : 'float'},
+        'fuel_def' : {'id' : 'fuel-def', 'value' : '', 'type' : 'float'},
+        'def_cost_per_gallon' : {'id' : 'def-cost-per-gallon', 'value' : '', 'type' : 'float'},
+        'over_night' : {'id' : 'over-night', 'value' : '', 'type' : 'int'},
+        'per_diem'   : {'id' : 'per-diem', 'value' : '', 'type' : 'float'},
+        'hotel_amount' : {'id' : 'hotel-amount', 'value' : '', 'type' : 'float'},
+        'toll_amount'  : {'id' : 'toll-amount', 'value' : '', 'type' : 'float'},
+        'hourly_pay_rate' : {'id' : 'hourly-pay-rate', 'value' : '', 'type' : 'float'},
+        'add_pay'   : {'id' : 'add-pay', 'value' : '', 'type' : 'float'},
+        'deduc_pay' : {'id' : 'deduc-pay', 'value' : '', 'type' : 'float'}
+    }
     //
-    // performing form validation
-    remove_class_all('invalid-field');
-    if (document.getElementById('over-night').value == 1) {document.getElementById('per-diem').disabled = false;}
-    else {document.getElementById('per-diem').disabled = true;}
-    check_num_str('base-rate','',false);
-    check_num_str('case-rate','',false);
-    check_num_str('stop-rate','',false);
-    check_date_str('date','',false);
-    check_num_str('hours','',false);
-    check_int_str('num-cases','',false);
-    check_int_str('num-routes','',false);
-    check_int_str('num-stops','',false);
-    check_num_str('num-miles','',false);
-    check_num_str('per-diem','',false);
-    check_num_str('hourly-pay-rate','',false); 
-    check_num_str('add-pay','',false);
-    check_num_str('deduc-pay','',false); 
-    //
-    // handling the checkboxes affecting pay level
+    // handling component pay checkboxes
     if (document.getElementById('rem-case-pay').checked) {document.getElementById('case-rate').value = '0.00';}
     if (document.getElementById('rem-route-pay').checked) {document.getElementById('base-rate').value = '0.00';}
     if (document.getElementById('rem-stop-pay').checked) {document.getElementById('stop-rate').value = '0.00';}
-    //
-    // getting form values
-    var base_rate = +document.getElementById('base-rate').value;
-    if (base_rate != base_rate) {add_class('invalid-field','base-rate');}
-    var case_rate = +document.getElementById('case-rate').value;
-    if (case_rate != case_rate) {add_class('invalid-field','case-rate');}
-    var stop_rate = +document.getElementById('stop-rate').value;
-    if (stop_rate != stop_rate) {add_class('invalid-field','stop-rate');}
-    var over_night = +document.getElementById('over-night').value;
-    if (over_night != over_night) {add_class('invalid-field','over-night');}
-    var per_diem = +document.getElementById('per-diem').value;
-    if (over_night > 0) {
-        if (per_diem != per_diem) {per_diem = 0.0; add_class('invalid-field','per-diem')}
-    }
-    var num_cases = +document.getElementById('num-cases').value;
-    if (num_cases != num_cases) {add_class('invalid-field','num-cases');}
-    var num_routes = +document.getElementById('num-routes').value;
-    if (num_routes != num_routes) {add_class('invalid-field','num-routes');}
-    var num_stops = +document.getElementById('num-stops').value;
-    if (num_stops != num_stops) {add_class('invalid-field','num-stops');}
-    var hours = +document.getElementById('hours').value;
-    if (hours != hours) {hours = 0.0;}
-    var add_pay = +document.getElementById('add-pay').value;
-    if (add_pay != add_pay) {add_pay = 0.0; add_class('invalid-field','add-pay');}
-    var deduc_pay = +document.getElementById('deduc-pay').value;
-    if (deduc_pay != deduc_pay) {deduc_pay = 0.0; add_class('invalid-field','deduc-pay');}
-    //
-    // rounding static fields
-    document.getElementById('base-rate').value = round(document.getElementById('base-rate').value,precision).toFixed(precision);
-    document.getElementById('case-rate').value = round(document.getElementById('case-rate').value,precision).toFixed(precision);
-    document.getElementById('stop-rate').value = round(document.getElementById('stop-rate').value,precision).toFixed(precision);
-    document.getElementById('hours').value = round(document.getElementById('hours').value,precision).toFixed(precision);
-    document.getElementById('num-miles').value = round(document.getElementById('num-miles').value,precision).toFixed(precision);
-    document.getElementById('per-diem').value = round(document.getElementById('per-diem').value,precision).toFixed(precision);
-    document.getElementById('hourly-pay-rate').value = round(document.getElementById('hourly-pay-rate').value,precision).toFixed(precision);
-    document.getElementById('add-pay').value = round(document.getElementById('add-pay').value,precision).toFixed(precision);
-    document.getElementById('deduc-pay').value = round(document.getElementById('deduc-pay').value,precision).toFixed(precision);
-    //
-    // testing checkboxes
-    if (document.getElementById('rem-case-pay').checked) {case_rate = 0.0;}
-    if (document.getElementById('rem-route-pay').checked) {base_rate = 0.0;}
-    if (document.getElementById('rem-stop-pay').checked) {stop_rate = 0.0;}
     if (document.getElementById('pre-inspection').checked) {pre = 3.50;}
     if (document.getElementById('post-inspection').checked) {post = 3.50;}
     //
+    // performing form validation and getting values
+    remove_class_all('invalid-field');
+    for (var name in inputs) {
+        error = check_data_type(inputs[name]['id'],inputs[name]['type'],true);
+        if ((error) && (inputs[name]['type'].match(/float|int/))) {inputs[name]['value'] = 0; continue;}
+        if (inputs[name]['type'].match(/float/)) {
+            inputs[name]['value'] = Number(document.getElementById(inputs[name]['id']).value);
+            if (inputs[name]['value'] === '') { continue;}
+            document.getElementById(inputs[name]['id']).value = round(inputs[name]['value'],precision).toFixed(precision);
+        }
+        else if (inputs[name]['type'].match(/int/)) {
+            inputs[name]['value'] = Number(document.getElementById(inputs[name]['id']).value);
+            if (inputs[name]['value'] === '') { continue;}
+            document.getElementById(inputs[name]['id']).value = round(inputs[name]['value'],0).toFixed(0);
+        }
+    }
+    //
+    if (inputs['over_night']['value'] == 1) { document.getElementById('per-diem').disabled = false;}
+    else { document.getElementById('per-diem').disabled = true;}
+    //
+    // handling hourly pay only checkbox
     if (document.getElementById('hourly-pay-only').checked) {
-        var pay_rate = +document.getElementById('hourly-pay-rate').value;
-        if (pay_rate != pay_rate) {pay_rate = 0.0; add_class('invalid-field','hourly-pay-rate');}
         //
-        num_cases  = 0.0;
-        num_routes = 0.0;
-        num_stops  = 0.0;
+        inputs['num_cases']['value']  = 0.0;
+        inputs['num_routes']['value'] = 0.0;
+        inputs['num_stops']['value']  = 0.0;
+        inputs['num_backhauls']['value'] = 0.0;
         pre  = 0.0;
         post = 0.0;
-        document.getElementById('num-cases').disabled = true;
+        document.getElementById('num-cases').disabled  = true;
         document.getElementById('num-routes').disabled = true;
-        document.getElementById('num-stops').disabled = true;
+        document.getElementById('num-stops').disabled  = true;
         remove_class('invalid-field','num-cases');
         remove_class('invalid-field','num-routes');
         remove_class('invalid-field','num-stops');
     }
     else {
-        pay_rate = 0.0;
-        remove_class('invalid-field','hourly-pay-rate');
-        document.getElementById('num-cases').disabled = false;
+        inputs['hourly_pay_rate']['value'] = 0.0;
+        document.getElementById('num-cases').disabled  = false;
         document.getElementById('num-routes').disabled = false;
-        document.getElementById('num-stops').disabled = false;
+        document.getElementById('num-stops').disabled  = false;
+        remove_class('invalid-field','hourly-pay-rate');
     }
     //
-    var hourly_pay = 0.0;
-    var incentive_pay = 0.0;
-    var tot_pay = 0.0;
-    //
-    if (over_night == 1) {
-        incentive_pay = per_diem;
-        base_rate = 2*base_rate
+    // adjusting values if overnight
+    if (inputs['over_night']['value'] == 1) {
+        incentive_pay = inputs['per_diem']['value'];
+        inputs['base_rate']['value'] = 2 * inputs['base_rate']['value'];
         pre = 2 * pre;
         post = 2 * post;
     }
     //
     // calculating pay values
-    incentive_pay += (base_rate * num_routes) + (case_rate * num_cases) + (stop_rate * num_stops) + pre + post;
-    hourly_pay = pay_rate * hours;
-    deduc_pay = deduc_pay * -1;
+    incentive_pay += (10.0 * inputs['num_backhauls']['value']);
+    incentive_pay += (inputs['base_rate']['value'] * inputs['num_routes']['value']);
+    incentive_pay += (inputs['case_rate']['value'] * inputs['num_cases']['value']);
+    incentive_pay += (inputs['stop_rate']['value'] * inputs['num_stops']['value']) + pre + post;
+    hourly_pay    +=  inputs['hourly_pay_rate']['value'] * inputs['hours']['value'];
+    reimbursement +=  inputs['hotel_amount']['value'];
+    reimbursement +=  inputs['toll_amount']['value'];
+    reimbursement += (inputs['truck_fuel']['value'] * inputs['cost_per_gallon']['value']);
+    reimbursement += (inputs['reefer_fuel']['value'] * inputs['cost_per_gallon']['value']);
+    reimbursement += (inputs['fuel_def']['value'] * inputs['def_cost_per_gallon']['value']);
+    inputs['deduc_pay']['value'] = inputs['deduc_pay']['value'] * -1;
     //
     // outputting values
-    tot_pay += hourly_pay + incentive_pay + add_pay + deduc_pay
+    tot_pay += hourly_pay + incentive_pay + inputs['add_pay']['value'] + inputs['deduc_pay']['value'];
     document.getElementById('pre-inspection').value = pre;
     document.getElementById('post-inspection').value = post;
     document.getElementById('incentive-pay').value = round(incentive_pay,2).toFixed(2);
-    document.getElementById('hourly-pay').value = round(hourly_pay,2).toFixed(2);    
+    document.getElementById('hourly-pay').value = round(hourly_pay,2).toFixed(2);  
+    document.getElementById('reimbursement').value = round(reimbursement,2).toFixed(2);      
     document.getElementById('total-pay').value = round(tot_pay,precision).toFixed(precision);   
 }
 //
@@ -924,7 +940,7 @@ function recalc_warehouse_form(truncate) {
         calc_sel_rate(response.sel_data);
     }
     //
-    ajax_multi_fetch([data_sql,sel_sql],['wk_data','sel_data'],callback)
+    ajax_fetch([data_sql,sel_sql],['wk_data','sel_data'],callback)
 }
 //
 // calculates overtime pay
@@ -1100,7 +1116,7 @@ function init_data_form_validation(department,action) {
     else {
         var sql_arr = [meta_sql];
         var name_arr = ['meta_data'];
-        ajax_multi_fetch(sql_arr,name_arr,submit_callback) 
+        ajax_fetch(sql_arr,name_arr,submit_callback) 
     }
 }
 //
@@ -1351,7 +1367,7 @@ function init_backhaul_form_validation(department,action) {
     else {
         var sql_arr = [meta_sql];
         var name_arr = ['meta_data'];
-        ajax_multi_fetch(sql_arr,name_arr,submit_callback) 
+        ajax_fetch(sql_arr,name_arr,submit_callback) 
     }
 }
 //
@@ -1629,7 +1645,7 @@ function validate_stock_form(action) {
     else if (action == 'update') {
         confirm_message = 'Confirm modification of Record: '+document.getElementById('entry-id').value;
         message = 'Succesfully Modified Record: '+document.getElementById('entry-id').value;
-        nav_id = 'records-table-page-nav';
+        nav_id = 'record-table-page-nav';
         table_fun = gen_stock_table;
         //
         var cont = confirm(confirm_message);
@@ -1638,7 +1654,7 @@ function validate_stock_form(action) {
     else if (action == 'delete') {
         confirm_message = 'Confirm deletion of Record: '+document.getElementById('entry-id').value;
         message = 'Succesfully Deleted Record: '+document.getElementById('entry-id').value;
-        nav_id = 'records-table-page-nav';
+        nav_id = 'record-table-page-nav';
         table_fun = gen_stock_table;
         //
         var cont = confirm(confirm_message);

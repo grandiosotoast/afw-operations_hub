@@ -20,12 +20,12 @@ function enter_data_emp_table(page,sort_col,sort_dir,department) {
     data_sql_args.table = 'employee_info';
     data_sql_args.where = [['department','REGEXP',department]];
     data_sql_args.where.push(['emp_status','LIKE','active'])
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     //
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_info(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','employee_table']];
-    meta_sql_args.orderBy = [['order_index','ASC']];
+    meta_sql_args.order_by = [['order_index','ASC']];
     emp_table_args.data_sql_args = data_sql_args;
     emp_table_args.meta_sql_args = meta_sql_args;
     //
@@ -35,22 +35,29 @@ function enter_data_emp_table(page,sort_col,sort_dir,department) {
     emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
     emp_table_args.table_data_cell_class = 'default-table-td';  
-    emp_table_args.table_row_appended_cells = ''; //might make this into a checkbox that will be checked if data has been entered for that employee
-    emp_table_args.page_nav_div_id = 'emp-table-page-nav';
-    emp_table_args.page_nav_class = 'page_nav';
-    emp_table_args.page_nav_id_prefix = 'emp';
-    emp_table_args.page_class_str = 'page_nav_link';
-    emp_table_args.page = page;
-    emp_table_args.tot_pages_shown = 9;
-    emp_table_args.page_onmouse_str = '';
-    emp_table_args.page_onclick = "enter_data_emp_table(%%,'%sort_col%','%sort_dir%','"+department+"');";
-    emp_table_args.head_row_class_str = 'default-table-header';
-    emp_table_args.sort_col = sort_col;
-    emp_table_args.sort_dir = sort_dir;
-    emp_table_args.sort_onclick = "enter_data_emp_table(%%,'%column_name%','%sort_dir%','"+department+"');";
+    emp_table_args.table_row_appended_cells = '';
     emp_table_args.row_onclick = row_onclick;
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
+    emp_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "enter_data_emp_table(%%,'%column_name%','%sort_dir%','"+department+"');"
+    }
+    emp_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 10,
+        'page_nav_div_id' : 'emp-table-page-nav',
+        'id_prefix' : 'emp',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "enter_data_emp_table(%%,'"+sort_col+"','"+sort_dir+"','"+department+"');",
+        'onmouse_str' : ''
+    };
     //
     //
     create_standard_table(emp_table_args);
@@ -159,11 +166,12 @@ function view_emp_table(page,sort_col,sort_dir) {
     var emp_table_args = {};
     var data_sql_args = {};
     var meta_sql_args = {};
+    var num_per_page = 10;
     var department = '.'
     //
     // getting page elements
     emp_table_args.department = document.getElementById('department').value;
-    emp_table_args.num_per_page = document.getElementById("emp-per-page").value;
+    num_per_page = Number(document.getElementById("emp-per-page").value);
     //
     if (!!(emp_table_args.department)) {
         department = emp_table_args.department;
@@ -173,14 +181,14 @@ function view_emp_table(page,sort_col,sort_dir) {
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'employee_info';
     data_sql_args.where = [['department','REGEXP',department]];
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     if (!(emp_table_args.show_inactive)) {
         data_sql_args.where.push(['emp_status','LIKE','active'])
     }
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_info(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','employee_table']];
-    meta_sql_args.orderBy = [['order_index','ASC']]
+    meta_sql_args.order_by = [['order_index','ASC']]
     emp_table_args.data_sql_args = data_sql_args;
     emp_table_args.meta_sql_args = meta_sql_args;
     //
@@ -190,22 +198,29 @@ function view_emp_table(page,sort_col,sort_dir) {
     emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
     emp_table_args.table_data_cell_class = 'default-table-td';  
-    emp_table_args.page_nav_div_id = 'emp-table-page-nav';
-    emp_table_args.page_nav_class = 'page_nav';
-    emp_table_args.page_nav_id_prefix = 'emp';
-    emp_table_args.page_class_str = 'page_nav_link';
-    emp_table_args.page = page;
-    emp_table_args.tot_pages_shown = 9;
-    emp_table_args.page_onmouse_str = '';
-    emp_table_args.page_onclick = "view_emp_table(%%,'%sort_col%','%sort_dir%')";
-    emp_table_args.head_row_class_str = 'default-table-header';
-    emp_table_args.sort_col = sort_col;
-    emp_table_args.sort_dir = sort_dir;
-    emp_table_args.sort_onclick = "view_emp_table(%%,'%column_name%','%sort_dir%')";
     emp_table_args.row_onclick = "view_emp_data_table(1,'date','DESC','%emp_id%','%department%')";
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
     emp_table_args.add_callback = function(){store_session("emp_table_page,"+page+",emp_table_sort_col,"+sort_col+",emp_table_sort_dir,"+sort_dir);}
+    emp_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "view_emp_table(%%,'%column_name%','%sort_dir%');"
+    }
+    emp_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : num_per_page,
+        'page_nav_div_id' : 'emp-table-page-nav',
+        'id_prefix' : 'emp',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "view_emp_table(%%,'"+sort_col+"','"+sort_dir+"','"+department+"');",
+        'onmouse_str' : ''
+    };
     //
     create_standard_table(emp_table_args);
 }
@@ -219,25 +234,26 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     var data_sql_args = {};
     var meta_sql_args = {};
     var ts_obj = {};
+    var num_per_page = 10
     //
     // getting page elements
-    data_table_args.num_per_page = document.getElementById('res-per-page').value;
+    num_per_page = Number(document.getElementById('res-per-page').value);
     // 
-    // processing time range information
+    // getting time range information
     ts_obj = to_and_from_timestamps();
     //
     // creating data and meta sql args
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'employee_data';
     data_sql_args.where = [['emp_id','REGEXP',emp_id],['date','BETWEEN',ts_obj.from_ts+"' AND '"+ts_obj.to_ts]];
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     if (!(data_table_args.show_deleted)) {
         data_sql_args.where.push(['entry_status','LIKE','submitted'])
     }
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
-    meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)']]; 
-    meta_sql_args.orderBy = [['order_index','ASC']];    
+    meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','employee_data_table']];
+    meta_sql_args.order_by = [['order_index','ASC']];    
     data_table_args.data_sql_args = data_sql_args;
     data_table_args.meta_sql_args = meta_sql_args;
     //
@@ -248,48 +264,43 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     data_table_args.row_id_prefix = 'emp-data-row-';
     data_table_args.table_data_cell_class = 'default-table-td'; 
     data_table_args.table_row_appended_cells = "<td style=\"background-color: rgb(255,255,255); box-shadow: 3px 3px 0px 3.25px rgb(255,255,255);\" onclick = \"view_to_edit_entry('%emp_id%','%department%','%entry_id%')\" ><a id = \"edit_link\" class =\"edit_link\">Edit </a></td>";
-    data_table_args.page_nav_div_id = 'employee-data-table-page-nav';
-    data_table_args.page_nav_class = 'page_nav';
-    data_table_args.page_nav_id_prefix = 'emp-data';
-    data_table_args.page_class_str = 'page_nav_link';
-    data_table_args.page_onmouse_str = '';
-    data_table_args.tot_pages_shown = 9;
-    data_table_args.page = page;
-    data_table_args.head_row_class_str = 'default-table-header';
-    data_table_args.sort_col = sort_col;
-    data_table_args.sort_dir = sort_dir;
-    data_table_args.page_onclick = "view_emp_data_table(%%,'%sort_col%','%sort_dir%','"+emp_id+"','"+department+"')";
-    data_table_args.sort_onclick = "view_emp_data_table(%%,'%column_name%','%sort_dir%','"+emp_id+"','"+department+"')";
     data_table_args.row_onclick = "view_employee_data_entry('%entry_id%','%department%','%row_id%')";
     data_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     data_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     data_table_args.add_callback = function(){store_session("data_table_page,"+page+",data_table_sort_col,"+sort_col+",data_table_sort_dir,"+sort_dir);}
-
-    //
-    var callback = function(response) {
-        // processing col_meta_data to get shared columns for sql request
-        data_table_args.data_sql_args.cols = [];
-        for (var i = 0; i < response.length; i++) {
-            data_table_args.data_sql_args.cols.push(response[i].column_name);
-        }
-        // adding the make table event handler to the adjust view range button
-        var curr_adj_button = document.getElementById('adj_view_range');
-        var adj_button = document.createElement('BUTTON');
-        adj_button.id = 'adj_view_range';
-        adj_button.type = 'button';
-        adj_button.class = 'hidden-elm'
-        adj_button.appendChild(document.createTextNode('Adjust Viewable Range'));
-        adj_button.addEventListener("click", function () {
-            view_emp_data_table(page,sort_col,sort_dir,emp_id,department); 
-            add_class('hidden-elm','adj_view_range');
-        });
-        curr_adj_button.parentNode.replaceChild(adj_button,curr_adj_button);
-        // getting specific columns now for output
-        data_table_args.meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','employee_data_table']];
-        create_standard_table(data_table_args);
+    data_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "view_emp_data_table(%%,'%column_name%','%sort_dir%','"+emp_id+"','"+department+"')"
     }
-    var meta_sql = gen_sql(data_table_args.meta_sql_args);
-    ajax_fetch_db(meta_sql,'',callback);
+    data_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : num_per_page,
+        'page_nav_div_id' : 'employee-data-table-page-nav',
+        'id_prefix' : 'emp-data',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "view_emp_data_table(%%,'"+sort_col+"','"+sort_dir+"','"+emp_id+"','"+department+"');",
+        'onmouse_str' : ''
+    };
+    create_standard_table(data_table_args);
+    //
+    // adding the make table event handler to the adjust view range button
+    var curr_adj_button = document.getElementById('adj_view_range');
+    var adj_button = document.createElement('BUTTON');
+    adj_button.id = 'adj_view_range';
+    adj_button.type = 'button';
+    adj_button.className = 'hidden-elm'
+    adj_button.appendChild(document.createTextNode('Adjust Viewable Range'));
+    adj_button.addEventListener("click", function () {
+        view_emp_data_table(page,sort_col,sort_dir,emp_id,department); 
+        add_class('hidden-elm','adj_view_range');
+    });
+    curr_adj_button.parentNode.replaceChild(adj_button,curr_adj_button);
 }
 //
 // defining the row onclick for the view data entries table
@@ -385,7 +396,7 @@ function view_employee_data_entry(entry_id,department,row_id) {
             }
            
         }
-        ajax_multi_fetch([data_sql],['data'],callback);
+        ajax_fetch([data_sql],['data'],callback);
     }
     else if (department == 'general') {
         //
@@ -557,14 +568,14 @@ function edit_data_emp_table(page,sort_col,sort_dir) {
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'employee_info';
     data_sql_args.where = [['department','REGEXP',department]];
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     if (!(emp_table_args.show_inactive)) {
         data_sql_args.where.push(['emp_status','LIKE','active'])
     }
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_info(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','employee_table']];
-    meta_sql_args.orderBy = [['order_index','ASC']]
+    meta_sql_args.order_by = [['order_index','ASC']]
     emp_table_args.data_sql_args = data_sql_args;
     emp_table_args.meta_sql_args = meta_sql_args;
     //
@@ -574,22 +585,28 @@ function edit_data_emp_table(page,sort_col,sort_dir) {
     emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
     emp_table_args.table_data_cell_class = 'default-table-td';  
-    emp_table_args.page_nav_div_id = 'emp-table-page-nav';
-    emp_table_args.page_nav_class = 'page_nav';
-    emp_table_args.page_nav_id_prefix = 'emp';
-    emp_table_args.page_class_str = 'page_nav_link';
-    emp_table_args.page_onmouse_str = '';
-    emp_table_args.num_per_page = document.getElementById("emp-per-page").value;
-    emp_table_args.tot_pages_shown = 9;
-    emp_table_args.page = page;
-    emp_table_args.head_row_class_str = 'default-table-header';
-    emp_table_args.sort_col = sort_col;
-    emp_table_args.sort_dir = sort_dir;
-    emp_table_args.page_onclick = "edit_data_emp_table(%%,'%sort_col%','%sort_dir%')";
-    emp_table_args.sort_onclick = "edit_data_emp_table(%%,'%column_name%','%sort_dir%')";
     emp_table_args.row_onclick = "mod_emp_data_table(1,'date','DESC',%emp_id%); remove_class('hidden-elm','edit-emp-data-div'); add_emp_id('%emp_id%','employee_table');";
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
+    emp_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "edit_data_emp_table(%%,'%column_name%','%sort_dir%')"
+    }
+    emp_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : Number(document.getElementById("emp-per-page").value),
+        'page_nav_div_id' : 'employee-table-page-nav',
+        'id_prefix' : 'emp',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "edit_data_emp_table(%%,'"+sort_col+"','"+sort_dir+"');",
+        'onmouse_str' : ''
+    };
     //
     create_standard_table(emp_table_args);
 }
@@ -612,7 +629,6 @@ function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
     //
     // getting page elements
     data_table_args.department = document.getElementById('department').value;
-    data_table_args.num_per_page = document.getElementById('res-per-page').value;
     data_table_args.show_deleted = document.getElementById('show-deleted').checked;
     //
     department = data_table_args.department;
@@ -638,11 +654,11 @@ function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
     if (!(data_table_args.show_deleted)) {
         data_sql_args.where.push(['entry_status','LIKE','submitted'])
     }
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','employee_data_table']];
-    meta_sql_args.orderBy = [['order_index','ASC']];
+    meta_sql_args.order_by = [['order_index','ASC']];
     data_table_args.data_sql_args = data_sql_args;
     data_table_args.meta_sql_args = meta_sql_args;
     //
@@ -652,22 +668,29 @@ function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
     data_table_args.table_class = 'default-table';
     data_table_args.row_id_prefix = 'emp-data-row-';
     data_table_args.table_data_cell_class = 'default-table-td';  
-    data_table_args.page_nav_div_id = 'employee-data-table-page-nav';
-    data_table_args.page_nav_class = 'page_nav';
-    data_table_args.page_nav_id_prefix = 'emp-data';
-    data_table_args.page_class_str = 'page_nav_link';
-    data_table_args.page_onmouse_str = '';
-    data_table_args.tot_pages_shown = 9;
-    data_table_args.page = page;
-    data_table_args.head_row_class_str = 'default-table-header';
-    data_table_args.sort_col = sort_col;
-    data_table_args.sort_dir = sort_dir;
-    data_table_args.page_onclick = "mod_emp_data_table(%%,'%sort_col%','%sort_dir%','"+emp_id+"')";
-    data_table_args.sort_onclick = "mod_emp_data_table(%%,'%column_name%','%sort_dir%','"+emp_id+"')";
     data_table_args.row_onclick = "mod_employee_data_entry('%entry_id%','%department%','%row_id%')";
     data_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     data_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     data_table_args.add_callback = function() { document.getElementById(data_table_args.table_id).dataset.empId = emp_id; }
+    data_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "mod_emp_data_table(%%,'%column_name%','%sort_dir%','"+emp_id+"')"
+    }
+    data_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : Number(document.getElementById("res-per-page").value),
+        'page_nav_div_id' : 'employee-data-table-page-nav',
+        'id_prefix' : 'emp-data',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "mod_emp_data_table(%%,'"+sort_col+"','"+sort_dir+"','"+emp_id+"');",
+        'onmouse_str' : ''
+    };
     //
     create_standard_table(data_table_args);
 }
@@ -833,9 +856,9 @@ function mod_backhaul_form(args) {
     var get_data_callback = function(response) {
         var data = response.data;
         var data_sql = 'SELECT *  FROM employee_data INNER JOIN '+table+' ON employee_data.entry_id = '+table+'.entry_id WHERE '+table+'.group_id LIKE '+data[0].group_id;
-        ajax_multi_fetch([data_sql],['data'],add_freight_pos);
+        ajax_fetch([data_sql],['data'],add_freight_pos);
     }
-    ajax_multi_fetch([sql],['data'],get_data_callback);
+    ajax_fetch([sql],['data'],get_data_callback);
 }
 //
 // this adds the PO fields to the update form
@@ -1001,14 +1024,14 @@ function mod_dbuser_table(page,sort_col,sort_dir) {
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'dbUsers';
     data_sql_args.where = [['department','REGEXP','.']];
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     if (!(dbuser_table_args.show_inactive)) {
         data_sql_args.where.push(['dbuser_status','LIKE','active'])
     }
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)dbUsers(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','dbuser_table']];
-    meta_sql_args.orderBy = [['order_index','ASC']];
+    meta_sql_args.order_by = [['order_index','ASC']];
     dbuser_table_args.data_sql_args = data_sql_args;
     dbuser_table_args.meta_sql_args = meta_sql_args;
     //
@@ -1017,23 +1040,29 @@ function mod_dbuser_table(page,sort_col,sort_dir) {
     dbuser_table_args.table_id = 'dbuser-table';
     dbuser_table_args.table_class = 'default-table';
     dbuser_table_args.row_id_prefix = 'dbuser-row-';
-    dbuser_table_args.table_data_cell_class = 'default-table-td'; 
-    dbuser_table_args.page_nav_div_id = 'dbuser-table-page-nav';
-    dbuser_table_args.page_nav_class = 'page_nav';     
-    dbuser_table_args.page_nav_id_prefix = 'dbuser';
-    dbuser_table_args.page_class_str = 'page_nav_link';
-    dbuser_table_args.page = page;
-    dbuser_table_args.tot_pages_shown = 9;
-    dbuser_table_args.num_per_page = 10;
-    dbuser_table_args.page_onclick = "mod_dbuser_table(%%,'%sort_col%','%sort_dir%',false)";
-    dbuser_table_args.page_onmouse_str = '';
-    dbuser_table_args.head_row_class_str = 'default-table-header';  
-    dbuser_table_args.sort_col = sort_col;
-    dbuser_table_args.sort_dir = sort_dir;
-    dbuser_table_args.sort_onclick = "mod_dbuser_table(%%,'%column_name%','%sort_dir%',false)";                                                                                                                                                                                              
+    dbuser_table_args.table_data_cell_class = 'default-table-td';                                                                                                                                                                                             
     dbuser_table_args.row_onclick = "remove_class_all('selected-field'); add_class('selected-field','%row_id%'); mod_dbuser_info('%dbuser_internal_id%','%row_id%');";
     dbuser_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
-    dbuser_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";    
+    dbuser_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
+    dbuser_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "mod_dbuser_table(%%,'%column_name%','%sort_dir%')"
+    }
+    dbuser_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 10,
+        'page_nav_div_id' : 'dbuser-table-page-nav',
+        'id_prefix' : 'dbuser',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "mod_dbuser_table(%%,'"+sort_col+"','"+sort_dir+"');",
+        'onmouse_str' : ''
+    };  
     //
     create_standard_table(dbuser_table_args)   
 }
@@ -1169,11 +1198,11 @@ function mod_emp_table(page,sort_col,sort_dir) {
     if (!(emp_table_args.show_inactive)) {
         data_sql_args.where.push(['emp_status','LIKE','active'])
     }
-    data_sql_args.orderBy = [[sort_col,sort_dir]];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_info(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','employee_table']];
-    meta_sql_args.orderBy = [['order_index','ASC']];
+    meta_sql_args.order_by = [['order_index','ASC']];
     emp_table_args.data_sql_args = data_sql_args;
     emp_table_args.meta_sql_args = meta_sql_args;
     //
@@ -1182,22 +1211,29 @@ function mod_emp_table(page,sort_col,sort_dir) {
     emp_table_args.table_id = 'employee_table';
     emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
-    emp_table_args.table_data_cell_class = 'default-table-td';  
-    emp_table_args.page_nav_div_id = 'emp-table-page-nav';
-    emp_table_args.page_nav_class = 'page_nav';
-    emp_table_args.page_nav_id_prefix = 'emp';
-    emp_table_args.page_class_str = 'page_nav_link';
-    emp_table_args.page_onmouse_str = '';
-    emp_table_args.tot_pages_shown = 9;
-    emp_table_args.page = page;
-    emp_table_args.head_row_class_str = 'default-table-header';
-    emp_table_args.sort_col = sort_col;
-    emp_table_args.sort_dir = sort_dir;
-    emp_table_args.page_onclick = "mod_emp_table(%%,'%sort_col%','%sort_dir%',false)";
-    emp_table_args.sort_onclick = "mod_emp_table(%%,'%column_name%','%sort_dir%',false)";                                                                                                                                                                                              
+    emp_table_args.table_data_cell_class = 'default-table-td';                                                                                                                                                                                              
     emp_table_args.row_onclick = "remove_class_all('selected-field'); add_class('selected-field','%row_id%'); mod_employee_info('%emp_id%');";
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
+    emp_table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "mod_emp_table(%%,'%column_name%','%sort_dir%')"
+    };
+    emp_table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 10,
+        'page_nav_div_id' : 'emp-table-page-nav',
+        'id_prefix' : 'emp',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "mod_emp_table(%%,'"+sort_col+"','"+sort_dir+"');",
+        'onmouse_str' : ''
+    }; 
     //
     create_standard_table(emp_table_args);
 }
@@ -1346,7 +1382,7 @@ function list_all_tables() {
         document.getElementById('table-select-div').innerHTML = select_element;
     }
     //
-    ajax_multi_fetch([sql],['tables'],callback)
+    ajax_fetch([sql],['tables'],callback)
 }
 //
 // this function clears the table maintenance inputs
@@ -1385,12 +1421,12 @@ function create_table(page,sort_col,sort_dir) {
     //
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = table_name;
-    if (sort_col != '') {data_sql_args.orderBy = [[sort_col,sort_dir]];}
+    if (sort_col != '') {data_sql_args.order_by = [[sort_col,sort_dir]];}
     //
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)'+table_name+'(%|$)'],['use_on_pages','REGEXP','table_maintenance'],['data_type','NOT REGEXP','hidden']];
-    meta_sql_args.orderBy = [['order_index','ASC']];
+    meta_sql_args.order_by = [['order_index','ASC']];
     table_args.data_sql_args = data_sql_args;
     table_args.meta_sql_args = meta_sql_args;
     //
@@ -1399,25 +1435,31 @@ function create_table(page,sort_col,sort_dir) {
     table_args.table_id = table_name;
     table_args.table_class = 'default-table';
     table_args.row_id_prefix = 'tm-row-';
-    table_args.table_data_cell_class = 'default-table-td';  
-    table_args.page_nav_div_id = 'table-page-nav';
-    table_args.page_nav_class = 'page_nav';
-    table_args.page_nav_id_prefix = 'tm';
-    table_args.page_class_str = 'page_nav_link';
-    table_args.page_onmouse_str = '';
-    table_args.tot_pages_shown = 9;
-    table_args.page = page;
-    table_args.head_row_args = {
-        head_row_class_str : 'default-table-header',
-        header_tooltip : '%column_name%'
-    };
-    table_args.sort_col = sort_col;
-    table_args.sort_dir = sort_dir;
-    table_args.page_onclick = "create_table(%%,'%sort_col%','%sort_dir%',false)";
-    table_args.sort_onclick = "create_table(%%,'%column_name%','%sort_dir%',false)";                                                                                                                                                                                              
+    table_args.table_data_cell_class = 'default-table-td';                                                                                                                                                                                                
     table_args.row_onclick = "mod_table_entry('"+table_name+"','%row_id%');";
     table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
+    table_args.head_row_args = {
+        'sortable' : true,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "create_table(%%,'%column_name%','%sort_dir%')",
+        'head_row_class_str' : 'default-table-header',
+        'header_tooltip' : '%column_name%'
+    };
+    table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 10,
+        'page_nav_div_id' : 'table-page-nav',
+        'id_prefix' : 'tm',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page_nav_link',
+        'onclick_str' : "create_table(%%,'"+sort_col+"','"+sort_dir+"');",
+        'onmouse_str' : ''
+    };
     table_args.add_callback = function(response) {
         document.getElementById('table-unique-col').value = '';
         for (var i = 0; i < response.meta_data.length; i++) {
@@ -1449,7 +1491,7 @@ function mod_table_entry(table_name,row_id) {
     meta_args.cmd = 'SELECT';
     meta_args.table = 'table_meta_data';
     meta_args.where = [['in_tables','REGEXP','(^|%)'+table_name+'(%|$)'],['use_on_pages','REGEXP','table_maintenance'],['data_type','NOT REGEXP','hidden']];
-    meta_args.orderBy = [['order_index','ASC']]; 
+    meta_args.order_by = [['order_index','ASC']]; 
     meta_sql = gen_sql(meta_args);
     //
     // setting table name in hidden field
@@ -1469,33 +1511,26 @@ function mod_table_entry(table_name,row_id) {
         sql_args.where = [[unique_col,'LIKE',unique_val]];
         data_sql = gen_sql(sql_args);
         //
-        ajax_fetch_db(data_sql,meta_sql,create_table_edit_form);
+        ajax_fetch([data_sql,meta_sql],['row_data','meta_data'],create_table_edit_form);
     }
     else {
         //
         document.getElementById('table-unique-val').value = '';
         //
-        ajax_fetch_db(meta_sql,'',create_table_edit_form);
+        ajax_fetch([meta_sql],['meta_data'],create_table_edit_form);
     }
     
 }
 //
 // creates the edit table row form
-function create_table_edit_form(data_arr) {
+function create_table_edit_form(response) {
     "use strict"
     //
     // if no meta data is returned then an array is output by the fetch_db function
-    if (Array.isArray(data_arr)) {
-        var row_data = {};
-        var meta_data = data_arr;
-        for (var i = 0; i < meta_data.length; i++){
-            row_data[meta_data[i].column_name] = '';
-        }
-    }
-    else {
-        var row_data = data_arr.data[0];
-        var meta_data = data_arr.meta_data;
-    }
+    var row_data  = {};
+    var meta_data = response.meta_data;
+    if (response.hasOwnProperty('row_data'))  { row_data = response.row_data[0];}
+    else { for (var i = 0; i < meta_data.length; i++) { row_data[meta_data[i].column_name] = '';}}
     //
     // setting modify header
     document.getElementById('modify-header').innerHTML = 'Modifying Table: '+document.getElementById('table-selected').value;
@@ -1513,7 +1548,7 @@ function create_table_edit_form(data_arr) {
         if (!(first_id) && !(disabled)) {first_id = col.column_name+'-input';}
         form_out += '<label class="label-large">'+col.column_nickname+':</label>';
         if (meta_data[i].data_type.match(/text/)) {
-            form_out += '<textarea id="'+col.column_name+'-input" name="'+col.column_name+'" rows="4" cols="60"></textarea>'
+            form_out += '<textarea id="'+col.column_name+'-input" name="'+col.column_name+'" rows="4" cols="60" onkeyup="remove_class(\'invalid-field\',this.id)" onblur="remove_class(\'invalid-field\',this.id)"></textarea>'
         }
         else {
           form_out += '<input id="'+col.column_name+'-input" type="text" name="'+col.column_name+'" class="input-long" value="" onkeyup="remove_class(\'invalid-field\',this.id)" onblur="remove_class(\'invalid-field\',this.id)" '+disabled+'></input>';

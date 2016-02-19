@@ -336,11 +336,25 @@ var transportation_data = ''+
     '<label class="label">Number of Stops:</label><input id="num-stops" type="text" name="num_stops" value="" placeholder="0" onblur="recalc_transportation_form(true);">'+
     '&nbsp&nbsp&nbsp<label class="label">Remove Stop Pay:</label><input id="rem-stop-pay" type="checkbox" value="0" onclick="document.getElementById(\'stop-rate\').value = document.getElementById(\'stop-rate-orig\').value; toggle_disabled(\'stop-rate\'); recalc_transportation_form(true);">'+
     '<br>'+
+    '<label class="label">Number of Backhauls:</label><input id="num-backhauls" type="text" name="num_backhauls" value="" placeholder="0" onblur="recalc_transportation_form(true);">'+
+    '<br>'+
+    '<br>'+
     '<label class="label">Miles:</label><input id="num-miles" type="text" name="miles" value="" placeholder="0.0" onblur="recalc_transportation_form(true);" >'+
     '<br>'+
-    '<label class="label">Pre Inspection:</label><input id="pre-inspection" type="checkbox" name="pre_inspection" onclick="recalc_transportation_form(true);" value="0"></input>'+
+    '<label class="label">Gallons of Truck Fuel:</label><input id="truck-fuel" type="text" name="truck_fuel" value="" placeholder="0" onblur="recalc_transportation_form(true);" >'+
     '<br>'+
-    '<label class="label">Post Inspection:</label><input id="post-inspection" type="checkbox" name="post_inspection" onclick="recalc_transportation_form(true);" value="0"></input>'+
+    '<label class="label">Gallons of Reefer Fuel:</label><input id="reefer-fuel" type="text" name="reefer_fuel" value="" placeholder="0" onblur="recalc_transportation_form(true);" >'+
+    '<br>'+
+    '<label class="label">Cost per Gallon:</label><input id="cost-per-gallon" type="text" name="cost_per_gallon" value="" placeholder="0.0" onblur="recalc_transportation_form(true);" >'+
+    '<br>'+
+    '<label class="label">Gallons of DEF:</label><input id="fuel-def" type="text" name="fuel_def" value="" placeholder="0" onblur="recalc_transportation_form(true);" >'+
+    '<br>'+
+    '<label class="label">DEF Cost per Gallon:</label><input id="def-cost-per-gallon" type="text" name="def_cost_per_gallon" value="" placeholder="0.0" onblur="recalc_transportation_form(true);" >'+
+    '<br>'+
+    '<br>'+
+    '<label class="label">Pre Inspection:</label><input id="pre-inspection" type="checkbox" name="pre_inspection" onclick="toggle_checkbox_value(this.id,3.5,0); recalc_transportation_form(true);" value="0"></input>'+
+    '<br>'+
+    '<label class="label">Post Inspection:</label><input id="post-inspection" type="checkbox" name="post_inspection" onclick="toggle_checkbox_value(this.id,3.5,0); recalc_transportation_form(true);" value="0"></input>'+
     '<br>'+
     '<label class="label">Error Code:</label>'+
     '<select id="error-code" name="error_code" onchange="show_if_val(\'error-code\',\'other-error-code-msg\',\'99\');" >'+
@@ -350,6 +364,10 @@ var transportation_data = ''+
     '<br>'+
     '<label class="label">Overnight Per Diem:</label><input id="per-diem" type="text" name="per_diem" value="0.0" onblur="recalc_transportation_form(true);" readonly disabled>'+
     '&nbsp&nbsp&nbsp<label class="label-7em">Edit Per Diem:</label><input id="edit-hourly-pay" type="checkbox" onclick="toggle_readonly(\'per-diem\'); recalc_transportation_form(true);"></input>'+
+    '<br>'+
+    '<label class="label">Hotel Amount:</label><input id="hotel-amount" type="text" name="hotel_amount" value="" placeholder="0.0" onblur="recalc_transportation_form(true);" >'+
+    '<br>'+
+    '<label class="label">Toll Amount:</label><input id="toll-amount" type="text" name="toll_amount" value="" placeholder="0.0" onblur="recalc_transportation_form(true);" >'+
     '<br>'+
     '<br>'+
     '<label class="label">Pay Employee Hourly:</label><input id="hourly-pay-only" type="checkbox" onclick="toggle_disabled(\'hourly-pay-rate\'); recalc_transportation_form(true);"></input>'+
@@ -368,6 +386,8 @@ var transportation_data = ''+
     '<label class="label">Incentive Pay:</label><input id="incentive-pay" type="text" value="0.00" readonly>'+
     '<br>'+
     '<label class="label">Hourly Pay:</label><input id="hourly-pay" type="text" value="0.00" readonly>'+
+    '<br>'+
+    '<label class="label">Hotel/Fuel/Fees:</label><input id="reimbursement" type="text" value="0.0" readonly><br>'+
     '<br>'+
     '<label class="label">Total Pay:</label><input id="total-pay" type="text" name="total" value="0.0" onblur="recalc_transportation_form(true);" readonly><br>'+
     '<br>'+
@@ -964,13 +984,13 @@ function populate_form(populate_form_args) {
     sql = gen_sql(sql_args);
     //
     var callback_fun = function(response) {
-        populate_form_args.data_arr = response[0];
+        populate_form_args.data_arr = response.data[0];
         process_form_data(populate_form_args)
         if (!!(populate_form_args.add_callback_funs)) { 
         populate_form_args.add_callback_funs();
         }
     }
-    ajax_fetch_db(sql,'',callback_fun);
+    ajax_fetch([sql],['data'],callback_fun);
 }
 //
 // this function processes the response from populate form
@@ -1079,7 +1099,7 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
     //
     // temporary function to populate a drop box
     var pop_dropbox = function(response) {
-        var data_arr = response;
+        var data_arr = response.data;
         var options_str = "";
         //
         // creating options for dropbox
@@ -1106,7 +1126,7 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
     }
     //
     // fetching data and populating the dropbox
-    ajax_fetch_db(sql,'',pop_dropbox)
+    ajax_fetch([sql],['data'],pop_dropbox)
 }
 //
 // this function specifically populates the year dropboxes 

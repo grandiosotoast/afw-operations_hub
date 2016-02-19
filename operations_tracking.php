@@ -195,14 +195,4 @@ function exec_db($server,$database,$username,$password,$sql,$message) {
         echo $e->getMessage();
         }
     }
-//
-// function to mimic array_column in PHP5
-function array_column_port($array,$key) {
-    $col = [];
-    for ($i = 0; $i < count($array); $i++) {
-        array_push($col,$array[$i][$key]);
-    }
-    return($col);
-}
-
 ?>

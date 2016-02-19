@@ -16,33 +16,9 @@ if (isset($_POST["async_exec_db"])) {
     }
     exec_db($server,$database,$username,$password,$sql,$message);
 }
-
 //
-// async execution of fetch_db and encoding of the returned data into a JSON arrray
-// this is being phased out in favor of multi-fetch
-if (isset($_POST["async_fetch_db"])) {
-    $sql = $_POST["sql"];
-    if (isset($_POST["meta_sql"])) {
-        $meta_sql = $_POST["meta_sql"];
-    }
-    else {
-        $meta_sql = '';
-    }
-    $results = fetch_db($server,$database,$username,$password,$sql);
-    if ($meta_sql != '') {
-        $col_meta = fetch_db($server,$database,$username,$password,$meta_sql);
-        $json = json_encode(array('data' => $results, 'meta_data' => $col_meta));
-    }
-    else {
-        $json = json_encode($results);
-    }
-    //
-    if ($json == '') { print_r('JSON Encoding Error: ',json_last_error(),' - ',json_last_error_msg());}
-    else { print_r($json);}
-}
-//
-//
-if (isset($_POST["async_fetch_multiple"])) {
+// fetches data from one or more sql statements and returned in a JSON encoded object
+if (isset($_POST["async_fetch"])) {
     $sql_arr = Array();
     $name_arr = Array();
     //

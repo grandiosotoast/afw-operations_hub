@@ -104,7 +104,8 @@ function round(number,numDigits) {
     if (numDigits === '') {console.log('Error: round requires numDigits arg',console.log(number),console.log(numDigits));return 0.0;}
     //
     var scale = Math.pow(10,numDigits);
-    number = number*scale;
+    number = Number(number);
+    number = number * scale;
     number = Math.round(number)/scale;
     return(number);   
 }
@@ -377,167 +378,123 @@ function get_session(process_fun) {
 }
 //
 // generates a sql command to be used in an ajax request
-function gen_sql(arg_object) {
-    // cmd values = INSERT, SELECT, UPDATE, DELETE
-    // Syntax to gen INSERT command: cmd = "INSERT", table=table, cols=[c1,c2,..c#], vals=[v1,v2,...,v#]
-    // Syntax to gen SELECT command: cmd = "SELECT", table=table, cols=[c1,c2,..c#], where[[c,(LIKE or REGEXP),v],[c,(LIKE or REGEXP),v],...]
-    // Syntax to gen UPDATE command: cmd = "UPDATE", table=table, cols=[c1,c2,..c#], vals=[v1,v2,...,v#] where[[c,(LIKE or REGEXP),v],[c,(LIKE or REGEXP),v],...]
-    // Syntax to gen DELETE command: cmd = "DELETE", table=table, where[[c,(LIKE or REGEXP),v],[c,(LIKE or REGEXP),v],...]
-    var sql = "";
-    var cmd,table,cols,vals,where;
-    // Checking what values exist in arg_object
-    if (!!(arg_object.cmd)) {cmd = arg_object.cmd;}
-    else {console.log("Function gen_sql requires a command to be provided"); return;}
-    if (!!(arg_object.table)) {table = arg_object.table;}
-    else {console.log("Function gen sql requires a table to be provided"); return;}
-    if (!!(arg_object.cols)) {cols = arg_object.cols;}
-    else {cols = [''];}
-    if (!!(arg_object.vals)) {vals = arg_object.vals;}
-    else {vals=[''];}
-    if (!!(arg_object.where)) {where = arg_object.where;}
-    else {where=[''];}
+function gen_sql(input_args) {
     //
-    if (cols.length  == 0) {cols  = [''];}
-    if (vals.length  == 0) {vals  = [''];}
-    if (where.length == 0) {where = [''];}
-//
-    if (cmd == "INSERT") {
-        sql = "INSERT INTO `"+table+"`";
-        if (cols[0] == '') {
-            console.log("No columns provided for INSERT command.");
-            return;
-        }
-        else {
-            sql += "(";
-            var n = cols.length-1;
-            for (var i = 0; i < n; i++) {
-                sql += "`"+cols[i]+"`, ";
-            }
-            sql += "`"+cols[n]+"`) ";
-        }
-        if (vals[0] == '') {
-            console.log("No values provided for the INSERT command.");
-            return;
-        }
-        else {
-            sql += "VALUES (";
-            var n = vals.length-1;
-            for (var i = 0; i < n; i++) {
-                vals[i] = vals[i]+''
-                if (vals[i].match(/\(\)$/)) {
-                    sql += vals[i]+", "; 
-                }
-                else if (typeof(vals[i]) == 'string') {
-                    sql += "'"+vals[i]+"', ";
-                }
-                else {
-                   sql += vals[i]+", "; 
-                }
-            }
-            vals[i] = vals[i]+''
-            if (vals[i].match(/\(\)$/)) {
-                sql += vals[i]+") "; 
-            }
-            else if (typeof(vals[i]) == 'string') {
-                sql += "'"+vals[i]+"') ";
-            }
-            else {
-                sql += vals[i]+") "; 
-            }
-        }
+    var sql = '';
+    var valid = false;
+    var args = {
+        'cmd'   : false,
+        'table' : false,
+        'cols'  : false,
+        'vals'  : false,
+        'where' : false
     }
-//
-    else if (cmd == "SELECT") {
-        if (cols[0] == '') {
-            sql = "SELECT * FROM `"+table+"` ";
-        }
-        else {
-            sql = "SELECT ";
-            var n = cols.length-1;
-            for (var i = 0; i < n; i++) {
-                sql += "`"+cols[i]+"`, ";
-            }
-            sql += "`"+cols[n]+"` FROM `"+table+"` ";
-        }
-        if (where[0] != '') {
-            sql += "WHERE `"+where[0][0]+"` "+where[0][1]+" '"+where[0][2]+"' ";
-            var n = where.length;
-            for (var i = 1; i < n; i++) {
-                sql += "AND `"+where[i][0]+"` "+where[i][1]+" '"+where[i][2]+"' ";
-            }
-        }
+    //
+    // updating default args with input args
+    for (var prop in input_args) {
+        args[prop] = input_args[prop]
+        if (Array.isArray(args[prop])) { if (args[prop].length == 0) { args[prop] = false;}}
     }
-//
-    else if (cmd == "UPDATE") {
-        if ((cols[0] == '') || (vals[0] == '')) {
-            console.log("No columns and/or values provided for UPDATE command")
-            return;
-        }
-        else {
-            sql = "UPDATE `"+table+"` SET ";
-            var n = cols.length - 1;    
-            for (var i = 0; i < n; i++) {
-                vals[i] = vals[i]+''
-                if (vals[i].match(/\(\)$/)) {sql += "`"+cols[i]+"` = "+vals[i]+", ";}
-                else if (typeof(vals[i]) == 'string') {sql += "`"+cols[i]+"` = '"+vals[i]+"', ";}
-                else {sql += "`"+cols[i]+"` = "+vals[i]+", ";}
-            }
-            vals[i] = vals[i]+''
-            if (vals[i].match(/\(\)$/)) {sql += "`"+cols[i]+"` = "+vals[i]+" ";}
-            else if (typeof(vals[i]) == 'string') {sql += "`"+cols[i]+"` = '"+vals[i]+"' ";}
-            else {sql += "`"+cols[i]+"` = "+vals[i]+" ";}
-        }
-        if (where[0] == '') {
-            console.log("No where array passed to gen_sql function for UPDATE command.")
-            return;
-        }
-        else {
-            sql += "WHERE `"+where[0][0]+"` "+where[0][1]+" '"+where[0][2]+"' ";
-            var n = where.length;
-            for (var i = 1; i < n; i++) {
-                sql += "AND `"+where[i][0]+"` "+where[i][1]+" '"+where[i][2]+"' ";
-            }
-        }
+    //
+    // checking for primary required arguments
+    if (!(args.cmd)) { console.log("Function gen_sql requires a command to be provided"); return;}
+    if (!(args.table)) { console.log("Function gen_sql requires a table to be provided"); return;}
+    //
+    // checking command specific arguments
+    if (args.cmd == 'SELECT') {
+        valid = true;
+        if (!(args.cols))  {args.cols = ['*'];}
+        sql = 'SELECT ';
     }
-//
-    else if (cmd == "DELETE") {
-        sql = "DELETE FROM `"+table+"` ";
-        if (where[0] == '') {
-            console.log("No where array passed to the gen_sql function for the DELETE command");
-            return;
-        }
-        else {
-            sql += "WHERE `"+where[0][0]+"` "+where[0][1]+" '"+where[0][2]+"' ";
-            var n = where.length;
-            for (var i = 1; i < n; i++) {
-                sql += "AND `"+where[i][0]+"` "+where[i][1]+" '"+where[i][2]+"' ";
-            }
-        }
+    else if (args.cmd == 'INSERT') {
+        valid = true;
+        if (!(args.cols))  { console.log("No columns provided for INSERT command."); valid = false;}
+        if (!(args.vals))  { console.log("No values provided for the INSERT command."); valid = false;} 
+        sql = 'INSERT INTO `'+args.table+'`';       
+    }  
+    else if (args.cmd == 'UPDATE') {
+        valid = true;
+        if (!(args.cols))  { console.log("No columns provided for UPDATE command."); valid = false;}
+        if (!(args.vals))  { console.log("No values provided for the UPDATE command."); valid = false;}
+        if (!(args.where)) { console.log("No where array provided for the UPDATE command."); valid = false;}
+        sql = 'UPDATE `'+args.table+'` SET ';       
+    }  
+    else if (args.cmd == 'DELETE') {
+        valid = true;
+        if (!(args.where)) { console.log("No where array provided for the DELETE command."); valid = false;}
+        sql = 'DELETE FROM `'+args.table+'` '
     }
-//
     else {
-        console.log("Invalid command supplied: "+cmd);
-        return;
+        console.log('Invalid command provided for gen SQL function: '+args.cmd);
+    }
+    if (valid == false) { return;}
+    //
+    // modifying values to fit commands 
+    for (var i = 0; i < args.cols.length; i++) {
+        if (args.cols[i] == '*') { continue;}
+        if (args.cols[i].match(/\./)) { continue;}
+        args.cols[i] = '`'+args.cols[i]+'`';
+    }
+    for (var i = 0; i < args.vals.length; i++) {
+        if (typeof(args.vals[i]) == 'string') {args.vals[i] = "'"+args.vals[i]+"'";}
+    }
+    if (args.where) {
+        for (var i = 0; i < args.where.length; i++) {
+          if (!(args.where[i][0].match(/\./))) {
+              args.where[i][0] = '`'+args.where[i][0]+'`';
+          }
+          args.where[i][2] = "'"+args.where[i][2]+"'";
+        }
+    }
+    if (args.cmd == 'UPDATE') {
+        for (var i = 0; i < args.cols.length; i++) {
+            args.cols[i] = args.cols[i]+'='+args.vals[i];
+        }
+        args.vals = false;
     }
     //
-    // handling order by clauses
-    if (arg_object.orderBy) {
-        sql += ' ORDER BY `'+arg_object.orderBy[0][0]+'` '+arg_object.orderBy[0][1]
-        for (var i = 1; i < arg_object.orderBy.length; i++) {
-            sql += ', `'+arg_object.orderBy[i][0]+'` '+arg_object.orderBy[i][1];
+    // adding cols and vals to sql statements
+    if (args.cmd == 'INSERT') {sql += '(';}
+    if (args.cols) { sql += args.cols.join(',');}
+    if (args.cmd == 'INSERT') {
+        sql += ') VALUES('+args.vals.join(',')+')';
+    }
+    if (args.cmd == 'SELECT') { sql += ' FROM `'+args.table+'` '}
+    //
+    // adding inner join logic
+    if (args.inner_join) {
+        for (var i = 0; i < args.inner_join.length; i++) {
+            sql += 'INNER JOIN '+args.inner_join[i][0]+' ON '+args.inner_join[i][1]+'='+args.inner_join[i][2]+' ';
         }
     }
     //
-    // checking if an additional string needs to be added
-    if (arg_object.addLogic) {
-        arg_object.addLogic = arg_object.addLogic.replace(';','');
-        sql += ' ' + arg_object.addLogic;
+    // adding where clause
+    if (args.where) {
+        sql += 'WHERE '+args.where[0].join(' ');
+        for (var i = 1; i < args.where.length; i++) {
+            sql += ' AND '+args.where[i].join(' ');
+        }
     }
     //
-    // adding in limit clause if it is available
-    if (arg_object.limit) {sql += ' LIMIT '+arg_object.limit.splice(0,2).join();}
+    // adding order by clauses
+    if (args.order_by) {
+        var col = args.order_by[0][0];
+        if (!(col.match(/\./))) { col = '`'+col+'`';}
+        sql += ' ORDER BY '+col+' '+args.order_by[0][1];
+        for (var i = 1; i < args.order_by.length; i++) {
+            col = args.order_by[i][0];
+            if (!(col.match(/\./))) {col = '`'+col+'`';}
+            sql += ', '+col+' '+args.order_by[i][1];
+        }
+    }
     //
-    return(sql);
+    // adding in group by clause
+    if (args.group_by) { sql += 'GROUP BY '+args.group_by;}
+    //
+    // adding in limit clause 
+    if (args.limit) { sql += ' LIMIT '+args.limit.splice(0,2).join();}
+    //
+    return(sql)
 }
 //
 // performs a sql command on the database with no data return 
@@ -599,57 +556,10 @@ function ajax_mulit_exec(sql_arr,callback_fun) {
     xmlhttp.send("async_exec_multiple=true&sql_statements="+encodeURIComponent(sql_arr.join(';')));
 }
 //
-// performs a sql command on the database with a data return 
-// also returns col meta data if a sql statment is provided
-function ajax_fetch_db(sql,meta_sql,callback_fun) {
-    console.log(sql); 
-    //
-    if (window.XMLHttpRequest) {
-        // code for IE7+, Firefox, Chrome, Opera, Safari
-        var xmlhttp = new XMLHttpRequest();
-    }
-    else {
-        // code for IE6, IE5
-        var xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    //
-    // executing async function
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            //
-            // parsing JSON with error handling
-            try {
-                var response = JSON.parse(xmlhttp.responseText);
-            }
-            catch(err) {
-                var error = err;
-                console.log(error);
-                console.log(xmlhttp.responseText);
-                alert("Error parsing JSON data check console.");
-            }
-            //
-            // executing callback function
-            if (callback_fun == "") {
-                console.log("Error - No callback function provided.");
-            }
-            else {
-                callback_fun(response);
-            }
-        }
-    }
-    xmlhttp.open("POST", "async_php_functions.php", true);
-    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.send("async_fetch_db=true&sql="+encodeURIComponent(sql)+"&meta_sql="+encodeURIComponent(meta_sql));
-}
-//
-// this is going to replace the current ajax fetch
-function ajax_multi_fetch(sql_arr,name_arr,callback_fun) {
+// function allowing for the return of multiple sql requests
+function ajax_fetch(sql_arr,name_arr,callback_fun) {
     //
     // processing arguments
-    var post_str = 'async_fetch_multiple=true';
-    if (sql_arr.length > 0) { post_str += '&sql_statements='+sql_arr.join(';');}
-    else { console.log('Error - No SQL statements provided.'); return;}
-    if (name_arr.length > 0) { post_str += '&return_names='+encodeURIComponent(name_arr.join(';'));}
     if (typeof callback_fun != 'function') {
         console.log("Error - No callback function provided.");
         return;
@@ -696,7 +606,7 @@ function ajax_multi_fetch(sql_arr,name_arr,callback_fun) {
     }
     xmlhttp.open("POST", "async_php_functions.php", true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.send("async_fetch_multiple=true&sql_statements="+encodeURIComponent(sql_arr.join(';'))+"&return_names="+name_arr.join(';'));
+    xmlhttp.send("async_fetch=true&sql_statements="+encodeURIComponent(sql_arr.join(';'))+"&return_names="+name_arr.join(';'));
 }
 //
 // this executes a non-returning ajax call
