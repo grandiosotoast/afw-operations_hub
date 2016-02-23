@@ -288,7 +288,6 @@ function create_page_links(input_args) {
         args[arg] = input_args[arg]+'' //converting to string to ensure .match method always exists
         if (args[arg].match(/^-?\d+$/)) {args[arg] = Number(args[arg]);}
     }
-    console.log(args);
     //
     var num_pages = Math.ceil(args.data_length/args.num_per_page);
     var num_left  = Math.floor((args.tot_pages_shown - 1)/2);

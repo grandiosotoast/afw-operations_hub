@@ -1739,7 +1739,6 @@ function gen_suggestions_table(session_data) {
     var status = '.+'    
     //
     // checking if the sugesstion link was clicked 
-    console.log(session_data)
     if (!(session_data.hasOwnProperty('gen_suggestions'))) { return;}
     if (session_data.hasOwnProperty('status')) { status = session_data['status'];}
     //
@@ -1764,7 +1763,6 @@ function gen_suggestions_table(session_data) {
     // creating function to execute on every mutation record
     function check_mutation(record) {
         //
-        console.log(record.addedNodes);
         var node_list = record.addedNodes;
         var table_select = false;
         for (var i = 0; i < node_list.length; i++) {

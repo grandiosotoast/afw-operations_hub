@@ -696,8 +696,7 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
     var error_dates = [];
     var supervisor_id = CONSTANTS.SHIPPING_SUPERVISOR_ID;
     var total_cases = 0;
-    var crew_cases = 0;
-    var crew_hours = 0;
+    var total_hours = 0;
     var case_bonus = 0.005;
     var total_bonus = 0.0;
     var bonus_per_entry = 0.0;
@@ -729,8 +728,7 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
             // resetting weekly totals
             supervisor_entries = [];
             error_dates = [];
-            crew_cases = 0;
-            crew_hours = 0;
+            total_hours = 0;
             total_cases = 0;
             total_bonus = 0.0;
             bonus_per_entry = 0.0;
@@ -741,12 +739,9 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
             supervisor_entries.push(i);
             if (data_arr[i]['attendance_error'] != 'none') { error_dates.push(data_arr[i]['date']);}
         }
-        else {
-            crew_cases += Number(data_arr[i]['num_cases']);
-            crew_hours += Number(data_arr[i]['prod_time']);
-        }
-        if (data_arr[i]['error_code'] != '0') { error_dates.push(data_arr[i]['date']);}
         total_cases += Number(data_arr[i]['num_cases']);
+        total_hours += Number(data_arr[i]['prod_time']);
+        if (data_arr[i]['error_code'] != '0') { error_dates.push(data_arr[i]['date']);}
     }
     outputIncentive()
     //
@@ -754,7 +749,7 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
     function outputIncentive() {
         //
         total_bonus = ceiling(case_bonus * total_cases,2);
-        if (crew_cases/crew_hours < 100) { total_bonus = 0.0;}
+        if (total_cases/total_hours < 100) { total_bonus = 0.0;}
         if (!(isFinite(total_bonus))) { total_bonus = 0.0;}
         //
         // putting smiths bonus in the incentive field
