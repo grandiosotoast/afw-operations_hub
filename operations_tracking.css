@@ -60,12 +60,6 @@
     float: right;
     right: 20%;
 }
-.edit_link {
-    color: rgb(0,0,235);    
-}
-.edit_link:hover {
-    text-decoration: underline;
-}
 .default-table {
     margin: auto;
     border: 0px solid rgb(0,0,0);
@@ -170,6 +164,30 @@ input[type="text"]:read-only {
   display: inline-block;
   width: 12em;
   vertical-align: top;
+}
+.link-blue {
+    color: rgb(0,0,235);    
+}
+.link-blue:hover {
+    text-decoration: underline;
+}
+.link-green {
+    color: rgb(0,135,0);    
+}
+.link-green:hover {
+    text-decoration: underline;
+}
+.link-orange {
+    color: rgb(235,135,35);    
+}
+.link-orange:hover {
+    text-decoration: underline;
+}
+.link-red {
+    color: rgb(235,35,0);    
+}
+.link-red:hover {
+    text-decoration: underline;
 }
 .main-container {
     width: 100%;

@@ -169,8 +169,10 @@ function create_production_report(parent_form_id,report_div_id,department,emp_id
     // getting all form information
     var name_val_obj = get_all_form_values(parent_form_id,'');
     var ts_obj = to_and_from_timestamps();
-    var from_ts = ts_obj.from_ts;
-    var to_ts = ts_obj.to_ts;
+    var data_range = [
+        find_pay_period(ts_obj.from_ts)[0],
+        find_pay_period(ts_obj.to_ts)[1]
+    ]
     //
     // processing data selection table
     var sel_cols = false;
@@ -220,6 +222,15 @@ function create_production_report(parent_form_id,report_div_id,department,emp_id
     report_args.emp_id = emp_id;
     report_args.from_ts = ts_obj.from_ts;
     report_args.to_ts = ts_obj.to_ts;
+    report_args.data_sql_args = {
+        'where' : [['date','BETWEEN',data_range[0]+"' AND '"+data_range[1]],['entry_status','LIKE','submitted']]
+    }    
+    var id_mtype = 'contains';
+    if (emp_id) { id_mtype = 'exact';}
+    report_args.display_params = {
+        'emp_id' : {'value' : emp_id, 'data_type' : 'string', 'match_type' : id_mtype},
+        'date' : {'value' : [ts_obj.from_ts.split(' ')[0],ts_obj.to_ts.split(' ')[0]], 'data_type' : 'date', 'match_type' : 'between'}
+    }
     // setting section total id formats
     if ((report_args.prime_sort == 'emp_id') || (report_args.prime_sort == 'emp_last_name')) {
         report_args.total_id_format_str = 'section-total-%emp_id%';
@@ -281,14 +292,14 @@ function make_data_sql(report_args) {
     //
     // setting data sql arguments 
     var sql_args = {};
+    for (var arg in report_args.data_sql_args) { sql_args[arg] = report_args.data_sql_args[arg];}
+    if (!(sql_args.where instanceof Array)) { sql_args.where = [];}
     sql_args.cmd = 'SELECT';
     sql_args.table = 'employee_data';
     if (report_args.dept_table != 'none') { 
         sql_args.inner_join = [[report_args.dept_table,'employee_data.entry_id',report_args.dept_table+'.entry_id']]
     }
-    sql_args.where = [['date','BETWEEN',report_args.from_ts+"' AND '"+report_args.to_ts],['entry_status','LIKE','submitted']];
     sql_args.where.push(['department','LIKE',report_args.department]);
-    if (report_args.emp_id != '') {sql_args.where.push(['emp_id','LIKE',report_args.emp_id]);}
     if (preset_data.preset_where != 'null') {
         //
         // parsing where JSON with error handling
@@ -496,7 +507,16 @@ function make_report(report_args) {
     row_args.sect_cols = sect_cols;
     //
     // creating the report body
-    for (var i = 0; i < data_arr.length; i++) {
+    var i = 0;
+    while (i < data_arr.length) {
+        //
+        // testing is data row should be displayed
+        var display = check_display(data_arr[i],report_args['display_params'])
+        if (!(display)) {
+            data_arr.splice(i,1);
+            continue;
+        }
+        
         //
         // testing for new section
         if (data_arr[i][prime_sort].toLowerCase() != sect_head_args.prev_sect) {
@@ -531,6 +551,8 @@ function make_report(report_args) {
         row = make_report_data_tr(row_args,totals_obj);
         if (summary) {row = '';}
         table += row;
+        //
+        i++
     }
     if (!(no_totals)) {
         //
@@ -582,6 +604,46 @@ function make_report(report_args) {
         col_funct(col.column_name,report_args);
     } 
     console.log(report_args);
+}
+//
+// this checks if a row should be displayed based on the reports display params
+function check_display(data_row,display_params) { 
+    var display = true;
+    if (!(display_params)) { return display;}
+    //
+    for (var col in display_params) {
+        var value = display_params[col]['value'];
+        var dtype = display_params[col]['data_type'];
+        var mtype = display_params[col]['match_type'];
+        //
+        if (dtype == 'string') {
+            if (mtype == 'contains') {
+                if (!(data_row[col].match(value))) { display = false;}    
+            }
+            else if (mtype == 'exact') {
+                if (!(data_row[col].match('^'+value+'$'))) { display = false;}    
+            }
+            else {
+                console.log('Unknown match type: '+mtype);
+            }
+        }
+        else if (dtype == 'date') {
+            if (mtype == 'between') {
+                var st_date = new Date(value[0].split('-')[0],Number(value[0].split('-')[1])-1,value[0].split('-')[2]);
+                var en_date = new Date(value[1].split('-')[0],Number(value[1].split('-')[1])-1,value[1].split('-')[2]);
+                var date = new Date(data_row[col].split('-')[0],Number(data_row[col].split('-')[1])-1,data_row[col].split('-')[2]);
+                if (!((date >= st_date) && (date <= en_date))) { display = false;}    
+            }
+            else {
+                console.log('Unknown match type: '+mtype);
+            }
+        }
+        else {
+            console.log('Unknown data type: '+dtype);
+        }
+    }
+    //
+    return display;
 }
 //
 // this creates the section header for the report
@@ -645,7 +707,7 @@ function make_report_data_tr(row_args,totals_obj) {
         //
         var td = '';
         var innerHTML = data_entry[col];
-        if ((col == 'comments') && (data_entry[col] != '')) { innerHTML = '<span id="comments-'+data_entry.entry_id+'" class="edit_link" onclick="toggle_innerHTML(this.id,\'C\',\''+data_entry[col]+'\');">C</span>'} 
+        if ((col == 'comments') && (data_entry[col] != '')) { innerHTML = '<span id="comments-'+data_entry.entry_id+'" class="link-blue" onclick="toggle_innerHTML(this.id,\'C\',\''+data_entry[col]+'\');">C</span>'} 
         else if (col_meta_data[i].data_type.match(/float/)) { innerHTML = round(Number(data_entry[col]),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);}
         else if (col_meta_data[i].data_type.match(/int/))   { innerHTML = round(Number(data_entry[col]),0).toFixed(0);} 
         td = '<td id="data-entry-'+data_entry.entry_id+'-'+col+'" class="report-data-td">'+innerHTML+'</td>';

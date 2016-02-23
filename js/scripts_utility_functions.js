@@ -141,7 +141,6 @@ function get_option_text(select_id,out_id) {
 //
 // goes to a php page provided the root name of the page
 function goto_link(id) {
-    
     if (id == 'super admin') {id = 'administration'}
     var url = id+'.php';
     location.href = url;
@@ -324,8 +323,14 @@ function print_page(printableArea) {
 }
 //
 // storing data in session variable to be used on different pages 
-function store_session(key_val_str) {
-    
+function store_session(key_val_obj) {
+    //
+    var key_val_array = [];
+    for (var key in key_val_obj) {
+        key_val_array.push(key,key_val_obj[key]);
+    }
+    var key_val_str = key_val_array.join(',');
+    //
     var post_str = "store_session=true&key_val_str="+key_val_str;
     if (window.XMLHttpRequest) {
     // code for IE7+, Firefox, Chrome, Opera, Safari
@@ -436,7 +441,8 @@ function gen_sql(input_args) {
         args.cols[i] = '`'+args.cols[i]+'`';
     }
     for (var i = 0; i < args.vals.length; i++) {
-        if (typeof(args.vals[i]) == 'string') {args.vals[i] = "'"+args.vals[i]+"'";}
+        if (args.vals[i].match(/\(.*?\)/)) {}
+        else if (typeof(args.vals[i]) == 'string') {args.vals[i] = "'"+args.vals[i]+"'";}
     }
     if (args.where) {
         for (var i = 0; i < args.where.length; i++) {

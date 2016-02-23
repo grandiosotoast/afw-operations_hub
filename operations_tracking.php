@@ -44,7 +44,6 @@ $page_perms = array(
 //
 function link_external_files() {
     echo '<link rel="stylesheet" type="text/css" encoding="utf-8" href="operations_tracking.css">';
-    //echo '<script src="js/jquery-2.1.3.js"></script>';
     echo '<script src="js/scripts_utility_functions.js"></script>';
     echo '<script src="js/scripts_driver_functions.js"></script>';
     echo '<script src="js/scripts_form_validation.js"></script>';
@@ -70,7 +69,7 @@ function page_head() {
 }
 
 function check_login($page_root) {
-    global $page_perms, $forbidden_str;
+    global $page_perms,$forbidden_str,$server,$database,$username,$password;
     // Getting user and password variables
     if (isset($_SESSION["username"]) and isset($_SESSION["password"])) {
         echo "<span id=\"welcome-line\" class=\"welcome-line\">";
@@ -78,6 +77,31 @@ function check_login($page_root) {
         echo "Welcome {$_SESSION["dbuser_first_name"]} {$_SESSION["dbuser_last_name"]}!";
         echo "&nbsp;&nbsp;&nbsp;";
         echo "<input id=\"logout-button\" type=\"button\" value=\"Logout\" onclick=\"sub_form('logout')\"></span>";
+        echo "<br>";
+        //
+        if (($page_root == 'administration') and (check_perms($_SESSION["permissions"],$page_perms["table_maintenance"]))) {
+            //
+            $sql = "SELECT count(*) FROM `suggestions` WHERE `suggestion_status` LIKE 'unread'";
+            $num_unread = fetch_db($server,$database,$username,$password,$sql);
+            $sql = "SELECT count(*) FROM `suggestions` WHERE `suggestion_status` LIKE 'flagged'";
+            $num_flagged = fetch_db($server,$database,$username,$password,$sql);
+            $num_unread = $num_unread[0]['count(*)'];
+            $num_flagged = $num_flagged[0]['count(*)'];
+            $flag_class = "link-orange";
+            $unread_class = "link-red";
+            if ($num_flagged == 0) { $flag_class = "link-green";}
+            if ($num_unread  == 0) { $unread_class = "link-green";}
+            //
+            echo '<span id="admin-messages" class="welcome-line">';
+            echo '<label class="label-bold" style="text-align:left; width: 6em;">Suggestions:</label>';
+            echo "<a class=\"{$flag_class}\" onclick=\"view_suggestions('flagged');\">{$num_flagged} Flagged</a>&nbsp;&nbsp;&nbsp;&nbsp;";
+            echo "<a class=\"{$unread_class}\" onclick=\"view_suggestions('unread');\">{$num_unread} Unread</a>&nbsp;&nbsp;&nbsp;&nbsp;";
+            echo '</span>';
+        }
+        //
+        echo '<span id="suggestion-line" class="welcome-line">';
+        echo '<a class="link-blue" onclick="enter_suggestion();">Leave a Suggestion!</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+        echo '</span>';
     }
     else {
         echo "<script> document.getElementById(\"invalid_login\").submit();</script>";

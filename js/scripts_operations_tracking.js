@@ -178,227 +178,234 @@ function create_standard_table(table_args) {
 }
 //
 // makes the employee table itself
-function make_standard_table(table_args) {   
+function make_standard_table(input_args) {   
     //
     // initializations
-    var output = '';
-    var table_row_appended_cells = '';
-    var row_onclick = '';
-    var row_onmouseenter = '';
-    var row_onmouseleave = '';
-    var page_nav_args = {};
+    var table = '';
+    var args = {
+        no_page_nav : false,
+        table_id : 'standard-data-table',
+        table_class : 'default-table',
+        table_data_cell_class : 'default-table-td',
+        table_row_appended_cells : '',
+        row_id_prefix : '',
+        row_onclick : '',
+        row_onmouseenter : '',
+        row_onmouseleave : '',
+    }
     var head_row_args = {};
+    var page_nav_args = {};
+    var data_arr = [];
+    var col_meta_data = [];
     //
     // putting arguments into variables 
-    var data_arr = table_args.data_arr;
-    var col_meta_data = table_args.col_meta_data;
-    var head_row_args = table_args.head_row_args;
-    var page_nav_args = table_args.page_nav_args;
-    page_nav_args.data_length = data_arr.length
+    data_arr = input_args.data_arr;
+    col_meta_data = input_args.col_meta_data;
+    head_row_args = input_args.head_row_args;
+    page_nav_args = input_args.page_nav_args;
+    page_nav_args.data_length = data_arr.length    
     //
-    // putting standard argument properities into variables 
-    if (table_args.hasOwnProperty('table_row_appended_cells')) { table_row_appended_cells = table_args.table_row_appended_cells;}
-    if (table_args.hasOwnProperty('row_onclick')) { row_onclick = table_args.row_onclick;}
-    if (table_args.hasOwnProperty('row_onmouseenter')) { row_onmouseenter = table_args.row_onmouseenter;}
-    if (table_args.hasOwnProperty('row_onmouseleave')) { row_onmouseleave = table_args.row_onmouseleave;}
+    // putting table arguments properities into defaults variable
+    for (var arg in input_args) {
+        args[arg] = input_args[arg];
+    }
     //
     // calculating number of pages and what to display
     var page = page_nav_args.curr_page;
     var start_index = 0;
     var end_index = data_arr.length; 
-    if (!(table_args.no_page_nav)) {
+    if (!(args.no_page_nav)) {
         start_index = (page - 1)*page_nav_args.num_per_page;
         end_index = page * page_nav_args.num_per_page; 
         if (end_index > data_arr.length) {end_index = data_arr.length;};
         //
         var page_nav = create_page_links(page_nav_args);
-        output += page_nav;
+        table += page_nav;
     }
     //
-    output += '<table id="'+table_args.table_id+'" class="'+table_args.table_class+'">';
+    table += '<table id="'+args.table_id+'" class="'+args.table_class+'">';
     //
     // creating column head rows 
     var head = make_head_rows(col_meta_data,head_row_args)    
-    output += head;
+    table += head;
     //
     // populating row data  
     for (var i = start_index; i < end_index; i++) {
-        var row_id = table_args.row_id_prefix+i;
+        data_arr[i]['row_id'] =  args.row_id_prefix+i;
         var td_str = '';
-        var this_table_row_appended_cells = table_row_appended_cells.replace(/%row_id%/g,row_id); 
-        var this_row_onclick = row_onclick.replace(/%row_id%/g,row_id);
-        var this_row_onmouseenter = row_onmouseenter.replace(/%row_id%/g,row_id);
-        var this_row_onmouseleave = row_onmouseleave.replace(/%row_id%/g,row_id);
+        var this_table_row_appended_cells = args.table_row_appended_cells; 
+        var this_row_onclick = args.row_onclick;
+        var this_row_onmouseenter = args.row_onmouseenter;
+        var this_row_onmouseleave = args.row_onmouseleave;
         for (var prop in data_arr[i]) {
             var pat = new RegExp('%'+prop+'%','g');
             this_row_onclick = this_row_onclick.replace(pat,data_arr[i][prop]);
+            this_row_onmouseenter = this_row_onmouseenter.replace(pat,data_arr[i][prop]);
+            this_row_onmouseleave = this_row_onmouseleave.replace(pat,data_arr[i][prop]);
             this_table_row_appended_cells = this_table_row_appended_cells.replace(pat,data_arr[i][prop]);
         }
-        var table_row = '<tr id="'+row_id+'" onmouseenter="'+this_row_onmouseenter+'" onmouseleave="'+this_row_onmouseleave+'" onclick="'+this_row_onclick+'">';
+        var table_row = '<tr id="'+data_arr[i]['row_id']+'" onmouseenter="'+this_row_onmouseenter+'" onmouseleave="'+this_row_onmouseleave+'" onclick="'+this_row_onclick+'">';
         // creating table data cells
         for (var c = 0; c < col_meta_data.length; c++) {
             var innerHTML = data_arr[i][col_meta_data[c].column_name];
             if ((col_meta_data[c].data_type.match(/text/)) && (innerHTML.length > CONSTANTS.MAX_STR_LENGTH)) {
                 var td_onlick = "toggle_innerHTML(this.id,'"+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+"...','"+innerHTML+"');"
-                innerHTML = '<span id="'+col_meta_data[c].column_name+'-'+i+'" class="edit_link" onclick="'+td_onlick+'">'+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...</span>'
+                innerHTML = '<span id="'+col_meta_data[c].column_name+'-'+i+'" class="link-blue" onclick="'+td_onlick+'">'+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...</span>'
             }
-            td_str += '<td id = "'+row_id+'-'+col_meta_data[c].column_name+'" class="'+table_args.table_data_cell_class+'">'+innerHTML+'</td>';
+            td_str += '<td id = "'+data_arr[i]['row_id']+'-'+col_meta_data[c].column_name+'" class="'+args.table_data_cell_class+'">'+innerHTML+'</td>';
         }
         table_row += td_str+this_table_row_appended_cells;
         table_row += '</tr>';
-        output += table_row;
+        table += table_row;
     }
-    output += '</table>';
+    table += '</table>';
     //
-    return output;
+    return table;
 }
 //
 // creates page link line
-function create_page_links(page_nav_args) {
+function create_page_links(input_args) {
     //
     // defining presets
-    var curr_page = 1;
-    var num_per_page = 10;
-    var data_length = 10;
-    var num_pages = 1;
-    var tot_pages_shown = 1;
-    var page_nav_div_id = 'table-page-nav';
-    var page_nav_class = 'page_nav';
-    var id_prefix = '';
-    var class_str = '';
-    var onclick_str = '';
-    var onmouse_str = '';
+    var args = {
+        curr_page : 1,
+        num_per_page : 10,
+        data_length : 10,
+        tot_pages_shown : 1,
+        data_length : 0,
+        sort_col : '',
+        sort_dir : '',
+        page_nav_div_id : 'table-page-nav',
+        page_nav_class : 'page_nav',
+        id_prefix : '',
+        class_str : '',
+        onclick_str : '',
+        onmouse_str : ''
+    }
     //
     // processing the argument object
-    if (!!(page_nav_args.page_nav_div_id)) { page_nav_div_id = page_nav_args.page_nav_div_id;}
-    if (!!(page_nav_args.page_nav_class)) { page_nav_class = page_nav_args.page_nav_class;}
-    if (!!(page_nav_args.curr_page)) {curr_page = page_nav_args.curr_page;}
-    if (!!(page_nav_args.data_length)) {data_length = page_nav_args.data_length;}
-    if (!!(page_nav_args.num_per_page)) {num_per_page = Number(page_nav_args.num_per_page);}
-    if (!!(page_nav_args.tot_pages_shown)) {tot_pages_shown = page_nav_args.tot_pages_shown;}
-    if (!!(page_nav_args.id_prefix)) {id_prefix = page_nav_args.id_prefix;}
-    if (!!(page_nav_args.class_str)) {class_str = page_nav_args.class_str;}
-    if (!!(page_nav_args.onclick_str)) {onclick_str = page_nav_args.onclick_str;}
-    if (!!(page_nav_args.onmouse_str)) {onmouse_str = page_nav_args.onmouse_str;}
+    for (var arg in input_args) {
+        args[arg] = input_args[arg]+'' //converting to string to ensure .match method always exists
+        if (args[arg].match(/^-?\d+$/)) {args[arg] = Number(args[arg]);}
+    }
+    console.log(args);
     //
-    var num_pages = Math.ceil(data_length/num_per_page);
-    var num_left  = Math.floor((tot_pages_shown - 1)/2);
-    var curr_page = parseInt(curr_page);
+    var num_pages = Math.ceil(args.data_length/args.num_per_page);
+    var num_left  = Math.floor((args.tot_pages_shown - 1)/2);
     var page_arr = new Array();
     var page_str = '';
     var p_class_str,p_onclick_str,p_onmouse_str
-    var p = curr_page - num_left;
-    if ((num_pages - p) <= tot_pages_shown) {p = num_pages - tot_pages_shown + 1;}
-    if (num_pages <= tot_pages_shown) {p = 1;}
+    var p = args.curr_page - num_left;
+    if ((num_pages - p) <= args.tot_pages_shown) {p = num_pages - args.tot_pages_shown + 1;}
+    if (num_pages <= args.tot_pages_shown) {p = 1;}
     if (p <= 0) {p = 1;}
 
     //
-    for (var i = 0; i < tot_pages_shown; i++) {
+    for (var i = 0; i < args.tot_pages_shown; i++) {
         page_arr[i] = p;
         p += 1;
         if (p > num_pages) {break;}
     }
     //
-    if (curr_page != 1) {
-        p_class_str = class_str.replace('%%',curr_page-1)
-        p_onclick_str = onclick_str.replace('%%',curr_page-1)
-        p_onmouse_str = onmouse_str.replace('%%',curr_page-1)
-        page_str += '<a id="'+id_prefix+'-page-nav-pre" class="'+p_class_str+'" onclick="'+p_onclick_str+'" onmouseover="'+p_onmouse_str+'">&#10094;</a>';
+    if (args.curr_page != 1) {
+        p_class_str = args.class_str.replace('%%',args.curr_page-1)
+        p_onclick_str = args.onclick_str.replace('%%',args.curr_page-1)
+        p_onmouse_str = args.onmouse_str.replace('%%',args.curr_page-1)
+        page_str += '<a id="'+args.id_prefix+'-page-nav-pre" class="'+p_class_str+'" onclick="'+p_onclick_str+'" onmouseover="'+p_onmouse_str+'">&#10094;</a>';
     }
     for (var i = 0; i < page_arr.length; i++) {
-        p_class_str = class_str.replace('%%',page_arr[i])
-        if (page_arr[i] == curr_page) { p_class_str += ' page_nav_link_curr';}
-        p_onclick_str = onclick_str.replace('%%',page_arr[i])
-        p_onmouse_str = onmouse_str.replace('%%',page_arr[i])
-        page_str += '<a id="'+id_prefix+'-page-nav-'+page_arr[i]+'" class="'+p_class_str+'" onclick="'+p_onclick_str+'" onmouseover="'+p_onmouse_str+'">['+page_arr[i]+']</a>';
+        p_class_str = args.class_str.replace('%%',page_arr[i])
+        p_onclick_str = args.onclick_str.replace('%%',page_arr[i])
+        p_onmouse_str = args.onmouse_str.replace('%%',page_arr[i])
+        if (page_arr[i] == args.curr_page) { p_class_str += ' page_nav_link_curr';}
+        page_str += '<a id="'+args.id_prefix+'-page-nav-'+page_arr[i]+'" class="'+p_class_str+'" onclick="'+p_onclick_str+'" onmouseover="'+p_onmouse_str+'">['+page_arr[i]+']</a>';
     }
-    if (curr_page < num_pages) {
-        p_class_str = class_str.replace('%%',curr_page+1)
-        p_onclick_str = onclick_str.replace('%%',curr_page+1)
-        p_onmouse_str = onmouse_str.replace('%%',curr_page+1)
-        page_str += '<a id="'+id_prefix+'-page-nav-next" class="'+p_class_str+'" onclick="'+p_onclick_str+'" onmouseover="'+p_onmouse_str+'">&#10095;</a>';
+    if (args.curr_page < num_pages) {
+        p_class_str = args.class_str.replace('%%',args.curr_page+1)
+        p_onclick_str = args.onclick_str.replace('%%',args.curr_page+1)
+        p_onmouse_str = args.onmouse_str.replace('%%',args.curr_page+1)
+        page_str += '<a id="'+args.id_prefix+'-page-nav-next" class="'+p_class_str+'" onclick="'+p_onclick_str+'" onmouseover="'+p_onmouse_str+'">&#10095;</a>';
     }
     //
-   page_str = '<div id="'+page_nav_div_id+'" class="'+page_nav_class+'" data-curr-page="'+curr_page+'" data-sort-col="'+page_nav_args.sort_col+'" data-sort-dir="'+page_nav_args.sort_dir+'">Pages: '+page_str+'</div>';
+   page_str = '<div id="'+args.page_nav_div_id+'" class="'+args.page_nav_class+'" data-curr-page="'+args.curr_page+'" data-sort-col="'+args.sort_col+'" data-sort-dir="'+args.sort_dir+'">Pages: '+page_str+'</div>';
    return page_str;
 }
 //
 // creates the header rows for a table
-function make_head_rows(col_data,head_rows_props) { 
+function make_head_rows(col_data,input_args) { 
     //
     // variable initializations
     var col_meta_data = JSON.parse(JSON.stringify(col_data));
-    var row_id = 'table-header';
-    var id_prefix = '';
-    var class_str = 'default-table-header';
-    var leading_cells = '';
-    var sortable = true;
-    var sort_col = '';
-    var sort_dir = '';
-    var sort_onclick_str = '';
-    var header_tooltip = false;
-    var skip_cols = [];
+    var args = {
+        row_id : 'table-header',
+        id_prefix : '',
+        class_str : 'default-table-header',
+        leading_cells : '',
+        tooltip : '',
+        skip_cols : [],
+        sortable : true,
+        sort_col : '',
+        sort_dir : '',
+        asc_arrow  : '&#x25BC;',
+        desc_arrow : '&#x25B2;',
+        cell_onclick_str : '',
+        sort_onclick_str : ''
+    };
     //
-    // checking head row args for additional generation parameters
-    if (head_rows_props.hasOwnProperty('id_prefix')) { id_prefix = head_rows_props.id_prefix;}
-    if (head_rows_props.hasOwnProperty('class_str')) { class_str = head_rows_props.class_str;}
-    if (head_rows_props.hasOwnProperty('leading_cells'))    { leading_cells = head_rows_props.leading_cells;}
-    if (head_rows_props.hasOwnProperty('header_tooltip'))   {header_tooltip = head_rows_props.header_tooltip;}
-    if (head_rows_props.hasOwnProperty('sort_onclick_str')) { sort_onclick_str = head_rows_props.sort_onclick_str;}
-    if (head_rows_props.hasOwnProperty('skip_cols')) {skip_cols = head_rows_props.skip_cols;}
-    if (head_rows_props.hasOwnProperty('sortable'))  {sortable = head_rows_props.sortable;}    
-    if (head_rows_props.hasOwnProperty('sort_col'))  {sort_col = head_rows_props.sort_col;}
-    if (head_rows_props.hasOwnProperty('sort_dir'))  {sort_dir = head_rows_props.sort_dir;}
+    // checking input args for generation parameters
+    for (var arg in input_args) {
+        args[arg] = input_args[arg];
+        if (typeof args[arg] == 'string') { args[arg] = args[arg].replace(/%%/g,'1');}
+    }
+    //
+    // modifying args if table is not sortable
+    if (!(args.sortable)) {
+        args.sort_onclick_str = '';
+        args.asc_arrow  = '';
+        args.desc_arrow = '';
+    }
     //
     // parsing array for dynamic totals and skip cols
     for (var i = 0; i < col_meta_data.length; i++) {
-        if (skip_cols.indexOf(col_meta_data[i].column_name) >=0) {col_meta_data.splice(i,1); continue;}
+        if (args.skip_cols.indexOf(col_meta_data[i].column_name) >=0) {col_meta_data.splice(i,1); continue;}
     }
     //
-    // setting sorting properties for each column
-    if (sortable) {
-        // replacing page field
-        sort_onclick_str = sort_onclick_str.replace(/%%/g,'1');
-        //
-        // initalizing the sort direction, sort_onlick and arrow for columns 
-        for (var i = 0; i < col_meta_data.length; i++) {
-            col_meta_data[i].arrow = "&#x25BC;";
-            col_meta_data[i].sort_dir = "ASC";
-            col_meta_data[i].sort_onclick = sort_onclick_str;
-            if ((sort_col == col_meta_data[i].column_name) && (sort_dir == 'ASC')) {
-                col_meta_data[i].arrow = "&#x25B2;";
-                col_meta_data[i].sort_dir = "DESC";
-            }
-            // stepping through properties of object to sub into the sort_onclick_str
-            for (var prop in col_meta_data[i]) {
-                col_meta_data[i].sort_onclick = col_meta_data[i].sort_onclick.replace("%"+prop+"%",col_meta_data[i][prop]);
-            }
+    // adding data to column objects
+    for (var i = 0; i < col_meta_data.length; i++) {
+        col_meta_data[i].arrow = args.asc_arrow;
+        col_meta_data[i].sort_dir = 'ASC';
+        col_meta_data[i].sort_onclick = args.sort_onclick_str;
+        col_meta_data[i].cell_onclick = args.cell_onclick_str;
+        col_meta_data[i].tooltip = args.tooltip;
+        if ((args.sort_col == col_meta_data[i].column_name) && (args.sort_dir == 'ASC')) {
+            col_meta_data[i].arrow = args.desc_arrow;
+            col_meta_data[i].sort_dir = 'DESC';
         }
-    }
-    else {
-        //
-        // setting sorting values to an empty string
-        for (var i = 0; i < col_meta_data.length; i++) {
-            col_meta_data[i].arrow = '';
-            col_meta_data[i].sort_dir = '';
-            col_meta_data[i].sort_onclick = '';
+        // stepping through properties of object to sub into values
+        for (var prop in col_meta_data[i]) {
+            col_meta_data[i].cell_onclick = col_meta_data[i].cell_onclick.replace("%"+prop+"%",col_meta_data[i][prop]);
+            col_meta_data[i].sort_onclick = col_meta_data[i].sort_onclick.replace("%"+prop+"%",col_meta_data[i][prop]);
+            col_meta_data[i].tooltip = col_meta_data[i].tooltip.replace("%"+prop+"%",col_meta_data[i][prop]);
         }
+        // adding sort onclick to the arrow
+        col_meta_data[i].arrow = '<span onclick="'+col_meta_data[i].sort_onclick+'">'+col_meta_data[i].arrow+'</span>';
     }
     //
     // processing data array to check for shared columns 
     var num_rows = 1;
     for (var i = 0; i < col_meta_data.length; i++) {
         var n = 0;
-        if (!!(col_meta_data[i].column_nickname.match(/-/g))) {
+        if (col_meta_data[i].column_nickname.match(/-/g)) {
             var col_nick = col_meta_data[i].column_nickname;  
             n = 1 + col_nick.match(/-/g).length
         }
         if (n > num_rows) {num_rows = n}
     }
+    //
     // initializing header rows and adding spacing cell
     var head_tr = [];
     for (var i = 0; i < num_rows; i++) {
-        head_tr[i] = '<tr id="'+row_id+'">'+leading_cells;
+        head_tr[i] = '<tr id="'+args.row_id+'">'+args.leading_cells;
     }
     //
     // creating the output cells array
@@ -408,7 +415,7 @@ function make_head_rows(col_data,head_rows_props) {
         var row_cells = [];
         var cell = 0;
         for (var i = 0; i < col_meta_data.length; i++) {
-            if (skip_cols.indexOf(col_meta_data[i].column_name) >=0) {continue;}
+            if (args.skip_cols.indexOf(col_meta_data[i].column_name) >=0) {continue;}
             var col_obj = JSON.parse(JSON.stringify(col_meta_data[i])); //prevents mutation of object in future loops
             var col_name_arr = col_obj.column_nickname.split(/-/g);
             if (lvl >= col_name_arr.length) {continue;} //skips cells that don't have this low of a teir
@@ -418,7 +425,9 @@ function make_head_rows(col_data,head_rows_props) {
             }
             else {
                 col_obj.rowspan = 1;
+                col_obj.cell_onclick = '';
                 col_obj.sort_onclick = '';
+                col_obj.tooltip = '';
                 col_obj.arrow = '';
             }
             // initializing colspan
@@ -427,7 +436,7 @@ function make_head_rows(col_data,head_rows_props) {
             col_obj.id = col_name_arr.slice(0,lvl+1).join('-');
             col_obj.id = col_obj.id.replace(/\s+/g,'_');
             //
-            // adding object to row for current teir
+            // adding object to row for current tier
             row_cells[cell] = col_obj;
             cell += 1;
         }
@@ -447,12 +456,12 @@ function make_head_rows(col_data,head_rows_props) {
                 var col_arr = output_cells[lvl][col].column_nickname.split('-');
                 var cmpr_arr = output_cells[lvl][cmpr].column_nickname.split('-');
                 for (var l = 0; l <= lvl; l++) {
-                    if (col_arr[l] != cmpr_arr[l]) {in_tree = false;}
+                    if (col_arr[l] != cmpr_arr[l]) { in_tree = false;}
                 }
                 //
                 if (in_tree) {
                     output_cells[lvl][col].colspan += 1;
-                    output_cells[lvl][cmpr] = ""; // "deleting spanned columns"
+                    output_cells[lvl][cmpr] = ''; // deleting "spanned columns"
                     cmpr += 1;
                 }
                 else {
@@ -470,15 +479,9 @@ function make_head_rows(col_data,head_rows_props) {
     // creating table rows
     for (var lvl = 0; lvl < num_rows; lvl++) {
         for (var col = 0; col < output_cells[lvl].length; col++) {
-            if (output_cells[lvl][col] == '') {continue;}
+            if (output_cells[lvl][col] == '') { continue;}
             var col_obj = output_cells[lvl][col];
-            var cell_tooltip = ''
-            if (header_tooltip) {
-                cell_tooltip = header_tooltip;
-                for (var prop in col_obj) { cell_tooltip = cell_tooltip.replace('%'+prop+'%',col_obj[prop])}
-                cell_tooltip = '<span class="default-table-tooltip">'+cell_tooltip+'</span>';
-            }
-            head_tr[lvl] += '<td id="'+id_prefix+col_obj.id+'" class="'+class_str+'" colspan="'+col_obj.colspan+'" rowspan="'+col_obj.rowspan+'" onclick="'+col_obj.sort_onclick+'">'+col_obj.innerHTML+'&nbsp;'+col_obj.arrow+cell_tooltip+'</td>';
+            head_tr[lvl] += '<td id="'+args.id_prefix+col_obj.id+'" class="'+args.class_str+'" colspan="'+col_obj.colspan+'" rowspan="'+col_obj.rowspan+'" onclick="'+col_obj.cell_onclick+'">'+col_obj.innerHTML+'&nbsp;'+col_obj.arrow+col_obj.tooltip+'</td>';
         }
     }
     //
@@ -558,7 +561,7 @@ function make_data_columns_table(args) {
         var checked = '';
         if (checked_cols.indexOf(col_obj.column_name) >= 0) {checked = 'checked';}
         view_col_tr += '<td id="'+col_obj.column_name+'-viewcol-td" class="report-data-td"><input id="'+col_obj.column_name+'-viewcol-checkbox" name="sel_cols" type="checkbox" value="'+col_obj.column_name+'" onclick="'+all_onclick_fun+'" '+checked+'></td>';
-        if (col_obj.column_type != 'static') {
+        if (!(col_obj.column_type.match('static'))) {
             sort_by_tr += '<td id="'+col_obj.column_name+'-sortby-td" class="report-data-td"></td>'; 
         }
         else {

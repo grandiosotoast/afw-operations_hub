@@ -257,7 +257,7 @@ function rep_report() {
     populate_dropbox_options('preset-report','report_presets','preset_index','preset_name','',dropbox_args);
     dropbox_args = {
         sql_args : {
-            where : [['column_type','LIKE','static'],['in_tables','REGEXP','(^|%)sales_rep_data(%|$)'],['use_on_pages','REGEXP','(^|%)sales_reporting(%|$)'],['use_in_html_tables','REGEXP','(^|%)sales_rep_report(%|$)']],
+            where : [['column_type','REGEXP','(^|%)static(%|$)'],['in_tables','REGEXP','(^|%)sales_rep_data(%|$)'],['use_on_pages','REGEXP','(^|%)sales_reporting(%|$)'],['use_in_html_tables','REGEXP','(^|%)sales_rep_report(%|$)']],
             order_by : [['order_index','ASC']]
         },
         value_format : 'sales_rep_data.%column_name%'

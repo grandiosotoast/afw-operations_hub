@@ -168,6 +168,11 @@ function view_emp_table(page,sort_col,sort_dir) {
     var meta_sql_args = {};
     var num_per_page = 10;
     var department = '.'
+    var session_obj = {
+        'emp_table_page' : page,
+        'emp_table_sort_col' : sort_col,
+        'emp_table_sort_dir' : sort_dir
+    }
     //
     // getting page elements
     emp_table_args.department = document.getElementById('department').value;
@@ -201,7 +206,7 @@ function view_emp_table(page,sort_col,sort_dir) {
     emp_table_args.row_onclick = "view_emp_data_table(1,'date','DESC','%emp_id%','%department%')";
     emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
-    emp_table_args.add_callback = function(){store_session("emp_table_page,"+page+",emp_table_sort_col,"+sort_col+",emp_table_sort_dir,"+sort_dir);}
+    emp_table_args.add_callback = function(){store_session(session_obj);}
     emp_table_args.head_row_args = {
         'sortable' : true,
         'sort_col' : sort_col,
@@ -235,6 +240,11 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     var meta_sql_args = {};
     var ts_obj = {};
     var num_per_page = 10
+    var session_obj = {
+        'data_table_page' : page,
+        'data_table_sort_col' : sort_col,
+        'data_table_sort_dir' : sort_dir
+    }
     //
     // getting page elements
     num_per_page = Number(document.getElementById('res-per-page').value);
@@ -263,11 +273,11 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     data_table_args.table_class = 'default-table';
     data_table_args.row_id_prefix = 'emp-data-row-';
     data_table_args.table_data_cell_class = 'default-table-td'; 
-    data_table_args.table_row_appended_cells = "<td style=\"background-color: rgb(255,255,255); box-shadow: 3px 3px 0px 3.25px rgb(255,255,255);\" onclick = \"view_to_edit_entry('%emp_id%','%department%','%entry_id%')\" ><a id = \"edit_link\" class =\"edit_link\">Edit </a></td>";
+    data_table_args.table_row_appended_cells = "<td style=\"background-color: rgb(255,255,255); box-shadow: 3px 3px 0px 3.25px rgb(255,255,255);\" onclick = \"view_to_edit_entry('%emp_id%','%department%','%entry_id%')\" ><a id = \"link-blue\" class =\"link-blue\">Edit </a></td>";
     data_table_args.row_onclick = "view_employee_data_entry('%entry_id%','%department%','%row_id%')";
     data_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     data_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
-    data_table_args.add_callback = function(){store_session("data_table_page,"+page+",data_table_sort_col,"+sort_col+",data_table_sort_dir,"+sort_dir);}
+    data_table_args.add_callback = function(){ store_session(session_obj);}
     data_table_args.head_row_args = {
         'sortable' : true,
         'sort_col' : sort_col,
@@ -477,12 +487,7 @@ function view_to_edit_entry(emp_id,department,entry_id) {
     session_obj.edit_entry_department = department;
     session_obj.edit_entry_id = entry_id;
     //
-    for (var prop in session_obj) {
-        session_str += prop+","+session_obj[prop]+",";
-    }
-    //
-    // storing the values in the $_SESSION var
-    store_session(session_str);
+    store_session(session_obj);
     //
     // going to the edit page
     goto_link('edit_emp_data');
@@ -1366,20 +1371,25 @@ function pop_add_dbuser_dropdowns(args) {
 function list_all_tables() {
     //
     var sql = "SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA` LIKE 'afwl3_operations' AND `TABLE_TYPE` LIKE 'BASE TABLE'";
-    var onchange_fun = "reset_table_maintence_inputs(); create_table(1,'','');";
+    var select_children = Array(
+        {'elm' : 'option', 'value' : '', 'disabled' : 'disabled', 'selected' : 'selected', 'textNode' : 'Select a Table'}
+        )
     //
     //
     var callback = function(response) {
         var tables = response.tables
-        var select_element = '<select id="table-select" class="multi-line-dropbox-input" multiple="mulitple" style="height: 10em;" onchange="'+onchange_fun+'">';
-        select_element += "<option value=\"\" disabled selected>Select a Table</option>"
+        var select_element = document.createElement('SELECT');
+        select_element.id = 'table-select';
+        select_element.className = 'multi-line-dropbox-input';
+        select_element.multiple = 'multiple';
+        select_element.style = 'height: 10em;';
+        select_element.addEventListener('change',function() { reset_table_maintence_inputs(); create_table(1,'','');})
         for (var i = 0; i < tables.length; i++) {
-            var table = tables[i];
-            select_element += "<option value=\""+table.TABLE_NAME+"\">"+table.TABLE_NAME+"</option>"
+            var option = {'elm' : 'option', 'value' : tables[i].TABLE_NAME, 'textNode' : tables[i].TABLE_NAME};
+            select_children.push(option);
         }
-        
-        select_element += '</select>';
-        document.getElementById('table-select-div').innerHTML = select_element;
+        addChildren(select_element,select_children);
+        document.getElementById('table-select-div').replaceChild(select_element,document.getElementById('place-holder'));
     }
     //
     ajax_fetch([sql],['tables'],callback)
@@ -1407,6 +1417,8 @@ function create_table(page,sort_col,sort_dir) {
     // unhiding logic box
     remove_class('hidden-elm','table-refinement');
     remove_class('hidden-elm','update-table');
+    remove_class('hidden-elm','clear-inputs');
+
     //
     // getting page elements
     var table_name = document.getElementById('table-select').value;
@@ -1425,7 +1437,7 @@ function create_table(page,sort_col,sort_dir) {
     //
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
-    meta_sql_args.where = [['in_tables','REGEXP','(^|%)'+table_name+'(%|$)'],['use_on_pages','REGEXP','table_maintenance'],['data_type','NOT REGEXP','hidden']];
+    meta_sql_args.where = [['column_type','NOT REGEXP','dynamic'],['in_tables','REGEXP','(^|%)'+table_name+'(%|$)'],['use_on_pages','REGEXP','table_maintenance'],['data_type','NOT REGEXP','hidden']];
     meta_sql_args.order_by = [['order_index','ASC']];
     table_args.data_sql_args = data_sql_args;
     table_args.meta_sql_args = meta_sql_args;
@@ -1443,9 +1455,10 @@ function create_table(page,sort_col,sort_dir) {
         'sortable' : true,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
+        'cell_onclick_str' : "col_name_to_search_box('%column_name%')",
         'sort_onclick_str' : "create_table(%%,'%column_name%','%sort_dir%')",
         'head_row_class_str' : 'default-table-header',
-        'header_tooltip' : '%column_name%'
+        'tooltip' : '<span class="default-table-tooltip">%column_name%</span>'
     };
     table_args.page_nav_args = {
         'curr_page' : page,
@@ -1480,6 +1493,25 @@ function create_table(page,sort_col,sort_dir) {
     create_standard_table(table_args);
 }
 //
+// this function adds the column name to the a serch box if the cell is clicked 
+function col_name_to_search_box(col_name) {
+    //
+    var box1_id  = 'column-name-1';
+    var box2_id  = 'column-name-2';
+    var val1_id  = 'column-value-1';
+    var val2_id  = 'column-value-2';
+    var box1_col = document.getElementById(box1_id).value;
+    var box2_col = document.getElementById(box2_id).value;
+    //
+    if (box1_col == '') {
+        document.getElementById(box1_id).value = col_name;
+    }
+    else {
+        document.getElementById(box2_id).value = col_name;
+    }
+    //
+}
+//
 // gets all of the entry data to generate the form with
 function mod_table_entry(table_name,row_id) {    
     //
@@ -1490,7 +1522,7 @@ function mod_table_entry(table_name,row_id) {
     //
     meta_args.cmd = 'SELECT';
     meta_args.table = 'table_meta_data';
-    meta_args.where = [['in_tables','REGEXP','(^|%)'+table_name+'(%|$)'],['use_on_pages','REGEXP','table_maintenance'],['data_type','NOT REGEXP','hidden']];
+    meta_args.where = [['column_type','NOT REGEXP','dynamic'],['in_tables','REGEXP','(^|%)'+table_name+'(%|$)'],['use_on_pages','REGEXP','table_maintenance'],['data_type','NOT REGEXP','hidden']];
     meta_args.order_by = [['order_index','ASC']]; 
     meta_sql = gen_sql(meta_args);
     //
@@ -1547,11 +1579,25 @@ function create_table_edit_form(response) {
         if (col.data_type.match(/locked/)) {disabled = 'disabled';}
         if (!(first_id) && !(disabled)) {first_id = col.column_name+'-input';}
         form_out += '<label class="label-large">'+col.column_nickname+':</label>';
-        if (meta_data[i].data_type.match(/text/)) {
+        if (col.column_type.match(/enum/)) {
+            var vals = col.column_type.match(/enum\[(.*?)\]/);
+            if (vals.length > 1) {
+                vals = vals[1].split(',');
+                form_out += '<select id="'+col.column_name+'-input" name="'+col.column_name+'" onchange="remove_class(\'invalid-field\',this.id)" '+disabled+'>';
+                for (var j = 0; j < vals.length; j++) {
+                    form_out += '<option value="'+vals[j]+'">'+vals[j]+'</option>'
+                }
+                form_out += '</select>';
+            }
+            else {
+                form_out += '<input id="'+col.column_name+'-input" type="text" name="'+col.column_name+'" class="input-long" value="" onkeyup="remove_class(\'invalid-field\',this.id)" onblur="remove_class(\'invalid-field\',this.id)" '+disabled+'></input>';
+            }
+        }
+        else if (col.data_type.match(/text/)) {
             form_out += '<textarea id="'+col.column_name+'-input" name="'+col.column_name+'" rows="4" cols="60" onkeyup="remove_class(\'invalid-field\',this.id)" onblur="remove_class(\'invalid-field\',this.id)"></textarea>'
         }
         else {
-          form_out += '<input id="'+col.column_name+'-input" type="text" name="'+col.column_name+'" class="input-long" value="" onkeyup="remove_class(\'invalid-field\',this.id)" onblur="remove_class(\'invalid-field\',this.id)" '+disabled+'></input>';
+            form_out += '<input id="'+col.column_name+'-input" type="text" name="'+col.column_name+'" class="input-long" value="" onkeyup="remove_class(\'invalid-field\',this.id)" onblur="remove_class(\'invalid-field\',this.id)" '+disabled+'></input>';
         }
         if (col.data_type.match(/skip/)) {form_out += '&nbsp;&nbsp;&nbsp;<label class="label-5em">Skip Field</label><input id="'+col.column_name+'-skip-checkbox" type="checkbox" onclick="toggle_disabled(\''+col.column_name+'-input\')">'}
         form_out += '<br>';
@@ -1580,6 +1626,7 @@ function create_table_edit_form(response) {
     populate_form_args.form_id = 'update-table-data';
     process_form_data(populate_form_args)
     //
+    if (first_id == '') { first_id = meta_data[0].column_name+'-input'}
     document.getElementById(first_id).focus();
 }
 //
@@ -1636,4 +1683,101 @@ function submit_table_changes(cmd,table_name) {
     if (!(cont)) {return;}
     //
     ajax_exec_db(sql,callback)
+}
+//
+// this generates the popup window to leave a suggestion
+function enter_suggestion() {
+    //
+    window.open('enter_suggestion.php', 'test', 'height=150,width=600,scrollbars=yes');
+    window.focus();
+}
+//
+// this submits the suggestion to the database
+function submit_suggestion() {
+    //
+    // getting values
+    var name_val_obj = {
+        submission_date : new Date().yyyymmdd(),
+        suggestion_description : document.getElementById('description').value,
+        entering_user : document.getElementById('user-username').value
+    };
+    console.log(name_val_obj);
+    //
+    var sql_args = {
+        cmd : 'INSERT',
+        table : 'suggestions',
+        cols : [],
+        vals : []
+    }
+    for (var col in name_val_obj) {
+        sql_args.cols.push(col);
+        sql_args.vals.push(name_val_obj[col]);
+    }
+    var sql = gen_sql(sql_args);
+    var callback = function() {
+        alert('Thank you for your suggestion!');
+        window.close();
+    }
+    ajax_exec_db(sql,callback);
+}
+//
+// this takes the user to the table maintence page to view the suggestions 
+function view_suggestions(status) {
+    //
+    var session_obj = {
+        'gen_suggestions' : true,
+        'status' : status
+    }
+    //
+    store_session(session_obj);
+    //
+    goto_link('table_maintenance');
+}
+//
+// this makes the suggestion table when the link was clicked
+function gen_suggestions_table(session_data) {
+    var status = '.+'    
+    //
+    // checking if the sugesstion link was clicked 
+    console.log(session_data)
+    if (!(session_data.hasOwnProperty('gen_suggestions'))) { return;}
+    if (session_data.hasOwnProperty('status')) { status = session_data['status'];}
+    //
+    // clearing session data 
+    ajax_call("clear_session=true");
+    document.getElementById('column-name-1').value = 'suggestion_status';
+    document.getElementById('column-value-1').value = status;
+    //
+    // initializing mutation observer
+    var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(check_mutation);
+    });
+    //
+    // tracking page mutations to ensure requried elements have been created
+    observer.observe(document, {
+        childList : true,
+        subtree : true,
+        attributes : false,
+        characterData : false
+    });
+    //
+    // creating function to execute on every mutation record
+    function check_mutation(record) {
+        //
+        console.log(record.addedNodes);
+        var node_list = record.addedNodes;
+        var table_select = false;
+        for (var i = 0; i < node_list.length; i++) {
+            if (node_list[i].id = 'table-select') {
+                observer.disconnect();
+                //
+                // sending event to trigger table generation
+                node_list[i].value = 'suggestions'
+                var event = document.createEvent("HTMLEvents");
+                event.initEvent("click",true,false);
+                document.getElementById('update-table').dispatchEvent(event);
+                //
+            }
+        }
+    }
 }

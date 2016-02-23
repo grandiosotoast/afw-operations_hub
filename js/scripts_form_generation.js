@@ -828,6 +828,36 @@ function create_time_range_inputs(input_args) {
     populate_year_dropboxes('en-year');
 }
 //
+// this determines the time beginning and end of a pay period for a given date
+function find_pay_period(date) {
+    var start_ts,end_ts
+    var ts_arr = [false,false]
+    //
+    if (date instanceof Array) {
+        if (date.length < 3) { console.log('Error in date array: ',date); return ts_arr;}
+        date = new Date(Number(date[0]),Number(date[1])-1,Number(date[2]));
+    }
+    else if ((typeof date == 'string') || (date instanceof String)) {
+        var date_arr = date.match(/(\d+).(\d+).(\d+)/)
+        if (date_arr.length < 4) { console.log('Error in date string: ',date); return ts_arr;}
+        date = new Date(Number(date_arr[1]),Number(date_arr[2])-1,Number(date_arr[3]));
+    }
+    //
+    var st_pp = new Date(CONSTANTS.FIRST_BUSINESS_DAY[0],+CONSTANTS.FIRST_BUSINESS_DAY[1]-1,CONSTANTS.FIRST_BUSINESS_DAY[2]);
+    var test_date = st_pp;
+    ts_arr = [st_pp]
+    for (var w = 0; w < 60; w+=2) { 
+        test_date = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()+14));
+        ts_arr[1] = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()-1));
+        if (test_date > date) {break;}
+        ts_arr = [test_date];
+    }    
+    //
+    ts_arr[0] = ts_arr[0].yyyymmdd();
+    ts_arr[1] = ts_arr[1].yyyymmdd();
+    return ts_arr;
+}
+//
 // this creates the haul information area on the backhaul form
 function create_haul_fields(out_id,entry_num) {
     //

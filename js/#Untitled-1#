@@ -1,0 +1,3 @@
+INSERT INTO `afwl3_operations`.`report_dynamic_columns` (`column_name`, `department`, `column_type`, `col_function`, `dependencies`, `column_index`) VALUES ('miles_per_gallon', 'transportation', 'regular', 'calc_miles_per_gallon', 'static', NULL); 
+
+INSERT INTO `afwl3_operations`.`table_meta_data` (`column_name`, `column_type`, `column_nickname`, `order_index`, `data_type`, `total_type`, `in_tables`, `use_on_pages`, `use_in_html_tables`) VALUES ('miles_per_gallon', 'dynamic', 'MPG', '227', 'float', 'avg', 'employee_data_transportation%', 'report%', 'report_transportation%column_selection_table%'); 

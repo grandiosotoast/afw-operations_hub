@@ -22,6 +22,7 @@ var REPORT_FUNCTIONS = {
     'calc_cost_per_mile'  : calc_cost_per_mile,
     'calc_cost_per_route' : calc_cost_per_route,
     'calc_cost_per_stop'  : calc_cost_per_stop,
+    'calc_miles_per_gallon' : calc_miles_per_gallon,
     'recalc_transportation_totals' : recalc_transportation_totals,
     // logistics functions
     'calc_freight_backhaul_ytd_savings' : calc_freight_backhaul_ytd_savings,
@@ -423,6 +424,14 @@ function calc_cost_per_stop(col_name,data_row,dynamic_cols) {
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
 //
+function calc_miles_per_gallon(col_name,data_row,dynamic_cols) {
+    //
+    check_dependency_regular(col_name,data_row,dynamic_cols);
+    //
+    data_row[col_name] = (+data_row['miles'])/(+data_row['truck_fuel']);
+    if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
+}
+//
 // this function properly recalculates the required shipping totals
 function recalc_transportation_totals(col_name,report_args) {
     //
@@ -438,7 +447,8 @@ function recalc_transportation_totals(col_name,report_args) {
         'cost_per_route' : {'numerator_col' : 'total', 'divisor_col' : 'num_routes'},
         'cost_per_stop' : {'numerator_col' : 'total', 'divisor_col' : 'num_stops'},
         'cost_per_case' : {'numerator_col' : 'total', 'divisor_col' : 'num_cases'},
-        'avg_hourly_rate' : {'numerator_col' : 'total', 'divisor_col' : 'hours'}
+        'avg_hourly_rate' : {'numerator_col' : 'total', 'divisor_col' : 'hours'},
+        'miles_per_gallon' : {'numerator_col' : 'miles', 'divisor_col' : 'truck_fuel'}
     };
     //
     // recalculating columns
@@ -686,6 +696,8 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
     var error_dates = [];
     var supervisor_id = CONSTANTS.SHIPPING_SUPERVISOR_ID;
     var total_cases = 0;
+    var crew_cases = 0;
+    var crew_hours = 0;
     var case_bonus = 0.005;
     var total_bonus = 0.0;
     var bonus_per_entry = 0.0;
@@ -703,30 +715,35 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
     });
     //
     // stepping over all of the entries to determine if the supervisor gets an incentive for a given week
-    var entry_date = new Date(data_arr[0].date.split('-')[0],data_arr[0].date.split('-')[1]-1,data_arr[0].date.split('-')[2]);
-    var exit_date = new Date(entry_date.getFullYear(),entry_date.getMonth(),(entry_date.getDate()+6-entry_date.getDay()));
+    var exit_date = new Date(data_arr[0].date.split('-')[0],data_arr[0].date.split('-')[1]-1,data_arr[0].date.split('-')[2]);;
     //
     for (var i = 0; i < data_arr.length; i++) {
         var entry_date = new Date(data_arr[i].date.split('-')[0],data_arr[i].date.split('-')[1]-1,data_arr[i].date.split('-')[2]);
         data_arr[i]['incentive_pay'] = 0.0
         //
         //
-        // outputting incentive if sunday is crossed
+        // outputting incentive if the day changes
         if (entry_date > exit_date) {
             outputIncentive()
             //
             // resetting weekly totals
             supervisor_entries = [];
             error_dates = [];
+            crew_cases = 0;
+            crew_hours = 0;
             total_cases = 0;
             total_bonus = 0.0;
             bonus_per_entry = 0.0;
-            exit_date = new Date(entry_date.getFullYear(),entry_date.getMonth(),(entry_date.getDate()+6-entry_date.getDay()) );
+            exit_date = entry_date;
         }
         //
         if (data_arr[i]['emp_id'] == supervisor_id) { 
             supervisor_entries.push(i);
             if (data_arr[i]['attendance_error'] != 'none') { error_dates.push(data_arr[i]['date']);}
+        }
+        else {
+            crew_cases += Number(data_arr[i]['num_cases']);
+            crew_hours += Number(data_arr[i]['prod_time']);
         }
         if (data_arr[i]['error_code'] != '0') { error_dates.push(data_arr[i]['date']);}
         total_cases += Number(data_arr[i]['num_cases']);
@@ -737,10 +754,10 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
     function outputIncentive() {
         //
         total_bonus = ceiling(case_bonus * total_cases,2);
-        if (!(isFinite(bonus_per_entry))) { bonus_per_entry = 0.0;}
+        if (crew_cases/crew_hours < 100) { total_bonus = 0.0;}
+        if (!(isFinite(total_bonus))) { total_bonus = 0.0;}
         //
         // putting smiths bonus in the incentive field
-        console.log(error_dates);
         for (var i = 0; i < supervisor_entries.length; i++) {
             bonus_per_entry = total_bonus/supervisor_entries.length
             if (error_dates.indexOf(data_arr[supervisor_entries[i]]['date']) > -1) { bonus_per_entry = 0.0;}
