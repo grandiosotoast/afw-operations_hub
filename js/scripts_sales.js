@@ -711,13 +711,11 @@ function submit_sales_rep_form(args) {
     }
     var user_sql = gen_sql(user_sql_args);
     var rep_sql = gen_sql(rep_sql_args);
-    var sql = 'BEGIN;'
-    if (!!(user_sql)) sql += user_sql+'; ';
-    if (!!(rep_sql))  sql +=  rep_sql+'; ';
-    sql += 'COMMIT;';
+    var sql_arr = [];
+    if (!!(user_sql)) sql_arr.push(user_sql);
+    if (!!(rep_sql))  sql_arr.push(rep_sql);
     //
-    console.log(sql);
-    ajax_exec_db(sql,callback);
+    exec_transaction(sql_arr,callback);
 }
 //
 // this function starts off the sales customer form validation

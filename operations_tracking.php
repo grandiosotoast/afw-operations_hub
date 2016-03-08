@@ -82,9 +82,9 @@ function check_login($page_root) {
         if (($page_root == 'administration') and (check_perms($_SESSION["permissions"],$page_perms["table_maintenance"]))) {
             //
             $sql = "SELECT count(*) FROM `suggestions` WHERE `suggestion_status` LIKE 'unread'";
-            $num_unread = fetch_db($server,$database,$username,$password,$sql);
+            list($num_unread,$err) = fetch_db($server,$database,$username,$password,$sql);
             $sql = "SELECT count(*) FROM `suggestions` WHERE `suggestion_status` LIKE 'flagged'";
-            $num_flagged = fetch_db($server,$database,$username,$password,$sql);
+            list($num_flagged,$err) = fetch_db($server,$database,$username,$password,$sql);
             $num_unread = $num_unread[0]['count(*)'];
             $num_flagged = $num_flagged[0]['count(*)'];
             $flag_class = "link-orange";
@@ -191,32 +191,60 @@ function fetch_db($server,$database,$username,$password,$sql) {
         $results =  $stmt->fetchAll();
         // Terminates connection to database 
         $conn = null;
-        return($results);
+        return([$results,false]);
         }
     catch(PDOException $e) { 
         // Returns the PDO error encountered and displays it
-        echo "<script>alert(\"{$e->getMessage()}\");</script>";
-        }
+        $err_str = "{$e->getMessage()}";
+        return([$err_str,true]);        }
     }  
- // Connects to the database and executes sql statment  
-function exec_db($server,$database,$username,$password,$sql,$message) {
+//
+// Connects to the database and executes sql statment  
+function exec_db($server,$database,$username,$password,$sql) {
+    try {
+        // Connects to the database using the credentials stored in the variables
+        $conn = new PDO("mysql:host=$server;dbname=$database", $username, $password);
+        //       
+        // set the PDO error mode to exception to display and handle any errors 
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        //
+        // executes a sql statment that isn't returning results. 
+        $conn->exec($sql);
+        $conn = null; 
+        //
+        return(['Success',false]);
+        }
+    catch(PDOException $e) { 
+        // Returns the PDO error encountered and displays it
+        $err_str = "{$e->getMessage()}";
+        return([$err_str,true]);
+        }
+    }
+//
+// Connects to the database and executes sql statment  
+function exec_transaction($server,$database,$username,$password,$sql_arr) {
     try {
         // Connects to the database using the credentials stored in the variables
         $conn = new PDO("mysql:host=$server;dbname=$database", $username, $password);
         
         // set the PDO error mode to exception to display and handle any errors 
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-        // executes a sql statment that isn't returning results.  
-        $conn->exec($sql);
-
-        // Terminates connection to database 
-        $conn = null;
-        if ($message != '') {echo "<script>alert(\"{$message}\");</script>";}
+        //
+        // executing a number of SQL statements. 
+        $conn->beginTransaction();
+        for ($i = 0; $i < count($sql_arr); $i++) {
+            $conn->exec($sql_arr[$i]);
         }
-    catch(PDOException $e) { 
+        $conn->commit();
+        $conn = null;
+        //
+        return(['Success',false]);
+        }
+    catch(Exception $e) { 
         // Returns the PDO error encountered and displays it
-        echo $e->getMessage();
+        $conn->rollBack();
+        $err_str = "{$e->getMessage()}";
+        return([$err_str,true]);
         }
     }
 ?>

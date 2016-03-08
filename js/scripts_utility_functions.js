@@ -77,10 +77,20 @@ function floor(number,numDigits) {
     if (number === '') {console.log('Error: round requires number arg',console.log(number),console.log(numDigits));return 0.0;}
     if (numDigits === '') {console.log('Error: round requires numDigits arg',console.log(number),console.log(numDigits));return 0.0;}
     //
+    number = Number(number); 
+    numDigits = Number(numDigits);
+    //
     var scale = Math.pow(10,numDigits);
     number = number*scale;
     number = Math.floor(number)/scale;
-    return(number);   
+    //
+    if (isFinite(number)) {
+        return(number);
+    }
+    else {
+        console.log('Warning: Non-Finite number')
+        return 0
+    }
 }
 //
 // this function performs rouding by converting to integers
@@ -90,10 +100,20 @@ function ceiling(number,numDigits) {
     if (number === '') {console.log('Error: round requires number arg',console.log(number),console.log(numDigits));return 0.0;}
     if (numDigits === '') {console.log('Error: round requires numDigits arg',console.log(number),console.log(numDigits));return 0.0;}
     //
+    number = Number(number); 
+    numDigits = Number(numDigits);    
+    //
     var scale = Math.pow(10,numDigits);
     number = number*scale;
     number = Math.ceil(number)/scale;
-    return(number);   
+    //
+    if (isFinite(number)) {
+        return(number);
+    }
+    else {
+        console.log('Warning: Non-Finite number')
+        return 0
+    }  
 }
 //
 // this function performs rouding by converting to integers
@@ -103,11 +123,20 @@ function round(number,numDigits) {
     if (number === '') {console.log('Error: round requires number arg',console.log(number),console.log(numDigits));return 0.0;}
     if (numDigits === '') {console.log('Error: round requires numDigits arg',console.log(number),console.log(numDigits));return 0.0;}
     //
+    number = Number(number); 
+    numDigits = Number(numDigits);  
+    //
     var scale = Math.pow(10,numDigits);
-    number = Number(number);
     number = number * scale;
     number = Math.round(number)/scale;
-    return(number);   
+    //
+    if (isFinite(number)) {
+        return(number);
+    }
+    else {
+        console.log('Warning: Non-Finite number')
+        return 0
+    }   
 }
 //
 // returns the current timestamp in MYSQL format
@@ -144,13 +173,12 @@ function goto_link(id) {
     if (id == 'super admin') {id = 'administration'}
     var url = id+'.php';
     location.href = url;
-    }
+}
 //
 // submits a form
-function sub_form(id) {
-    
+function sub_form(id) {  
     document.getElementById(id).submit();
-    }
+}
 //
 // toggles the disabled status on an HTML element
 function toggle_disabled(elm_id_str) {
@@ -396,6 +424,7 @@ function gen_sql(input_args) {
     }
     //
     // updating default args with input args
+    input_args = JSON.parse(JSON.stringify(input_args));
     for (var prop in input_args) {
         args[prop] = input_args[prop]
         if (Array.isArray(args[prop])) { if (args[prop].length == 0) { args[prop] = false;}}
@@ -438,10 +467,11 @@ function gen_sql(input_args) {
     for (var i = 0; i < args.cols.length; i++) {
         if (args.cols[i] == '*') { continue;}
         if (args.cols[i].match(/\./)) { continue;}
+        if (args.cols[i].match(/\(.*\)/)) { continue;}
         args.cols[i] = '`'+args.cols[i]+'`';
     }
     for (var i = 0; i < args.vals.length; i++) {
-        if (args.vals[i].match(/\(.*?\)/)) {}
+        if ((args.vals[i]+'').match(/\(.*?\)/)) { continue;}
         else if (typeof(args.vals[i]) == 'string') {args.vals[i] = "'"+args.vals[i]+"'";}
     }
     if (args.where) {
@@ -476,7 +506,7 @@ function gen_sql(input_args) {
     //
     // adding where clause
     if (args.where) {
-        sql += 'WHERE '+args.where[0].join(' ');
+        sql += ' WHERE '+args.where[0].join(' ');
         for (var i = 1; i < args.where.length; i++) {
             sql += ' AND '+args.where[i].join(' ');
         }
@@ -519,22 +549,33 @@ function ajax_exec_db(sql,callback_fun) {
     // executing async function
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            if (!!(xmlhttp.responseText)) {
+            //
+            // parsing JSON with error handling
+            try {
+                var response = JSON.parse(xmlhttp.responseText);
+                if (response.error) { alert(response.msg); return;}
+            }
+            catch(err) {
+                console.log(err);
+                console.log(sql_arr);
+                console.log(xmlhttp);
                 console.log(xmlhttp.responseText);
-                alert(xmlhttp.responseText);
-            }
-            else {
-                if (callback_fun != "") { callback_fun();}
-            }
+                alert("Error parsing JSON data check console.");
+                return;
+            }            
+            //
+            if (callback_fun != "") { callback_fun();}
+            else {console.log('Warning no callback function provided')}
         }
     }
     xmlhttp.open("POST", "async_php_functions.php", true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.send("async_exec_db=true&sql="+encodeURIComponent(sql));
+    xmlhttp.send("exec_db=true&sql="+encodeURIComponent(sql));
 }
 //
-// performs a sql command on the database with no data return 
-function ajax_mulit_exec(sql_arr,callback_fun) {
+// performs a sql transaction on the database with no data return 
+function exec_transaction(sql_arr,callback_fun) {
+    console.log(sql_arr);
     //
     if (window.XMLHttpRequest) {
     // code for IE7+, Firefox, Chrome, Opera, Safari
@@ -548,24 +589,39 @@ function ajax_mulit_exec(sql_arr,callback_fun) {
     // executing async function
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            if (!!(xmlhttp.responseText)) {
+            //
+            // parsing JSON with error handling
+            try {
+                var response = JSON.parse(xmlhttp.responseText);
+                if (response.error) { 
+                    alert(response.msg);
+                    return;
+                }
+            }
+            catch(err) {
+                console.log(err);
+                console.log(sql_arr);
+                console.log(xmlhttp);
                 console.log(xmlhttp.responseText);
-                alert(xmlhttp.responseText);
-            }
-            else {
-                if (callback_fun != "") { callback_fun();}
-            }
+                alert("Error parsing JSON data check console.");
+                return;
+            }            
+            //
+            if (callback_fun != "") { callback_fun();}
+            else {console.log('Warning no callback function provided')}
         }
     }
+    sql_arr = JSON.stringify(sql_arr);
     xmlhttp.open("POST", "async_php_functions.php", true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.send("async_exec_multiple=true&sql_statements="+encodeURIComponent(sql_arr.join(';')));
+    xmlhttp.send("exec_transaction=true&sql_statements="+encodeURIComponent(sql_arr));
 }
 //
 // function allowing for the return of multiple sql requests
 function ajax_fetch(sql_arr,name_arr,callback_fun) {
     //
     // processing arguments
+    var error = false;
     if (typeof callback_fun != 'function') {
         console.log("Error - No callback function provided.");
         return;
@@ -591,6 +647,13 @@ function ajax_fetch(sql_arr,name_arr,callback_fun) {
             // parsing JSON with error handling
             try {
                 var response = JSON.parse(xmlhttp.responseText);
+                for (var prop in response) {
+                    if (prop.match(/SQL_REQ_ERROR_MSG/i)) { 
+                        error = true; 
+                        alert(response[prop]);
+                    }
+                }
+                if (error) {console.log(response); return false;}
             }
             catch(err) {
                 console.log(err);
@@ -610,9 +673,10 @@ function ajax_fetch(sql_arr,name_arr,callback_fun) {
             }
         }
     }
+    sql_arr = JSON.stringify(sql_arr);
     xmlhttp.open("POST", "async_php_functions.php", true);
     xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.send("async_fetch=true&sql_statements="+encodeURIComponent(sql_arr.join(';'))+"&return_names="+name_arr.join(';'));
+    xmlhttp.send("fetch_db=true&sql_statements="+encodeURIComponent(sql_arr)+"&return_names="+name_arr.join(';'));
 }
 //
 // this executes a non-returning ajax call

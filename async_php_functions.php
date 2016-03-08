@@ -6,32 +6,37 @@ require 'operations_tracking.php';
 $protected_vars = ['username','password','permissions','email','department','dbuser_last_name','dbuser_first_name','dbuser_internal_id'];
 //
 // asnyc execution of exec_db
-if (isset($_POST["async_exec_db"])) {
+if (isset($_POST["exec_db"])) {
     $sql = $_POST["sql"];
-    if (isset($_POST["message"])) {
-        $message = $_POST["message"];
-    }
-    else {
-        $message = "";
-    }
-    exec_db($server,$database,$username,$password,$sql,$message);
+    //
+    list($msg,$err) = exec_db($server,$database,$username,$password,$sql);
+    $json = json_encode(Array('msg' => $msg, 'error' => $err));
+    if ($json == '') { print_r('JSON Encoding Error: ',json_last_error(),' - ',json_last_error_msg());}
+    else { print_r($json);}
 }
 //
 // fetches data from one or more sql statements and returned in a JSON encoded object
-if (isset($_POST["async_fetch"])) {
+if (isset($_POST["fetch_db"])) {
     $sql_arr = Array();
     $name_arr = Array();
     //
-    if (isset($_POST['sql_statements'])) {$sql_arr = explode(';',$_POST['sql_statements']);}
+    if (isset($_POST['sql_statements'])) {$sql_arr = json_decode($_POST['sql_statements']);}
     else {print_r('Error - no SQL statments provided');}
     //
     if (isset($_POST['return_names'])) {$name_arr = explode(';',$_POST['return_names']);}
+    //
+    // cleaning any empty elements from sql_arr
+    $sql_arr = array_filter($sql_arr);
+    $sql_arr = array_values($sql_arr);
     //
     $results = Array();
     //
     for ($i = 0; $i < count($sql_arr); $i++) {
         //
         $db_res = fetch_db($server,$database,$username,$password,$sql_arr[$i]);
+        $error = $db_res[1];
+        $db_res = $db_res[0];
+        if ($error) {$name_arr[$i] = "SQL_REQ_ERROR_MSG-{$i}";}
         if ($i < count($name_arr)) {
             $results[$name_arr[$i]] = $db_res;
         }
@@ -46,16 +51,21 @@ if (isset($_POST["async_fetch"])) {
 }
 //
 //
-if (isset($_POST["async_exec_multiple"])) {
+if (isset($_POST["exec_transaction"])) {
     $sql_arr = Array();
     //
-    if (isset($_POST['sql_statements'])) {$sql_arr = explode(';',$_POST['sql_statements']);}
+    if (isset($_POST['sql_statements'])) {$sql_arr = json_decode($_POST['sql_statements']);}
     else {print_r('Error - no SQL statments provided');}
     //
-    for ($i = 0; $i < count($sql_arr); $i++) {
-        $sql = $sql_arr[$i];
-        exec_db($server,$database,$username,$password,$sql,'');
-    }
+    // cleaning any empty elements from sql_arr
+    $sql_arr = array_filter($sql_arr);
+    $sql_arr = array_values($sql_arr);
+    //
+    list($msg,$err) = exec_transaction($server,$database,$username,$password,$sql_arr);
+    $json = json_encode(Array('msg' => $msg, 'error' => $err));
+    if ($json == '') { print_r('JSON Encoding Error: ',json_last_error(),' - ',json_last_error_msg());}
+    else { print_r($json);}
+    
 }
 // storing data in session variable
 if (isset($_POST["store_session"])) {

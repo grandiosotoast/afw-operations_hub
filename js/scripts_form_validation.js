@@ -1085,7 +1085,6 @@ function init_data_form_validation(department,action) {
     }
     //
     // determining department and creating meta_sql statment
-    console.log(department);
     if (CONSTANTS.DEPT_TABLES.hasOwnProperty(department)) { var dept_table = CONSTANTS.DEPT_TABLES[department];}
     else { console.log(' Department has no set table: '+department); return;}
     if (CONSTANTS.DEPT_FORMS.hasOwnProperty(department)) { var data_form = CONSTANTS.DEPT_FORMS[department];}
@@ -1251,13 +1250,12 @@ function submit_data_entry_fom(submit_args) {
     var main_sql = gen_sql(main_sql_args);
     var dept_sql = gen_sql(dept_sql_args);
     if (dept_table == 'none') { dept_sql = false;}
-    var sql = 'BEGIN;'
-    if (!!(main_sql)) sql += main_sql+'; '
-    if (!!(dept_sql)) sql += dept_sql+'; '
-    sql += 'COMMIT;';
+    var sql_arr = []
+    if (!!(main_sql)) sql_arr.push(main_sql);
+    if (!!(dept_sql)) sql_arr.push(dept_sql);
     //
     // executing async code
-    ajax_exec_db(sql,callback);
+    exec_transaction(sql_arr,callback);
 }
 //
 // this validates the backhaul form and calculates fields
@@ -1274,14 +1272,14 @@ function recalc_backhaul_form(truncate) {
     //
     // validating fields
     check_date_str('date');
-    if (trim(document.getElementById('carrier').value) == '') { add_class('invalid-field','carrier');}
+    if (trim(document.getElementById('carrier').value) === '') { add_class('invalid-field','carrier');}
     if (isNaN(freightCharge)) {add_class('invalid-field','freight-charge'); freightCharge = 0.0;}
     //
     // checking all of the haul fields
     for (var i = 0; i < maxNumFields; i++) {
         if (!!(document.getElementById('haul-info-'+i))) {
-            if (trim(document.getElementById('po-number-{'+i+'}').value) == '') { add_class('invalid-field','po-number-{'+i+'}');}
-            if (trim(document.getElementById('pickup-point-{'+i+'}').value) == '') { add_class('invalid-field','pickup-point-{'+i+'}');}
+            if (trim(document.getElementById('po-number-{'+i+'}').value) === '') { add_class('invalid-field','po-number-{'+i+'}');}
+            if (trim(document.getElementById('pickup-point-{'+i+'}').value) === '') { add_class('invalid-field','pickup-point-{'+i+'}');}
             var freightAllowance = parseFloat(document.getElementById('freight-allowance-{'+i+'}').value);
             var palletCharges = parseFloat(document.getElementById('pallet-charges-{'+i+'}').value);
             // checking if the fields are disabled
@@ -1379,7 +1377,6 @@ function submit_backhaul_form(submitArgs) {
     var inputData = submitArgs.inputData;
     var metaData = submitArgs.metaData;
     var colMetaData = {};
-    var sql = ''
     var groupID = round(Math.random()*Math.pow(10,9),0);
     //
     // defining messages for specfic actions 
@@ -1429,7 +1426,7 @@ function submit_backhaul_form(submitArgs) {
         colMetaData[metaData[i].column_name] = metaData[i];
     }
     //
-    sql = 'BEGIN;'
+    var sql_arr = [];
     for (var i = 0; i < inputData.length; i++) {
         if (inputData[i]['exists'] != true) {continue;}
         delete inputData[i]['exists'];
@@ -1477,13 +1474,12 @@ function submit_backhaul_form(submitArgs) {
                 deptSqlArgs.vals.push(data[name]);
             }
         }
-        sql += gen_sql(mainSqlArgs)+';';
-        sql += gen_sql(deptSqlArgs)+';';
+        sql_arr.push(gen_sql(mainSqlArgs));
+        sql_arr.push(gen_sql(deptSqlArgs));
     } //ends primary field loop
-    sql += 'COMMIT;';
     //
     // executing async code
-    ajax_exec_db(sql,callback);
+    exec_transaction(sql_arr,callback);
 }
 //
 // this validates the meat_shop_item form
@@ -1721,8 +1717,6 @@ function validate_stock_form(action) {
         sql_args.vals = [document.getElementById('new-quantity').value];
         sql_args.where = [['item_number','LIKE',document.getElementById('item-number').value]]
         item_sql = gen_sql(sql_args);
-        //
-        sql = 'BEGIN; '+stock_sql+'; '+item_sql+'; COMMIT;';
     }
     else {
         //
@@ -1748,10 +1742,8 @@ function validate_stock_form(action) {
         sql_args.vals = [document.getElementById('new-quantity').value];
         sql_args.where = [['item_number','LIKE',document.getElementById('item-number').value]]
         item_sql = gen_sql(sql_args);
-        //
-        sql = 'BEGIN; '+stock_sql+'; '+item_sql+'; COMMIT;';
     }
+    var sql_arr = [stock_sql,item_sql]
     //
-    console.log(sql);
-    ajax_exec_db(sql,callback);
+    exec_transaction(sql_arr,callback);
 }
