@@ -1382,7 +1382,7 @@ function list_all_tables() {
         select_element.id = 'table-select';
         select_element.className = 'multi-line-dropbox-input';
         select_element.multiple = 'multiple';
-        select_element.style = 'height: 10em;';
+        select_element.style.height = '10em';
         select_element.addEventListener('change',function() { reset_table_maintence_inputs(); create_table(1,'','');})
         for (var i = 0; i < tables.length; i++) {
             var option = {'elm' : 'option', 'value' : tables[i].TABLE_NAME, 'textNode' : tables[i].TABLE_NAME};

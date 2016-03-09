@@ -491,7 +491,7 @@ function calc_freight_backhaul_ytd_savings(col_name,report_args) {
         var row   = Array ( {'elm' : 'tr', 'id' : 'freight-logistics-ytd-savings'});
         var cells = Array (
                 {'elm' : 'td', 'id' : 'report-spacer-td-ytds', 'className' : 'report-spacer-td', 'innerHTML' : '&nbsp;'},
-                {'elm' : 'td', 'id': 'savings-label-td', 'colSpan' : report_args.skip_cols.length, 'className' : 'report-data-td', 'style' : 'font-weight: bold;' , 'innerHTML' : 'Total Year to Date Savings:'},
+                {'elm' : 'td', 'id': 'savings-label-td', 'colSpan' : report_args.skip_cols.length, 'className' : 'report-data-td', 'style.font-weight' : 'bold' , 'innerHTML' : 'Total Year to Date Savings:'},
                 {'elm' : 'td', 'className' : 'report-data-td', 'colSpan' : colspan, 'innerHTML' : innerHTML}
             );
         //
