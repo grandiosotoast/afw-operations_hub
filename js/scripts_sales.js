@@ -36,7 +36,7 @@ function reset_sales_page() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
 }
 //
@@ -46,10 +46,10 @@ function new_rep() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
     //
-    document.getElementById('modify-header').innerHTML = 'Creating a New Sales Rep';
+    document.getElementById('modify-header').textContent = 'Creating a New Sales Rep';
     create_form('sales_rep_form','content-div');
 }
 // 
@@ -59,7 +59,7 @@ function mod_rep() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
     //
     // adding a show inactive button
@@ -85,10 +85,10 @@ function new_customer() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
     //
-    document.getElementById('modify-header').innerHTML = 'Creating a New Customer';
+    document.getElementById('modify-header').textContent = 'Creating a New Customer';
     create_form('sales_customer_form','content-div');
     //
     // populating rep dropbox
@@ -104,7 +104,7 @@ function mod_customer() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
     //
     // adding refinement fields
@@ -156,7 +156,7 @@ function rep_report() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
     //
     // setting up report inputs
@@ -236,7 +236,7 @@ function rep_report() {
     elements = Array(
         {'elm' : 'br'},
         //
-        {'elm' : 'button', 'id' : 'show-data-sel-cols', 'textNode' : 'Show Data Selection Columns', 'events' : [{'event' : 'click', 'function' : function(){ rep_report_data_columns('sel-cols-div','show-data-sel-cols',true,false);}}]},
+        {'elm' : 'button', 'id' : 'show-data-sel-cols', 'textNode' : 'Show Data Selection Columns', 'events' : [{'event' : 'click', 'function' : function(){ rep_report_data_columns('sel-cols-div','show-data-sel-cols',true,true);}}]},
         //
         {'elm' : 'button', 'id' : 'create-rep-table', 'textNode' : 'Show Sales Rep Table', 'events' : [{'event' : 'click', 'function' : function(){ report_rep_table(1,'rep_id','ASC',true);}}]},
         //
@@ -249,6 +249,10 @@ function rep_report() {
         {'elm' : 'div', 'id' : 'sel-cols-div', 'className' : 'hidden-elm'}
         );
     addChildren(document.getElementById('input-div'),elements);
+    //
+    // adding temporary hidden table
+    var table = document.createElementWithAttr('TABLE',{'id':'sales-rep-report','class':'hidden-elm'});
+    document.getElementById('content-div').appendChild(table);
     //
     // populating dropboxes
     var dropbox_args = {
@@ -271,7 +275,7 @@ function customer_report() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
     alert('WIP')
 }
@@ -407,10 +411,10 @@ function modify_rep_form(dbuser_internal_id,row_id) {
     name = ''
     if (row_id != '') {
         var name = document.getElementById(row_id+'-rep_name').innerHTML;
-        document.getElementById('modify-header').innerHTML = "Modfiying User: "+name;
+        document.getElementById('modify-header').textContent = 'Modfiying User: '+name;
     }
     else {
-        document.getElementById('modify-header').innerHTML = "Modfiying User:";
+        document.getElementById('modify-header').textContent = 'Modfiying User:';
     }
     //
     // creating form
@@ -466,10 +470,10 @@ function modify_customer_form(customer_internal_id,row_id) {
     name = ''
     if (row_id != '') {
         var name = document.getElementById(row_id+'-customer_name').innerHTML;
-        document.getElementById('modify-header').innerHTML = "Modfiying Customer: "+name;
+        document.getElementById('modify-header').textContent = 'Modfiying Customer: '+name;
     }
     else {
-        document.getElementById('modify-header').innerHTML = "Modfiying Customer:";
+        document.getElementById('modify-header').textContent = 'Modfiying Customer:';
     }
     //
     // creating form
@@ -661,8 +665,8 @@ function submit_sales_rep_form(args) {
         var sort_dir  = document.getElementById('rep-table-page-nav').dataset.sortDir;
         create_rep_table(curr_page,sort_col,sort_dir);
         // clearing form off of page
-        document.getElementById('modify-header').innerHTML = "";
-        document.getElementById('content-div').innerHTML = "";
+        document.getElementById('modify-header').removeAll();
+        document.getElementById('content-div').removeAll();
         //
         alert(args.return_message);
     }
@@ -834,8 +838,8 @@ function submit_sales_customer_form(args) {
         var sort_dir  = document.getElementById('customer-table-page-nav').dataset.sortDir;
         create_customer_table(curr_page,sort_col,sort_dir);
         // clearing form off of page
-        document.getElementById('modify-header').innerHTML = "";
-        document.getElementById('content-div').innerHTML = "";
+        document.getElementById('modify-header').removeAll();
+        document.getElementById('content-div').removeAll();
         //
         alert(args.return_message);
     }
@@ -913,18 +917,18 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
         'onclick_str' : "report_rep_table(%%,'"+sort_col+"','"+sort_dir+"',false);",
         'onmouse_str' : ''
     };
-    rep_table_args.add_callback = function() { 
-        if (document.getElementById('rep-table-header')) { return;}
-        var header = document.createElement('H4');
-        header.appendChild(document.createTextNode('Click on a sales rep to generate a report for them.'))
-        document.getElementById('table-div').insertBefore(header,document.getElementById('table-div').childNodes[0]);
-    };
     //
-    create_standard_table(rep_table_args);
+    if (!(document.getElementById('rep-table-header'))) {
+        var header = document.createElementWithAttr('H4',{'id':'rep-table-header'});
+        header.appendChild(document.createTextNode('Click on a sales rep to generate a report for them.'));
+        document.getElementById('table-div').appendChild(header);
+        //
+        create_standard_table(rep_table_args);
+    }
     //
     if (toggle == true) {
         toggle_view_element_button('create-rep-table','table-div','Hide Sales Rep Table','Show Sales Rep Table');
-        if (document.getElementById('rep-table-header')) { show_hide('rep-table-header');}
+        //
         if (document.getElementById('table-div').className.match('hidden-elm')) {
             remove_class('hidden-elm','create-all-rep-report');
         }
@@ -932,11 +936,15 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
             add_class('hidden-elm','create-rep-report');
         }
     }
+    else {
+        //
+        create_standard_table(rep_table_args);
+    }
 }
 //
 // creates the data columns table for the report page
 function rep_report_data_columns(out_id,button_id,toggle,reset) { 
-    var meta_sql = "";
+    var meta_sql = '';
     var preset_sql = '';
     var preset = document.getElementById('preset-report').value;
     //
@@ -949,9 +957,37 @@ function rep_report_data_columns(out_id,button_id,toggle,reset) {
     meta_sql = "SELECT * FROM `table_meta_data` WHERE `in_tables` REGEXP '(^|%)sales_rep_data(%|$)|(^|%)sales_rep_table(%|$)' ";
     meta_sql += "AND `use_on_pages` REGEXP 'sales_reporting' AND `use_in_html_tables` REGEXP 'sales_rep_report' ORDER BY `order_index` ASC"
     //
-    // creating reset button
-    var reset_onclick = "rep_report_data_columns('"+out_id+"','"+button_id+"',false,true); show_update_button('create-rep-report','sales-rep-report','Show Changes'); add_class('hidden-elm','restore-data-col-defaults');";
-    var button = "<br><button id=\"restore-data-col-defaults\" type=\"button\" class=\"hidden-elm\" onclick=\""+reset_onclick+"\">Restore Defaults</button>";
+    // creating reset button and modifying show button
+    if (!(document.getElementById('restore-data-col-defaults'))) {
+        var reset_onclick = function() {
+            rep_report_data_columns(out_id,button_id,false,true);
+            show_update_button('create-rep-report','sales-rep-report','Show Changes');
+            add_class('hidden-elm','restore-data-col-defaults');
+        }
+        var br = document.createElement('BR');
+        var button = document.createElementWithAttr('button',{'id':'restore-data-col-defaults','type':'button','class':'hidden-elm'});
+        var table = document.createElementWithAttr('TABLE',{'id':'data_sel_cols_table','class':'hidden-elm'});
+        button.addTextNode('Restore Defaults');
+        button.addEventListener('click',reset_onclick);
+        document.getElementById(out_id).appendChild(br);
+        document.getElementById(out_id).appendChild(button);
+        document.getElementById(out_id).appendChild(br.cloneNode());
+        document.getElementById(out_id).appendChild(table);
+        //
+        button = document.createElementWithAttr('button',{'id':button_id,'type':'button'});
+        button.addEventListener('click',rep_report_data_columns.bind(null,'sel-cols-div', 'show-data-sel-cols', true, false));
+        document.getElementById(button_id).parentNode.replaceChild(button,document.getElementById(button_id));
+    }
+    //
+    // shows or hides the data column div
+    if (toggle) { show_hide(out_id);}
+    //
+    if (document.getElementById(out_id).className.match(/hidden/i)) {
+        document.getElementById(button_id).textContent = 'Show Data Selection Columns';
+    }
+    else {
+        document.getElementById(button_id).textContent = 'Hide Data Selection Columns';
+    }
     //
     var callback = function(response) {
         var args = {};
@@ -960,28 +996,13 @@ function rep_report_data_columns(out_id,button_id,toggle,reset) {
         args.hide_sort_row = true;
         args.hide_totals_row = true;
         args.all_onclick_fun = "show_update_button('create-rep-report','sales-rep-report','Show Changes'); remove_class('hidden-elm','restore-data-col-defaults');";
-        var table = make_data_columns_table(args)
-        //
-        // shows or hides the data column div
-        if (toggle) { show_hide(out_id);}
-        //
-        if (document.getElementById(out_id).className.match(/hidden/i)) {
-            document.getElementById(button_id).innerHTML = "Show Data Selection Columns";
-        }
-        else {
-            document.getElementById(button_id).innerHTML = "Hide Data Selection Columns";
-        }
-        //
-        // checking if the checkbox array needs reset or not
-        if (!(reset)) {
-            if (document.getElementById(out_id).innerHTML.match(/table/)) {return; }
-        }
-        //
-        document.getElementById(out_id).innerHTML = button+table;
+        document.getElementById(out_id).removeChild(document.getElementById('data_sel_cols_table'));
+        make_data_columns_table(document.getElementById(out_id),args);
     }
     //
-    ajax_fetch([meta_sql,preset_sql],['meta_data','preset_data'],callback)
-    //
+    if (reset) {
+        ajax_fetch([meta_sql,preset_sql],['meta_data','preset_data'],callback);
+    }
 }
 //
 // this creates the rep report 
@@ -1036,7 +1057,15 @@ function create_rep_report(rep_id) {
     var sql = gen_sql(sql_args);
     //
     var callback = function(response) {
-        if (!(response[0][0])) {document.getElementById('content-div').innerHTML = '<table id="sales-rep-report"><h3>No available data</h3></table>'; return;}
+        if (!(response[0][0])) {
+            table = document.createElementWithAttr('TABLE',{'id' : 'sales-rep-report'});
+            h3 = document.createElement('H3');
+            h3.addTextNode('No available data')
+            table.appendChild(h3);
+            document.getElementById('content-div').removeAll();
+            document.getElementById('content-div').appendChild(table); 
+            return;
+        }
         report_args.end_date = response[0][0]['date'];
         rep_report_get_data(report_args);
     }
@@ -1158,15 +1187,6 @@ function rep_report_process_data(args) {
         col_funct(col.column_name,args);
     }
     //
-    // handling data types in the report
-    for (var i = 0; i < rep_data.length; i++) {
-        for (var j = 0; j < meta_data.length; j++) {
-            var col = meta_data[j];
-            //console.log(i,col.column_name,rep_data[i][col.column_name],col.data_type)
-            rep_data[i][col.column_name] = process_data_type(rep_data[i][col.column_name],col.data_type);
-        }
-    }
-    //
     // calling final creation function
     build_rep_report(args);
 }
@@ -1193,5 +1213,5 @@ function build_rep_report(args) {
     };
     //
     var output_table = make_standard_table(table_args)
-    document.getElementById(table_args.table_output_id).innerHTML = output_table;
+    document.getElementById(table_args.table_output_id).replaceChild(output_table,document.getElementById(output_table.id));
 }

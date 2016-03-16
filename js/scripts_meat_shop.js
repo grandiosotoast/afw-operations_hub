@@ -11,12 +11,16 @@ function item_maintenance() {
     //
     document.getElementById('tab-clicked').value = 'item-maintenance';
     // 
-    var head ='<h4>Click on an item in the table to modfy it or click the button below the table to create a new item.</h4>';
-    head += '<label class="label">Show Inactive Items</label><input id="show-inactive" type="checkbox" onclick="gen_item_table(1,\'item_number\',\'ASC\');">';
-    head += '<br>';
-    head += '<label class="label-12em">Narrow by Item Number: </label><input id="search-item-number" type="text" onkeyup="gen_item_table(1,\'item_number\',\'ASC\');">';
+    var head_elements = Array(
+        {'elm' : 'H4','textNode' : 'Click on an item in the table to modfy it or click the button below the table to create a new item.'},
+        {'elm' : 'LABEL', 'className' : 'label', 'textNode' : 'Show Inactive Items'},
+        {'elm' : 'INPUT', 'id' : 'show-inactive', 'type' : 'checkbox', 'events' : [{'event' : 'click', 'function' : gen_item_table.bind(null,1,'item_number','ASC')}]},
+        {'elm' : 'BR'},
+        {'elm' : 'LABEL', 'className' : 'label-12em', 'textNode' : 'Narrow by Item Number:'},
+        {'elm' : 'INPUT', 'id' : 'search-item-number', 'type' : 'text', 'events' : [{'event' : 'keyup', 'function' : gen_item_table.bind(null,1,'item_number','ASC')}]}
+        );
     //
-    document.getElementById('input-div').innerHTML = head;
+    addChildren(document.getElementById('input-div'),head_elements);
     //
     gen_item_table(1,'item_number','ASC');
 }
@@ -53,13 +57,13 @@ function reset_meat_page() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
 }
 //
 // this sets up the page if the create new item button is clicked
 function create_item() {
-    document.getElementById('modify-header').innerHTML = 'Creating new Item';
+    document.getElementById('modify-header').textContent = 'Creating new Item';
     create_form('meat_shop_item','content-div');
 }
 //
@@ -69,15 +73,19 @@ function update_stock() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
     //
     document.getElementById('tab-clicked').value = 'stock-changes';
     // 
-    var head ='<h4>Click on an item in the table to update it\'s quantity.</h4>';
-    head += '<label class="label-12em">Narrow by Item Number: </label><input id="search-item-number" type="text" onkeyup="gen_item_table(1,\'item_number\',\'ASC\');">';
+    // 
+    var head_elements = Array(
+        {'elm' : 'H4','textNode' : "Click on an item in the table to update it's quantity."},
+        {'elm' : 'LABEL', 'className' : 'label-12em', 'textNode' : 'Narrow by Item Number:'},
+        {'elm' : 'INPUT', 'id' : 'search-item-number', 'type' : 'text', 'events' : [{'event' : 'keyup', 'function' : gen_item_table.bind(null,1,'item_number','ASC')}]}
+        );
     //
-    document.getElementById('input-div').innerHTML = head;
+    addChildren(document.getElementById('input-div'),head_elements);
     //
     gen_item_table(1,'item_number','ASC');
 }
@@ -85,15 +93,21 @@ function update_stock() {
 // this sets up the page for modifying a stock change record
 function mod_change_records() {
     //
-    document.getElementById('content-div').innerHTML = '';
-    document.getElementById('modify-header').innerHTML = '';    
+    document.getElementById('content-div').removeAll();
+    document.getElementById('modify-header').removeAll();   
+    document.getElementById('input-div').removeAll();
     //
-    var head ='<h4>Click on a record in the table to modify it.</h4>';
-    head += '<label class="label">Show Deleted Records</label><input id="show-deleted" type="checkbox" onclick="gen_stock_table(1,\'creation_timestamp\',\'DESC\');">';
-    head += '<br>';
-    head += '<label class="label-12em">Narrow by Item Number: </label><input id="search-item-number" type="text" onkeyup="gen_stock_table(1,\'creation_timestamp\',\'DESC\');">';
+    // 
+    var head_elements = Array(
+        {'elm' : 'H4','textNode' : 'Click on a record in the table to modify it.'},
+        {'elm' : 'LABEL', 'className' : 'label', 'textNode' : 'Show Deleted Records'},
+        {'elm' : 'INPUT', 'id' : 'show-deleted', 'type' : 'checkbox', 'events' : [{'event' : 'click', 'function' : gen_stock_table.bind(null,1,'creation_timestamp','DESC')}]},
+        {'elm' : 'BR'},
+        {'elm' : 'LABEL', 'className' : 'label-12em', 'textNode' : 'Narrow by Item Number:'},
+        {'elm' : 'INPUT', 'id' : 'search-item-number', 'type' : 'text', 'events' : [{'event' : 'keyup', 'function' : gen_stock_table.bind(null,1,'creation_timestamp','DESC')}]}
+        );
     //
-    document.getElementById('input-div').innerHTML = head;
+    addChildren(document.getElementById('input-div'),head_elements);
     //
     gen_stock_table(1,'creation_timestamp','DESC');
 }
@@ -104,6 +118,7 @@ function gen_item_table(page,sort_col,sort_dir) {
     var item_table_args = {};
     var data_sql_args = {};
     var meta_sql_args = {};
+    document.getElementById('item-table-div').removeAll();
     //
     // setting up the data and meta SQL args
     meta_sql_args.cmd = 'SELECT';
@@ -125,13 +140,19 @@ function gen_item_table(page,sort_col,sort_dir) {
     var table_callback = '';
     if (document.getElementById('tab-clicked').value == 'item-maintenance') {
         table_callback = function() {
-                var create_button = "<br><button id=\"create-new-item\" type=\"button\" style=\"display:block; margin:auto;\"onclick=\"create_item();\">Create New Item</button>";
-                document.getElementById('item-table-div').innerHTML = document.getElementById('item-table-div').innerHTML + create_button;
+                var br = document.createElement('BR');
+                var button = document.createElementWithAttr('BUTTON',{'id' : 'create-new-item','type' : 'button'});
+                button.style.display = 'block';
+                button.style.margin = 'auto';
+                button.addEventListener('click',function() { create_item();});
+                button.appendChild(document.createTextNode('Create New Item'));
+                document.getElementById('item-table-div').appendChild(br);
+                document.getElementById('item-table-div').appendChild(button);
             };
-        item_table_args.row_onclick = 'mod_item(\'%item_number%\')';
+        item_table_args.row_onclick = "mod_item('%item_number%');";
     }
     else if (document.getElementById('tab-clicked').value == 'stock-changes') {
-        item_table_args.row_onclick = 'update_item_stock(\'%row_id%\');'; // this will be a gen stock report onclick
+        item_table_args.row_onclick = "update_item_stock('%row_id%');"; // this will be a gen stock report onclick
     }
     //
     item_table_args.meta_sql_args = meta_sql_args;
@@ -143,15 +164,12 @@ function gen_item_table(page,sort_col,sort_dir) {
     item_table_args.table_class = 'default-table';
     item_table_args.row_id_prefix = 'item-row';
     item_table_args.table_data_cell_class = 'default-table-td';
-    item_table_args.head_row_class_str = 'default-table-header';
-    item_table_args.sort_col = sort_col;
-    item_table_args.sort_dir = sort_dir;
-    item_table_args.sort_onclick = "gen_item_table(%%,'%column_name%','%sort_dir%');";
     item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = table_callback;
     item_table_args.head_row_args = {
         'sortable' : true,
+        'head_row_class_str' : 'default-table-header',
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "gen_item_table(%%,'%column_name%','%sort_dir%')"
@@ -179,7 +197,7 @@ function mod_item(item_number) {
     create_form('meat_shop_item','content-div');
     //
     // creating header 
-    document.getElementById('modify-header').innerHTML = "Modfiying Item: "+item_number;
+    document.getElementById('modify-header').textContent = 'Modfiying Item: '+item_number;
     //
     var curr_page = document.getElementById('item-table-page-nav').dataset.currPage;
     var sort_col = document.getElementById('item-table-page-nav').dataset.sortCol;
@@ -331,7 +349,7 @@ function mod_stock_change_record(entry_id) {
     // unhiding form elements 
     remove_class('hidden-elm','orig-amount-label');
     remove_class('hidden-elm','orig-amount');
-    document.getElementById('amount-label').innerHTML = 'New Add/Remove Pounds:';
+    document.getElementById('amount-label').textContent = 'New Add/Remove Pounds:';
     //
     // creating the meta_data sql statement
     data_sql =  'SELECT * FROM meat_shop_stock '
@@ -393,7 +411,7 @@ function mod_stock_change_record(entry_id) {
         }
         process_form_data(populate_form_args);
         button_fun();
-        document.getElementById('modify-header').innerHTML = "Modfiying Record: "+entry_id+' for Item: '+data.item_number+' - '+data.item_name;
+        document.getElementById('modify-header').textContent = 'Modfiying Record: '+entry_id+' for Item: '+data.item_number+' - '+data.item_name;
         document.getElementById('new-quantity').value = data.quantity;
     }
     //
@@ -421,7 +439,7 @@ function meat_shop_inventory_report() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) { childNodes[i].removeAll();}
     }
     //
     var report_type = 'stock_report'; //this can be a variable later
@@ -433,7 +451,7 @@ function meat_shop_inventory_report() {
     var item_table_args = {};
     //
     // setting header
-    document.getElementById('modify-header').innerHTML = 'Meat Shop Inventory Report'
+    document.getElementById('modify-header').textContent = 'Meat Shop Inventory Report';
     //
     // populating meta and data sql args
     meta_sql_args.cmd = 'SELECT';
@@ -470,7 +488,7 @@ function meat_shop_inventory_report() {
     
 }
 //
-// this function modifies the non sortable table output by create_meat_shop_report
+// this function modifies the table output by create_meat_shop_report
 function mod_inventory_report_table() {
     //
     var report_rows = document.getElementById('meat-shop-report').getElementsByTagName("TR");;
@@ -480,49 +498,81 @@ function mod_inventory_report_table() {
     //
     // modifying head row to add in total value column
     var head_row = report_rows[0];
-    var value_td = '<td id="Total Value" class="default-table-header">Total Value</td>';
-    head_row.innerHTML += value_td;
+    var td = document.createElementWithAttr('TD',{'id' : 'total-value', 'class' : 'default-table-header'});
+    td.appendChild(document.createTextNode('Total Value'));
+    head_row.appendChild(td);
     //
     // processing rows
+    var money_fmt_str = '<span style="float:left;">$&nbsp;</span><span style="float:right;">%value%<span>';
+    var type_str = 'float%round(r,'+CONSTANTS.STD_PRECISION+')';
+    var row = null;
+    var price_td = null;
+    var price_span = null;
+    var qty_td   = null;
+    var value_td = null;
+    var value_span = null;
+    var dollar_sign = document.createElement('SPAN');
+    dollar_sign.style['float'] = 'left';
+    dollar_sign.appendChild(document.createTextNode('$\u00A0'));
+    var dollar_value = document.createElement('SPAN');
+    dollar_value.style['float'] = 'right';
+    //
     var total_weight = 0.0;
     var total_value = 0.0;
-    var row = '';
-    var price_td = '';
-    var qty_td = '';
     var price = 0.0;
-    var qty = 0.0;
+    var qty   = 0.0;
     var value = 0.0;
+    //
     for (var i = 1; i < report_rows.length; i++) {
         row = report_rows[i];
         price_td = document.getElementById(row.id+'-cost_per_lb');
-        qty_td = document.getElementById(row.id+'-quantity');
-        price = +price_td.innerHTML;
-        qty = +qty_td.innerHTML;
+        qty_td   = document.getElementById(row.id+'-quantity');
+        value_td = document.createElementWithAttr('TD',{'id' : row.id, 'class' : 'default-table-td'})
         //
-        // calculating value of stock
+        // calculating values
+        price = Number.parse(price_td.innerHTML);
+        qty = Number.parse(qty_td.innerHTML);
         value = qty*price;
         total_weight += qty;
         total_value += value;
         //
         // outputting tds
-        price_td.innerHTML = '<span style="float:left;">$&nbsp;</span><span style="float:right;">'+round(price,2).toFixed(2)+'<span>';
-        //qty_td.style = 'text-align: right';
-        qty_td.innerHTML = round(qty,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") //this regex adds commas
-        value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-        value_td = '<td id="'+row.id+'-total_value" class="default-table-td"><span style="float:left;">$&nbsp;</span><span style="float:right;">'+value+'<span></td>';
-        row.innerHTML += value_td;
-        
+        remove_all_children(price_td,'');
+        remove_all_children(qty_td,'');     
+        price_span = dollar_value.cloneNode();   
+        value_span = dollar_value.cloneNode();
+        process_data_type(price,type_str,price_span,null);
+        process_data_type(qty,type_str,qty_td,null);
+        process_data_type(value,type_str,value_span,null);
+        price_td.appendChild(dollar_sign.cloneNode(true));
+        price_td.appendChild(price_span);
+        value_td.appendChild(dollar_sign.cloneNode(true));
+        value_td.appendChild(value_span);
+        row.appendChild(value_td);
     }
     //
     // outputting a total row at the bottom of the table
-    total_weight = round(total_weight,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    total_value = round(total_value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    var total_row = '<tr>';
-    total_row += '<td colspan=2 class="default-table-header" style="font-size:16px;">Total:</td>';
-    total_row += '<td class="default-table-header" style="text-align: right; font-size:16px;">'+total_weight+'</td>';
-    total_row += '<td class="default-table-header">&nbsp</td>';
-    total_row += '<td class="default-table-header"><span style="float:left; font-size:16px;">$&nbsp;</span><span style="float:right; font-size:16px;">'+total_value+'<span></td>';
-    document.getElementById('meat-shop-report').innerHTML += total_row;
+    var total_row = document.createElement('TR');
+    var total_td  = document.createElementWithAttr('TD',{'class' : 'default-table-header', 'colspan' : '2'});
+    var total_qty = document.createElementWithAttr('TD',{'class' : 'default-table-header'});
+    var total_blk = document.createElementWithAttr('TD',{'class' : 'default-table-header'});
+    var total_val = document.createElementWithAttr('TD',{'class' : 'default-table-header'});
+    total_row.style['font-size'] = '16px';
+    total_qty.style['text-align'] = 'right';
+    total_val.style['text-align'] = 'right';
+    total_td.appendChild(document.createTextNode('Total:'));
+    total_blk.appendChild(document.createTextNode('\u00A0'));
+    process_data_type(total_weight,type_str,total_qty,null);
+    value_span = dollar_value.cloneNode();
+    process_data_type(total_value,type_str,value_span,null);
+    //
+    total_row.appendChild(total_td);
+    total_row.appendChild(total_qty);
+    total_row.appendChild(total_blk);
+    total_val.appendChild(dollar_sign.cloneNode(true));
+    total_val.appendChild(value_span);
+    total_row.appendChild(total_val);
+    document.getElementById('meat-shop-report').appendChild(total_row);
 }
 //
 // this handles page creation and generation of a stock change report
@@ -531,22 +581,29 @@ function stock_change_report() {
     // clearing elements inside main-container div
     var childNodes = document.getElementById('main-container').childNodes;
     for (var i = 0; i < childNodes.length; i++) {
-        if (childNodes[i].nodeType == 1) {childNodes[i].innerHTML = '';}
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
     //
-    var head ='<fieldset class="fieldset-default">';
-    head += '<legend>Stock Report Parameters</legend>';
-    head += '<label class="label-12em">Show Deleted Records</label><input id="show-deleted" type="checkbox" onclick="show_update_button(\'create-report\',\'stock-change-report-table\',\'Show Changes\');">';
-    head += '<br>';
-    head += '<label class="label-12em">Narrow by Item Number: </label><input id="search-item-number" type="text" onkeyup="show_update_button(\'create-report\',\'stock-change-report-table\',\'Show Changes\');">';
-    head += '<br>';
-    head += '<br>';
-    head += '<div id="time-range-inputs"></div>';
-    head += '</fieldset>';
-    head += '<button id="create-report" type="button" onclick="create_change_report();">Create Report</button>';
-    head += '<br>';
-    // outputting head
-    document.getElementById('input-div').innerHTML = head;
+    // 
+    var head_elements = Array(
+        {'elm' : 'LEGEND','textNode' : 'Stock Report Parameters'},
+        {'elm' : 'LABEL', 'className' : 'label-12em', 'textNode' : 'Show Deleted Records'},
+        {'elm' : 'INPUT', 'id' : 'show-deleted', 'type' : 'checkbox', 'events' : [{'event' : 'click', 'function' : show_update_button.bind(null,'create-report','stock-change-report-table','Show Changes')}]},
+        {'elm' : 'BR'},
+        {'elm' : 'LABEL', 'className' : 'label-12em', 'textNode' : 'Narrow by Item Number:'},
+        {'elm' : 'INPUT', 'id' : 'search-item-number', 'type' : 'text', 'events' : [{'event' : 'keyup', 'function' : show_update_button.bind(null,'create-report','stock-change-report-table','Show Changes')}]},
+        {'elm' : 'BR'},
+        {'elm' : 'BR'},
+        {'elm' : 'DIV', 'id' : 'time-range-inputs'}
+        );
+    //
+    var fieldset = document.createElementWithAttr('FIELDSET',{'class' : 'fieldset-default'});
+    var button = document.createElementWithAttr('BUTTON',{'id' : 'create-report', 'type' : 'button'});
+    button.addEventListener('click',create_change_report.bind(null));
+    button.addTextNode('Create Report');
+    document.getElementById('input-div').appendChild(fieldset);
+    document.getElementById('input-div').appendChild(button);
+    addChildren(fieldset,head_elements);
     //
     // creating time range inputs
     var input_args = {

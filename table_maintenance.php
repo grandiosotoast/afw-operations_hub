@@ -75,6 +75,13 @@ if (!!(old_url.match(/administration.php/))) {
 <br>
 <h3 id="modify-header"></h3>
 <div id="modify-table-form">
+<form id="update-table-data" class="hidden-elm"></form>
+<label id="form-errors" class="error-msg hidden-elm">Form errors are highlighted in red</label>
+<br>
+<br>
+<button id="submit-changes" class="hidden-elm"></button>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<button id="delete-row" class="hidden-elm"></button>
 </div>
 </div>
 </body>

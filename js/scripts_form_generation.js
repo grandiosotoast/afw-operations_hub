@@ -703,6 +703,14 @@ function addChildren(parentNode,elementsArray) {
     }
 }
 //
+// this removes all children from an element
+function remove_all_children(element,args) {
+    //
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
+//
 // this creates the time range inputs for a page
 function create_time_range_inputs(input_args) {
     //
@@ -788,9 +796,6 @@ function create_time_range_inputs(input_args) {
       '</select>'+
       '&nbsp;'+
       '<select id="st-year" class="dropbox-input" name="st-year" onchange="'+year_onchange+'" disabled>'+
-        '<option id="st-2015" value="2015">2015</option>'+
-        '<option id="st-2014" value="2014">2014</option>'+
-        '<option id="st-2013" value="2013">2013</option>'+
       '</select>'+
       '&nbsp;&nbsp;&nbsp;&nbsp;'+
       '<a onclick="'+st_img_onclick+'"><image id="cal_st_image" class="cal-image"  src="http://www.afwendling.com/operations/images/calander.png"></a>'+
@@ -814,9 +819,6 @@ function create_time_range_inputs(input_args) {
       '</select>'+
       '&nbsp;'+
       '<select id="en-year" class="dropbox-input" name="en-year" onchange="'+year_onchange+'" disabled>'+
-        '<option id ="en-2015" value="2015">2015</option>'+
-        '<option id ="en-2014" value="2014">2014</option>'+
-        '<option id ="en-2013" value="2013">2013</option>'+
       '</select>'+
       '&nbsp;&nbsp;&nbsp;&nbsp;'+
       '<a onclick="'+end_img_onclick+'"><image id="cal_en_image" class="cal-image" src="http://www.afwendling.com/operations/images/calander.png"></a>'+
@@ -846,15 +848,27 @@ function find_pay_period(date) {
     var st_pp = new Date(CONSTANTS.FIRST_BUSINESS_DAY[0],+CONSTANTS.FIRST_BUSINESS_DAY[1]-1,CONSTANTS.FIRST_BUSINESS_DAY[2]);
     var test_date = st_pp;
     ts_arr = [st_pp]
-    for (var w = 0; w < 60; w+=2) { 
-        test_date = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()+14));
-        ts_arr[1] = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()-1));
-        if (test_date > date) {break;}
-        ts_arr = [test_date];
-    }    
+    if (date < st_pp) {
+        while (true) { 
+            ts_arr[1] = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()));
+            test_date = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()-14));
+            ts_arr[0] = test_date;
+            if ((date >= ts_arr[0]) && (date <= ts_arr[1])) {break;}
+            if (date >= ts_arr[0]) { break;}
+        }  
+    }
+    else {
+        while (true) { 
+            test_date = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()+14));
+            ts_arr[1] = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()-1));
+            if (test_date >= date) { break;}
+            ts_arr = [test_date];
+        }    
+    }
     //
     ts_arr[0] = ts_arr[0].yyyymmdd();
     ts_arr[1] = ts_arr[1].yyyymmdd();
+    //
     return ts_arr;
 }
 //
@@ -1129,28 +1143,40 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
     //
     // temporary function to populate a drop box
     var pop_dropbox = function(response) {
+        var dropbox = document.getElementById(dropbox_id)
         var data_arr = response.data;
-        var options_str = "";
+        var opt = null;
+        var opt_attr = {};
         //
         // creating options for dropbox
-        if (place_holder != ""){
-            options_str += "<option value= \""+place_holder_value+"\" "+place_holder_status+">"+place_holder+"</option>";
+        dropbox.removeAll();
+        if (place_holder != ''){
+            opt_attr = {'value' : place_holder_value}
+            opt = document.createElementWithAttr('OPTION',opt_attr);
+            if (place_holder_status) { opt[place_holder_status] = true;}
+            opt.addTextNode(place_holder);
+            dropbox.appendChild(opt);
         }
         //
         for (var i = 0; i < data_arr.length; i++) {
             var text = text_format;
             var value = value_format;
             for (var prop in data_arr[i]) { text = text.replace('%'+prop+'%',data_arr[i][prop]); value = value.replace('%'+prop+'%',data_arr[i][prop]);}
-            options_str += "<option value=\""+value+"\">"+text+"</option>";
+            opt_attr = {'value' : value}
+            opt = document.createElementWithAttr('OPTION',opt_attr);            
+            opt.addTextNode(text);
+            dropbox.appendChild(opt);
         }
         //
         // placing additional options in list
         if (!!(add_args.add_opts_val)) {
             for (var i = 0;  i < add_args.add_opts_val.length; i++) {
-                options_str += "<option value=\""+add_args.add_opts_val[i]+"\">"+add_args.add_opts_text[i]+"</option>";
+                opt_attr = {'value' : add_args.add_opts_val[i]}
+                opt = document.createElementWithAttr('OPTION',opt_attr);            
+                opt.addTextNode(add_args.add_opts_text[i]);
+                dropbox.appendChild(opt);
             }
         }
-        document.getElementById(dropbox_id).innerHTML = options_str;
         //
         if (callback) {callback();}
     }
@@ -1167,8 +1193,13 @@ function populate_year_dropboxes(dropbox_id) {
     var date = new Date();
     var curr_year = date.getFullYear();
     var first_year = CONSTANTS.FIRST_YEAR_WITH_DATA;
+    var dropbox = document.getElementById(dropbox_id);
+    var opt = null;
+    var opt_attr = {};
     for (var y = curr_year; y >= first_year; y--) {
-        options_str += "<option id=\""+dropbox_id+"-"+y+"\" value=\""+y+"\">"+y+"</option>";
+        opt_attr = {'id' : dropbox_id+'-'+y, 'value' : y}
+        opt = document.createElementWithAttr('OPTION',opt_attr);
+        opt.appendChild(document.createTextNode(y));
+        dropbox.appendChild(opt);
     }
-    document.getElementById(dropbox_id).innerHTML = options_str;
 }

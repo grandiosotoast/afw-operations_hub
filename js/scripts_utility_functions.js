@@ -4,6 +4,38 @@
 ////////////////////////////////////////////////////////////////////////////////
 "use strict";
 //
+// creates and element with the supplied attributes
+document.createElementWithAttr = function(nodeName,attributes) {
+    var element = document.createElement(nodeName);
+    //
+    for (var attr in attributes) {
+        element.setAttribute(attr,attributes[attr]);
+    }
+    return element;
+}
+//
+// Adds multiple nodes to an element
+Node.prototype.addNodes = function(node_array) {
+    //
+    for (var i = 0; i < node_array.length; i++) {
+        this.appendChild(node_array[i]);
+    }
+}
+//
+// this is just a short hand to add a text node to an element
+Node.prototype.addTextNode = function(text) {
+    //
+    this.appendChild(document.createTextNode(text));
+}
+//
+// removes all children from an element
+Node.prototype.removeAll = function() {
+    //
+    while (this.firstChild) {
+        this.removeChild(this.firstChild);
+    }
+}
+//
 // this creates a method to output a YYYY-MM-DD formatted date 
 Date.prototype.yyyymmdd = function() {
     // getting components of date
@@ -12,8 +44,39 @@ Date.prototype.yyyymmdd = function() {
     var   DD =  this.getDate().toString();
     //
     // returning formatted string
-    return YYYY + '-' + (MM[1]?MM:"0"+MM[0]) + '-' + (DD[1]?DD:"0"+DD[0])
+    return YYYY + '-' + (MM[1]?MM:'0'+MM[0]) + '-' + (DD[1]?DD:'0'+DD[0])
 };
+//
+// this parses a number, removing commas, dollar and percent signs 
+Number.parse = function(num_str) {
+    //
+    num_str = num_str+'';//ensures value is a string 
+    num_str = num_str.replace(/[%$,]/g,'');
+    //
+    return(Number(num_str));
+}
+//
+// this takes a function string and executes it
+function exec_fun_str(func_str) {
+    //
+    var funs = func_str.split(';');
+    for (var i = 0; i < funs.length; i++) {
+        if (funs[i] === '') { continue;}
+        //
+        var m = funs[i].match(/([A-Z_]+)[(](.*?)[)]/i);
+        var name = m[1];
+        var args = m[2].split(',');
+        //
+        for (var j = 0; j < args.length; j++) {
+            args[j] = args[j].replace(/^'/,'"');
+            args[j] = args[j].replace(/'$/,'"');    
+            args[j] = JSON.parse(args[j]);
+        }
+        //
+        var func = window[name];
+        func.apply(null,args);
+    }
+}
 //
 // this performs and outputs the desired math on 2 values
 function elementArithmetic(id1,id2,out_id,operator) {
@@ -72,12 +135,12 @@ function toTitleCase(str)
 //
 // this function performs rouding by converting to integers
 // doing this since .toFixed() doesn't seem to work right;
-function floor(number,numDigits) {
+function floor(number_in,numDigits) {
     //
-    if (number === '') {console.log('Error: round requires number arg',console.log(number),console.log(numDigits));return 0.0;}
-    if (numDigits === '') {console.log('Error: round requires numDigits arg',console.log(number),console.log(numDigits));return 0.0;}
+    if (number_in === '') {console.log('Error: round requires number arg',console.log(number_in),console.log(numDigits));return 0.0;}
+    if (numDigits === '') {console.log('Error: round requires numDigits arg',console.log(number_in),console.log(numDigits));return 0.0;}
     //
-    number = Number(number); 
+    var number = Number(number_in); 
     numDigits = Number(numDigits);
     //
     var scale = Math.pow(10,numDigits);
@@ -88,19 +151,19 @@ function floor(number,numDigits) {
         return(number);
     }
     else {
-        console.log('Warning: Non-Finite number')
-        return 0
+        console.log('Warning: Non-Finite number: '+number_in);
+        return 0;
     }
 }
 //
 // this function performs rouding by converting to integers
 // doing this since .toFixed() doesn't seem to work right;
-function ceiling(number,numDigits) {
+function ceiling(number_in,numDigits) {
     //
-    if (number === '') {console.log('Error: round requires number arg',console.log(number),console.log(numDigits));return 0.0;}
-    if (numDigits === '') {console.log('Error: round requires numDigits arg',console.log(number),console.log(numDigits));return 0.0;}
+    if (number_in === '') {console.log('Error: round requires number arg',console.log(number_in),console.log(numDigits));return 0.0;}
+    if (numDigits === '') {console.log('Error: round requires numDigits arg',console.log(number_in),console.log(numDigits));return 0.0;}
     //
-    number = Number(number); 
+    var number = Number(number_in); 
     numDigits = Number(numDigits);    
     //
     var scale = Math.pow(10,numDigits);
@@ -111,19 +174,19 @@ function ceiling(number,numDigits) {
         return(number);
     }
     else {
-        console.log('Warning: Non-Finite number')
-        return 0
+        console.log('Warning: Non-Finite number: '+number_in);
+        return 0;
     }  
 }
 //
 // this function performs rouding by converting to integers
 // doing this since .toFixed() doesn't seem to work right;
-function round(number,numDigits) {
+function round(number_in,numDigits) {
     //
-    if (number === '') {console.log('Error: round requires number arg',console.log(number),console.log(numDigits));return 0.0;}
-    if (numDigits === '') {console.log('Error: round requires numDigits arg',console.log(number),console.log(numDigits));return 0.0;}
+    if (number_in === '') {console.log('Error: round requires number arg',console.log(number_in),console.log(numDigits));return 0.0;}
+    if (numDigits === '') {console.log('Error: round requires numDigits arg',console.log(number_in),console.log(numDigits));return 0.0;}
     //
-    number = Number(number); 
+    var number = Number(number_in); 
     numDigits = Number(numDigits);  
     //
     var scale = Math.pow(10,numDigits);
@@ -134,8 +197,8 @@ function round(number,numDigits) {
         return(number);
     }
     else {
-        console.log('Warning: Non-Finite number')
-        return 0
+        console.log('Warning: Non-Finite number: '+number_in);
+        return 0;
     }   
 }
 //
@@ -226,10 +289,10 @@ function toggle_innerHTML(id,str_1,str_2) {
     var content = document.getElementById(id).innerHTML;
     //
     if (content != str_1) {
-        document.getElementById(id).innerHTML = str_1;
+        document.getElementById(id).textContent = str_1;
     }
     else {
-        document.getElementById(id).innerHTML = str_2;
+        document.getElementById(id).textContent = str_2;
     }
 }
 //
@@ -281,10 +344,10 @@ function toggle_view_element_button(button_id,element_id,hide_str,show_str) {
     //
     // updating button string
     if (document.getElementById(element_id).className.match('hidden-elm')) {
-        document.getElementById(button_id).innerHTML = show_str; 
+        document.getElementById(button_id).textContent = show_str; 
     }
     else {
-        document.getElementById(button_id).innerHTML = hide_str; 
+        document.getElementById(button_id).textContent = hide_str; 
     }
     
 }
@@ -299,7 +362,7 @@ function show_update_button(button_id,data_table_id,update_str) {
         remove_class('hidden-elm',button_id);
         add_class('submit-changes-button',button_id);
         if (update_str != '') {
-            document.getElementById(button_id).innerHTML = update_str;
+            document.getElementById(button_id).textContent = update_str;
             document.getElementById(button_id).value = 'update';
         }
     }
@@ -323,6 +386,7 @@ function remove_class(class_name,elm_id) {
     var element,css;
     var class_pat = new RegExp('(?:^|\\s)'+class_name+'(?!\\S)',"gi");
     element = document.getElementById(elm_id);
+    if (!(element)) {console.log('No element found with id: '+elm_id); return;}
     css = document.getElementById(elm_id).className;
     element.className = css.replace(class_pat,'');
 }

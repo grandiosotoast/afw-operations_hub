@@ -5,8 +5,7 @@
 "use strict";
 //
 // generates the employe table on the report page
-function report_emp_table(page,sort_col,sort_dir,toggle) {
-    
+function report_emp_table(page,sort_col,sort_dir,toggle) {   
     //
     // creating argument objects
     var emp_table_args = {};
@@ -66,25 +65,29 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
         'onmouse_str' : ''
     };
     //
-    // creating employee table
-    create_standard_table(emp_table_args);
+    // creating inital employee table
+    if (!(document.getElementById(emp_table_args.table_id))) {
+        create_standard_table(emp_table_args);
+    }
+    //
     if (toggle == true) {
         toggle_view_element_button('show_employee_table','employee-table-div','Hide Employee Table','Show Employee Table');
-        show_hide("emp-table-header");
-        if (!!(document.getElementById("employee-table-div").className.match("hidden-elm"))) {
-            remove_class("hidden-elm","get_emp_data_all")
+        if (document.getElementById('employee-table-div').className.match('hidden-elm')) {
+            remove_class('hidden-elm','get_emp_data_all');
         }
         else {
-            add_class("hidden-elm","get_emp_data")
+            add_class('hidden-elm','get_emp_data');
         }
+    }
+    else {
+        create_standard_table(emp_table_args);
     }
 }
 //
 // creates the data columns table for the report page
 function show_data_columns(department,out_id,button_id,toggle,reset) { 
-    var arg_object = {};
     var sql_args = {};
-    var meta_sql = "";
+    var meta_sql = '';
     var preset_sql = '';
     var preset = document.getElementById('preset-report').value;
     //
@@ -110,39 +113,52 @@ function show_data_columns(department,out_id,button_id,toggle,reset) {
         return;
     }
     //
-    // creating reset button
-    var reset_onclick = "show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',false,true); show_update_button('get_emp_data','report-table','Show Changes'); add_class('hidden-elm','restore-data-col-defaults');";
-    var button = "<br><button id=\"restore-data-col-defaults\" type=\"button\" class=\"hidden-elm\" onclick=\""+reset_onclick+"\">Restore Defaults</button><br>";
-    //
-    var callback = function(response) {
-        arg_object.data = response.meta_data;
-        arg_object.preset_data = response.preset_data[0];
-        arg_object.all_onclick_fun = "show_update_button('get_emp_data','report-table','Show Changes'); remove_class('hidden-elm','restore-data-col-defaults');";
-        var table = make_data_columns_table(arg_object)
-        //
-        // shows or hides the data column div
-        if (toggle) {
-            show_hide(out_id);
+    // creating reset button and modifying show button
+    if (!(document.getElementById('restore-data-col-defaults'))) {
+        var reset_onclick = function() {
+            show_data_columns(document.getElementById('department').value,out_id,button_id,false,true);
+            show_update_button('get_emp_data','report-table','Show Changes');
+            add_class('hidden-elm','restore-data-col-defaults');
         }
+        var br = document.createElement('BR');
+        var button = document.createElementWithAttr('button',{'id':'restore-data-col-defaults','type':'button','class':'hidden-elm'});
+        var table = document.createElementWithAttr('TABLE',{'id':'data_sel_cols_table','class':'hidden-elm'});
+        button.addTextNode('Restore Defaults');
+        button.addEventListener('click',reset_onclick);
+        document.getElementById(out_id).appendChild(br);
+        document.getElementById(out_id).appendChild(button);
+        document.getElementById(out_id).appendChild(br.cloneNode());
+        document.getElementById(out_id).appendChild(table);
         //
-        if (document.getElementById(out_id).className.match(/hidden/i)) {
-            document.getElementById(button_id).innerHTML = "Show Data Selection Columns";
-        }
-        else {
-            document.getElementById(button_id).innerHTML = "Hide Data Selection Columns";
-        }
-        //
-        // checking if the checkbox array needs reset or not
-        if (!(reset)) {
-            if (document.getElementById(out_id).innerHTML.match(/table/)) {return; }
-        }
-        //
-        document.getElementById(out_id).innerHTML = button+table;
-        var int_secd_sort = document.getElementById('secd-sort').value
-        document.getElementById(int_secd_sort+'-sortby-radio').checked = true;
+        button = document.createElementWithAttr('button',{'id':button_id,'type':'button'});
+        button.addEventListener('click',show_data_columns.bind(null,document.getElementById('department').value,out_id,button_id,true, false));
+        document.getElementById(button_id).parentNode.replaceChild(button,document.getElementById(button_id));
     }
     //
-    ajax_fetch([meta_sql,preset_sql],['meta_data','preset_data'],callback)
+    // shows or hides the data column div
+    if (toggle) { show_hide(out_id);}
+    //
+    if (document.getElementById(out_id).className.match(/hidden/i)) {
+        document.getElementById(button_id).textContent = 'Show Data Selection Columns';
+    }
+    else {
+        document.getElementById(button_id).textContent = 'Hide Data Selection Columns';
+    }
+    //
+    //
+    var callback = function(response) {
+        var args = {};
+        args.data = response.meta_data;
+        args.preset_data = response.preset_data[0];
+        args.all_onclick_fun = "show_update_button('get_emp_data','report-table','Show Changes'); remove_class('hidden-elm','restore-data-col-defaults');";
+        document.getElementById(out_id).removeChild(document.getElementById('data_sel_cols_table'));
+        make_data_columns_table(document.getElementById(out_id),args);
+        update_sort_by_col('sort-by-col-tr', 'secd-sort');
+    }
+    //
+    if (reset) {
+        ajax_fetch([meta_sql,preset_sql],['meta_data','preset_data'],callback);
+    }
 }
 //
 // function to get data and create a data report
@@ -333,26 +349,39 @@ function make_data_sql(report_args) {
 // this function handles creation of the report header for production reports 
 function make_production_report_header(args) {
     //
-    var head = '<div id="report-header" style="padding: 5px; border-top: solid 1px rgb(0,0,0);">';
+    var br = document.createElement('BR');
+    var head = document.createElementWithAttr('DIV',{'id':'report-header'});
+    head.style['padding'] = '5px';
+    head.style['border-top'] = 'solid 1px rgb(0,0,0)';
     //
     // creating report info head
+    var span = document.createElement('SPAN');
+    span.style['text-align'] = 'center';
+    span.style['display'] = 'block';
+    span.style['width'] = '100%';
     if (args.emp_id) {
-        head+= '<span style="text-align: center; display: block; width: 100%;"> Report for Employee: '+args.emp_id+'</span>';
+        span.textContent = 'Report for Employee: '+args.emp_id;
     }
     else {
-        head+= '<span style="text-align: center; display: block; width: 100%;"> Report for Department: '+toTitleCase(args.department.replace('_',' '))+'</span>';
+        span.textContent = 'Report for Department: '+toTitleCase(args.department.replace('_',' '));
     }
-    head += '&nbsp;&nbsp;&nbsp;&nbsp;Date Range: '+args.from_ts+' : '+args.to_ts;
+    head.appendChild(span);
+    head.addTextNode('\u00A0\u00A0\u00A0\u00A0Date Range: '+args.from_ts+' : '+args.to_ts);
+    //
+    // adding crewsize to receiving reports
     if (args.department == 'warehouse_receiving') {
-        var crew_size = parseInt(document.getElementById('crew-size').value);
+        var crew_size = Number(document.getElementById('crew-size').value);
         if (!(isFinite(crew_size))) {
             add_class('invalid-field','crew-size'); 
             crew_size = '*** ERROR: NONE PROVIDED ***';
         }
-        head += '<span id="crew-size-line" ><br>&nbsp;&nbsp;&nbsp;&nbsp;Crew Size: '+crew_size+'</span>'
+        span = document.createElementWithAttr('SPAN',{'id':'crew-size-line'});
+        span.appendChild(br.cloneNode(true));
+        span.addTextNode('\u00A0\u00A0\u00A0\u00A0Crew Size: '+crew_size);
+        head.appendChild(span);
     }
-    head += '<br><br>';
-    head += '</div>';
+    head.appendChild(br.cloneNode('true'));
+    head.appendChild(br.cloneNode('true'));
     //
     return head;
 }
@@ -428,33 +457,36 @@ function make_report(report_args) {
         report_args.col_name_meta[col_meta_data[i].column_name] = col_meta_data[i];
     }
     //
-    // making report header if function was provided
-    var head = '';
-    if (report_head_function) {
-        head = report_args.report_head_function(report_args);
-    }
-    //
-    // making table header rows
+    // setting table head arguments
     head_row_args.sortable = false;
     head_row_args.id_prefix = "report-";
     head_row_args.class_str = "report-column-header";
-    head_row_args.leading_cells = "<td class=\"report-spacer-td\"></td>";
+    head_row_args.leading_cells =  [document.createElementWithAttr('TD',{'class':'report-spacer-td'})];
     head_row_args.skip_cols = sect_cols.slice(0);
     for (var prop in report_args.head_row_args) { head_row_args[prop] = report_args.head_row_args[prop];}
     //
     for (var i = 0; i < col_meta_data.length; i++) {
         if (col_meta_data[i].column_type.match(/total/)) {head_row_args.skip_cols.push(col_meta_data[i].column_name)}
     }
-    var table_head = make_head_rows(col_meta_data,head_row_args)
-    var table = '<table id="'+report_id+'" class="report-table">'
-    table += table_head;
     //
-    // initializing the totals objects
+    // setting report body arguments  
+    var sect_head_args = {}
+    var row_args = {};
+    sect_head_args.prev_id   = '';
+    sect_head_args.prev_sect = '';
+    sect_head_args.td_inner  = '';
+    sect_head_args.td_class  = 'report-table-section-head';
+    sect_head_args.colspan   = col_meta_data.length - 1;
+    row_args.col_meta_data = col_meta_data;
+    row_args.dynamic_cols = report_args.dynamic_cols;
+    row_args.sect_cols = sect_cols;
+    //
+    // setting totals args and initializing the totals objects
     var total_args = {}
+    var totals_obj = {};
     total_args.sect_cols = sect_cols;
     total_args.skip_cols = [];
     total_args.dynamic_cols = report_args.dynamic_cols;
-    var totals_obj = {};
     totals_obj['section_count'] = {};
     totals_obj['section_total'] = {};
     totals_obj['overall_count'] = {};
@@ -475,43 +507,45 @@ function make_report(report_args) {
     }
     report_args.skip_cols = total_args.skip_cols.slice(0);
     //
-    // initializing report body arguments  
-    var sect_head_args = {}
-    sect_head_args.prev_id   = '';
-    sect_head_args.prev_sect = '';
-    sect_head_args.td_inner  = '';
-    sect_head_args.td_class  = 'report-table-section-head';
-    sect_head_args.colspan   = col_meta_data.length - 1;
+    // performing report data precalculations
+    if (data_arr.length > 0) {
+        report_args.called_funs = {};
+        for (var col in report_args.dynamic_cols) {
+            col = report_args.dynamic_cols[col];
+            if (col.column_type != 'precalculate') { continue;}
+            var col_funct = REPORT_FUNCTIONS[col.col_function]
+            if (!(col_funct)) {console.log('Error: No function for column: '+col.column_name); continue;}
+            col_funct(col.column_name,report_args);
+        }
+    }
     //
-    // checking length of data array
+    // creating report head
+    if (report_head_function) {
+        var head = report_args.report_head_function(report_args);
+        document.getElementById(output_id).replaceChild(head,document.getElementById(head.id))
+    }
+    //
+    // creating report table and checking length of data array
+    var table = document.createElementWithAttr('TABLE',{'id':report_id,'class':'report-table'});
+    make_head_rows(table,col_meta_data,head_row_args)
+    document.getElementById(output_id).replaceChild(table,document.getElementById(table.id));
     if (data_arr.length == 0) {
-        head += '***** No Data for Selected Report Parameters *****';
-        document.getElementById(output_id).innerHTML = head+table+'</table></div>';
+        var tr = document.createElement('TR');
+        var td = document.createElementWithAttr('TD',{'colSpan':(col_meta_data.length - 1)});
+        td.addTextNode('***** No Data for Selected Report Parameters *****');
+        tr.appendChild(td);
+        table.appendChild(tr);
         return;
     }
     //
-    // handle report data precalculations
-    report_args.called_funs = {};
-    for (var col in report_args.dynamic_cols) {
-        col = report_args.dynamic_cols[col];
-        if (col.column_type != 'precalculate') { continue;}
-        var col_funct = REPORT_FUNCTIONS[col.col_function]
-        if (!(col_funct)) {console.log('Error: No function for column: '+col.column_name); continue;}
-        col_funct(col.column_name,report_args);
-    }
-    //
-    var row = '';
-    var row_args = {};
-    row_args.col_meta_data = col_meta_data;
-    row_args.dynamic_cols = report_args.dynamic_cols;
-    row_args.sect_cols = sect_cols;
-    //
     // creating the report body
+    var row = null;
+    var rows = null;
     var i = 0;
     while (i < data_arr.length) {
         //
         // testing is data row should be displayed
-        var display = check_display(data_arr[i],report_args['display_params'])
+        var display = check_display(data_arr[i],report_args['display_params']);
         if (!(display)) {
             data_arr.splice(i,1);
             continue;
@@ -527,20 +561,24 @@ function make_report(report_args) {
                 total_args.total_name = 'section';
                 total_args.total_id = total_id;
                 report_args.section_ids.push(total_id);
-                row = make_report_total_tr(total_args,totals_obj,col_meta_data)
+                rows = make_report_total_tr(total_args,totals_obj,col_meta_data)
                 //
-                table += row;
+                if (rows[0]) { table.appendChild(rows[0]);}
+                if (rows[1]) { table.appendChild(rows[1]);}
             }
             //
-            // outputting a section header
             sect_head_args.prev_sect = data_arr[i][prime_sort].toLowerCase();
-            sect_head_args.prev_id = data_arr[i].emp_id;
-            sect_head_args.td_inner = data_arr[i][prime_sort];
-            if (report_section_head_function) { sect_head_args.td_inner = report_section_head_function(data_arr[i],report_args);}
-            sect_head_args.sect = data_arr[i][prime_sort]
-            row = make_report_sect_row(sect_head_args)
-            if (no_sect_headers) { row = '';}
-            table += row;
+            if (!(no_sect_headers)) {
+                //
+                // outputting a section header
+                sect_head_args.prev_id = data_arr[i].emp_id;
+                sect_head_args.td_inner = data_arr[i][prime_sort];
+                if (report_section_head_function) { sect_head_args.td_inner = report_section_head_function(data_arr[i],report_args);}
+                sect_head_args.sect = data_arr[i][prime_sort]
+                row = make_report_sect_row(sect_head_args)
+                //
+                table.appendChild(row);
+            }
         }
         //
         // setting next total id
@@ -549,8 +587,7 @@ function make_report(report_args) {
         //
         row_args.data_entry = data_arr[i];
         row = make_report_data_tr(row_args,totals_obj);
-        if (summary) {row = '';}
-        table += row;
+        if (!(summary)) { table.appendChild(row);}
         //
         i++
     }
@@ -560,18 +597,19 @@ function make_report(report_args) {
         total_args.total_name = 'section';
         total_args.total_id = total_id;
         report_args.section_ids.push(total_id);
-        row = make_report_total_tr(total_args,totals_obj,col_meta_data)
-        table += row;
+        rows = make_report_total_tr(total_args,totals_obj,col_meta_data)
+        //
+        if (rows[0]) { table.appendChild(rows[0]);}
+        if (rows[1]) { table.appendChild(rows[1]);}
         //
         total_args.total_name = 'overall';
         total_args.total_id = 'overall';
         report_args.section_ids.push('overall');
-        row = make_report_total_tr(total_args,totals_obj,col_meta_data)  
-        table += row;
+        rows = make_report_total_tr(total_args,totals_obj,col_meta_data)  
+        //
+        if (rows[0]) { table.appendChild(rows[0]);}
+        if (rows[1]) { table.appendChild(rows[1]);}
     }
-    //
-    table += '</table>';
-    document.getElementById(output_id).innerHTML = head+table+'</div>';
     //
     // handling total and special cols
     for (var col in report_args.dynamic_cols) {
@@ -648,11 +686,12 @@ function check_display(data_row,display_params) {
 //
 // this creates the section header for the report
 function make_report_sect_row(args) {
-    var row = '<tr>';
+    var row = document.createElementWithAttr('TR',{});
+    var td = document.createElementWithAttr('TD',{'class':'report-table-section-head','colSpan':args.colspan});
     //
-    row += '<td class="report-table-section-head" colspan="'+args.colspan+'">'+args.td_inner+'</td>'
+    td.textContent = args.td_inner;
+    row.appendChild(td);
     //
-    row += '</tr>'
     return row;
 }
 //
@@ -681,9 +720,13 @@ function make_report_data_tr(row_args,totals_obj) {
     }
     //
     // creating data line
-    var row = '<tr id="data-entry-'+data_entry.entry_id+'">';
-    row += '<td class="report-spacer-td"></td>';
+    var row = document.createElementWithAttr('TR',{'id':'data-entry-'+data_entry.entry_id});
+    var td = document.createElementWithAttr('TD',{'class':'report-spacer-td'});
+    row.appendChild(td);
     //
+    var td_attr = {};
+    var span = null;
+    var text = '';
     for (var i = 0; i < col_meta_data.length; i++) {
         var col = col_meta_data[i].column_name
         if (sect_cols.indexOf(col) >= 0) {continue;}
@@ -705,16 +748,22 @@ function make_report_data_tr(row_args,totals_obj) {
             }
         }
         //
-        var td = '';
-        var innerHTML = data_entry[col];
-        if ((col == 'comments') && (data_entry[col] != '')) { innerHTML = '<span id="comments-'+data_entry.entry_id+'" class="link-blue" onclick="toggle_innerHTML(this.id,\'C\',\''+data_entry[col]+'\');">C</span>'} 
-        else if (col_meta_data[i].data_type.match(/float/)) { innerHTML = round(Number(data_entry[col]),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);}
-        else if (col_meta_data[i].data_type.match(/int/))   { innerHTML = round(Number(data_entry[col]),0).toFixed(0);} 
-        td = '<td id="data-entry-'+data_entry.entry_id+'-'+col+'" class="report-data-td">'+innerHTML+'</td>';
-        row += td;
+        td_attr = {'id':'data-entry-'+data_entry.entry_id+'-'+col,'class':'report-data-td'};
+        td = document.createElementWithAttr('TD',td_attr);
+        text = data_entry[col];
+        if ((col == 'comments') && (data_entry[col] != '')) { 
+            span = document.createElementWithAttr('SPAN',{'class':'link-blue'});
+            span.id = 'comments-'+data_entry.entry_id;
+            span.addEventListener('click',toggle_innerHTML.bind(null,span.id,'C',data_entry[col]));
+            span.textContent = 'C'
+            td.appendChild(span);
+        } 
+        else {
+            process_data_type(data_entry[col],col_meta_data[i].data_type,td,null)
+        }
+        row.appendChild(td);
     }
     //
-    row += '</tr>'
     return row;
 }
 //
@@ -729,9 +778,13 @@ function make_report_total_tr(total_args,totals_obj,col_meta_data) {
     var regular = 0;
     disp_name = toTitleCase(disp_name);
     //
-    var row = '<tr id="'+total_args.total_id+'">';
-    row += '<td id="report-spacer-td" class="report-spacer-td">&nbsp;</td>';
-    row += '<td id="report-data-td" class="report-data-td" colspan="'+total_args.skip_cols.length+'">'+disp_name+' Total:</td>';
+    var row = document.createElementWithAttr('TR',{'id':total_args.total_id});
+    var td  = document.createElementWithAttr('TD',{'id':'report-spacer-td','class':'report-spacer-td'});
+    row.appendChild(td);
+    td = document.createElementWithAttr('TD',{'id':'report-data-td','class':'report-data-td'});
+    td.colSpan = total_args.skip_cols.length;
+    td.textContent = disp_name+' Total:';
+    row.appendChild(td);
     //
     // outputting totals and resetting their values
     for (var i = 0; i < col_meta_data.length; i++) {
@@ -744,44 +797,55 @@ function make_report_total_tr(total_args,totals_obj,col_meta_data) {
         regular += 1;
         //
         var col = col_meta_data[i];
-        var td = '';
-        var innerHTML = ''
-        var value = totals_obj[total_name+'_total'][col.column_name]
-        var reset = ''
+        var span = document.createElementWithAttr('SPAN',{'class':'report-data-span-'+col.total_type});
+        var td = document.createElementWithAttr('TD',{'id':total_args.total_id+'-'+col.column_name,'class':'report-data-td'});
+        var value = totals_obj[total_name+'_total'][col.column_name];
+        var reset = '';
+        //
         if (col.total_type == 'avg') {
             value = value/totals_obj[total_name+'_count'][col.column_name];
-            if (col.data_type.match(/float/)) { value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);}
-            else if (col.data_type.match(/int/))   { value = round(value,0).toFixed(0);} 
             reset = 0;
+            td.style['text-align'] = 'right';
         }
-        else if (col.total_type == 'sum'){
-            if (col.data_type.match(/float/)) { value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);}
-            else if (col.data_type.match(/int/))   { value = round(value,0).toFixed(0);} 
+        else if (col.total_type == 'sum') {
             reset = 0;
+            td.style['text-align'] = 'right';
         }
         //
         totals_obj[total_name+'_total'][col.column_name] = reset;
         totals_obj[total_name+'_count'][col.column_name] = reset;
-        if (value != '') { innerHTML = '<span id="'+total_args.total_id+'-span-'+col.column_name+'" class="report-data-span-'+col.total_type+'">'+value+'</span>';}
-        td = '<td id="'+total_args.total_id+'-'+col.column_name+'" class="report-data-td">'+innerHTML+'</td>';
-        row += td;
+        //
+        if (value !== '') { 
+            span.id = total_args.total_id+'-span-'+col.column_name;
+            process_data_type(value,col.data_type,span,null)
+            td.appendChild(span);
+        }
+        row.appendChild(td);
     }
-    //
-    row += '</tr>';
     //
     // checking if any dynamic totals exist getting thier counts to estimate col spans
+    var dynamic_row = null;
     if (dynamic > 0) {
-        var dynamic_row = '<tr id="special-'+total_args.total_id+'">';
-        dynamic_row += '<td id="report-spacer-td" class="report-spacer-td">&nbsp;</td>';
-        dynamic_row += '<td id="report-data-td" class="report-data-td" colspan="'+total_args.skip_cols.length+'">'+disp_name+' Special Total:</td>';
-        dynamic_row += '<td class="report-data-td" colspan="'+regular+'">'
+        dynamic_row = document.createElementWithAttr('TR',{'id':'special-'+total_args.total_id});
+        td = document.createElementWithAttr('TD',{'id':'report-spacer-td','class':'report-spacer-td'});
+        dynamic_row.appendChild(td);
+        //
+        td = document.createElementWithAttr('TD',{'id':'report-data-td','class':'report-data-td'});
+        td.colSpan = total_args.skip_cols.length;
+        td.textContent = disp_name+' Special Total:';
+        dynamic_row.appendChild(td);
+        //
+        td = document.createElementWithAttr('TD',{'class':'report-data-td','colSpan':regular});
         for (var i = 0; i < col_meta_data.length; i++) {
             if (col_meta_data[i].column_type.match(/^dynamic-total$/)) {
-                dynamic_row += '<span id="'+total_args.total_id+'-'+col_meta_data[i].column_name+'" style="display: inline-block; width: '+(100/dynamic)+'%">X</span>';
+                span = document.createElementWithAttr('SPAN',{'id':total_args.total_id+'-'+col_meta_data[i].column_name});
+                span.style['display'] = 'inline-block';
+                span.style['with'] = (100/dynamic)+'%';
+                span.textContent = 'X';
+                td.appendChild(span);
             }
         }
-        dynamic_row += '</tr>';
-        row += dynamic_row;
+        dynamic_row.appendChild(td);
     }
-    return row;
+    return([row,dynamic_row]);
 }

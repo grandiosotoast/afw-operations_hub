@@ -142,7 +142,7 @@ function get_backhaul_form(emp_id,form_div_id) {
     var add_fieldset_button = document.createElement('BUTTON');
     add_fieldset_button.id = 'add-fieldset';
     add_fieldset_button.type = 'button';
-    add_fieldset_button.innerHTML = 'Add another PO';
+    add_fieldset_button.appendChild(document.createTextNode('Add another PO'));
     add_fieldset_button.addEventListener('click', function () {
            var num = parseInt(document.getElementById('number-of-fields').value)+1;
            create_haul_fields('haul-info',num)
@@ -348,10 +348,12 @@ function view_employee_data_entry(entry_id,department,row_id) {
     name = ''
     if (row_id != '') {
         var name = document.getElementById(row_id+'-emp_first_name').innerHTML+" "+document.getElementById(row_id+'-emp_last_name').innerHTML;
-        document.getElementById('view-header').innerHTML = "Viewing Record: "+entry_id+" of Employee "+name;
+        remove_all_children(document.getElementById('view-header'));
+        document.getElementById('view-header').appendChild(document.createTextNode('Viewing Record: '+entry_id+' of Employee '+name));
     }
     else {
-        document.getElementById('view-header').innerHTML = "Viewing Record: "+entry_id;
+        remove_all_children(document.getElementById('view-header'));
+        document.getElementById('view-header').appendChild(document.createTextNode('Viewing Record: '+entry_id));
     }
     //
     // creating hide button for deleted records
@@ -359,8 +361,8 @@ function view_employee_data_entry(entry_id,department,row_id) {
     hide_button.type = "button";
     hide_button.appendChild(document.createTextNode('Hide Entry'));
     hide_button.addEventListener("click", function () {
-        document.getElementById('view-header').innerHTML = '';
-        document.getElementById('view-emp-entry-div').innerHTML = '';
+        remove_all_children(document.getElementById('view-header'));
+        remove_all_children( document.getElementById('view-emp-entry-div'));
     });
     //
     submit_button.parentNode.replaceChild(hide_button,submit_button);
@@ -728,11 +730,13 @@ function mod_employee_data_entry(entry_id,department,row_id) {
     // creating header 
     name = ''
     if (row_id != '') {
-        var name = document.getElementById(row_id+'-emp_first_name').innerHTML+" "+document.getElementById(row_id+'-emp_last_name').innerHTML;
-        document.getElementById('modify-header').innerHTML = "Modfiying Record: "+entry_id+" of Employee "+name;
+        var name = document.getElementById(row_id+'-emp_first_name').innerHTML+' '+document.getElementById(row_id+'-emp_last_name').innerHTML;
+        remove_all_children(document.getElementById('modify-header'));
+        document.getElementById('modify-header').appendChild(document.createTextNode('Modfiying Record: '+entry_id+' of Employee '+name));
     }
     else {
-        document.getElementById('modify-header').innerHTML = "Modfiying Record: "+entry_id;
+        remove_all_children(document.getElementById('modify-header'));
+        document.getElementById('modify-header').appendChild(document.createTextNode('Modfiying Record: '+entry_id));
     }
     //
     // creating form
@@ -806,7 +810,7 @@ function mod_backhaul_form(args) {
     var add_fieldset_button = document.createElement('BUTTON');
     add_fieldset_button.id = 'add-fieldset';
     add_fieldset_button.type = 'button';
-    add_fieldset_button.innerHTML = 'Add another PO';
+    add_fieldset_button.appendChild(document.createTextNode('Add another PO'));
     add_fieldset_button.addEventListener('click', function () {
            var num = parseInt(document.getElementById('number-of-fields').value)+1;
            create_haul_fields('haul-info',num)
@@ -1074,12 +1078,13 @@ function mod_dbuser_table(page,sort_col,sort_dir) {
 //
 // defining the row onclick for the employee table
 function mod_dbuser_info(user_id,row_id) {
-    
+    //
     create_form('add_dbuser','mod-dbuser-form-div');
     //
     // creating header 
-    var name = document.getElementById(row_id+'-dbuser_first_name').innerHTML+" "+document.getElementById(row_id+'-dbuser_last_name').innerHTML;
-    document.getElementById('modify-header').innerHTML = "Modfiying User: "+name;
+    var name = document.getElementById(row_id+'-dbuser_first_name').innerHTML+' '+document.getElementById(row_id+'-dbuser_last_name').innerHTML;
+    remove_all_children(document.getElementById('modify-header'));
+    document.getElementById('modify-header').appendChild(document.createTextNode('Modfiying User: '+name));
     //
     var curr_page = document.getElementById('dbuser-table-page-nav').dataset.currPage;
     var sort_col = document.getElementById('dbuser-table-page-nav').dataset.sortCol;
@@ -1090,21 +1095,21 @@ function mod_dbuser_info(user_id,row_id) {
     var reinstate_button = document.createElement('BUTTON');
     //
     // creating delete button
-    delete_button.id = "del-dbuser";
-    delete_button.type = "button";
+    delete_button.id = 'del-dbuser';
+    delete_button.type = 'button';
     delete_button.appendChild(document.createTextNode('Delete User'));
-    delete_button.addEventListener("click", function () {
-        var cont = confirm("Confirm Deletion of User: "+name);
+    delete_button.addEventListener('click', function () {
+        var cont = confirm('Confirm Deletion of User: '+name);
         if (!(cont)) {return;}
         var sql_args = {}
-        sql_args.cmd = "UPDATE";
-        sql_args.table = "dbUsers";
+        sql_args.cmd = 'UPDATE';
+        sql_args.table = 'dbUsers';
         sql_args.cols = ['dbuser_status'];
         sql_args.vals = ['inactive'];
         sql_args.where = [['dbuser_internal_id','LIKE',user_id]];
         var sql = gen_sql(sql_args);
         var callback = function() {
-            alert("Sucessfully Deleted User: "+name+".");
+            alert('Sucessfully Deleted User: '+name+'.');
             document.getElementById('dbuser-status').value = 'inactive'
             mod_dbuser_table(curr_page,sort_col,sort_dir);
             init_dbuser_form_valiation(true)
@@ -1112,28 +1117,28 @@ function mod_dbuser_info(user_id,row_id) {
         ajax_exec_db(sql,callback);     
     });
     // creating modify button
-    mod_button.id = "mod-dbuser";
-    mod_button.type = "button";
-    mod_button.appendChild(document.createTextNode("Submit Changes"))
-    mod_button.addEventListener("click", function () {
+    mod_button.id = 'mod-dbuser';
+    mod_button.type = 'button';
+    mod_button.appendChild(document.createTextNode('Submit Changes'))
+    mod_button.addEventListener('click', function () {
         init_dbuser_form_valiation(true);
     });   
     // creating reinstate button for inactive employees
-    reinstate_button.id = "reinstate-dbuser"
-    reinstate_button.type = "button";
+    reinstate_button.id = 'reinstate-dbuser'
+    reinstate_button.type = 'button';
     reinstate_button.appendChild(document.createTextNode('Reinstate User'));
-    reinstate_button.addEventListener("click", function () {
-        var cont = confirm("Confirm Reinstation of User: "+name);
+    reinstate_button.addEventListener('click', function () {
+        var cont = confirm('Confirm Reinstation of User: '+name);
         if (!(cont)) {return;}
         var sql_args = {}
-        sql_args.cmd = "UPDATE";
-        sql_args.table = "dbUsers";
+        sql_args.cmd = 'UPDATE';
+        sql_args.table = 'dbUsers';
         sql_args.cols = ['dbuser_status'];
         sql_args.vals = ['active'];
         sql_args.where = [['dbuser_internal_id','LIKE',user_id]];
         var sql = gen_sql(sql_args);
         var callback = function() {
-            alert("Sucessfully Reinstated User: "+name+".");
+            alert('Sucessfully Reinstated User: '+name+'.');
             document.getElementById('dbuser-status').value = 'active'
             mod_dbuser_table(curr_page,sort_col,sort_dir);
             init_dbuser_form_valiation(true)
@@ -1249,7 +1254,8 @@ function mod_employee_info(emp_id) {
     create_form('add_employee','mod-employee-form');
     //
     // creating header 
-    document.getElementById('modify-header').innerHTML = "Modfiying Employee: "+emp_id;
+    remove_all_children(document.getElementById('modify-header'));
+    document.getElementById('modify-header').appendChild(document.createTextNode('Modfiying Employee: '+emp_id));
     //
     var curr_page = document.getElementById('emp-table-page-nav').dataset.currPage;
     var sort_col = document.getElementById('emp-table-page-nav').dataset.sortCol;
@@ -1444,7 +1450,7 @@ function create_table(page,sort_col,sort_dir) {
     //
     // creating argument object  
     table_args.table_output_id = 'table-div';
-    table_args.table_id = table_name;
+    table_args.table_id = 'db-table';
     table_args.table_class = 'default-table';
     table_args.row_id_prefix = 'tm-row-';
     table_args.table_data_cell_class = 'default-table-td';                                                                                                                                                                                                
@@ -1458,7 +1464,7 @@ function create_table(page,sort_col,sort_dir) {
         'cell_onclick_str' : "col_name_to_search_box('%column_name%')",
         'sort_onclick_str' : "create_table(%%,'%column_name%','%sort_dir%')",
         'head_row_class_str' : 'default-table-header',
-        'tooltip' : '<span class="default-table-tooltip">%column_name%</span>'
+        'tooltip' : {'elm' : 'SPAN', 'className':'default-table-tooltip','textNode':'%column_name%'}
     };
     table_args.page_nav_args = {
         'curr_page' : page,
@@ -1486,8 +1492,17 @@ function create_table(page,sort_col,sort_dir) {
             alert("Error: No unique column found for table: "+table_name);
         }
         //
-        var button = "<br><button id=\"create-new-entry\" type=\"button\" onclick=\"mod_table_entry('"+table_name+"','');\">Create a New Entry</button>";
-        document.getElementById('table-div').innerHTML += button;
+        var br = document.createElement('BR');
+        var button = document.createElementWithAttr('BUTTON',{'id' : 'create-new-entry','type' : 'button'});
+        button.addEventListener('click',mod_table_entry.bind(null,table_name,''));
+        button.appendChild(document.createTextNode('Create a New Entry'));
+        if (document.getElementById(button.id)) {
+            document.getElementById('table-div').replaceChild(button,document.getElementById(button.id));
+        }
+        else {
+            document.getElementById('table-div').appendChild(br);
+            document.getElementById('table-div').appendChild(button);
+        }
     }
     //
     create_standard_table(table_args);
@@ -1555,70 +1570,116 @@ function mod_table_entry(table_name,row_id) {
 }
 //
 // creates the edit table row form
-function create_table_edit_form(response) {
+function create_table_edit_form(response) { //!!!! start re-writting this to use element creation
     "use strict"
     //
-    // if no meta data is returned then an array is output by the fetch_db function
+    var table_name = document.getElementById('table-selected').value
     var row_data  = {};
     var meta_data = response.meta_data;
     if (response.hasOwnProperty('row_data'))  { row_data = response.row_data[0];}
     else { for (var i = 0; i < meta_data.length; i++) { row_data[meta_data[i].column_name] = '';}}
     //
     // setting modify header
-    document.getElementById('modify-header').innerHTML = 'Modifying Table: '+document.getElementById('table-selected').value;
+    document.getElementById('modify-header').textContent = 'Modifying Table: '+table_name;
     //
-    var form_out = '<form id="update-table-data">';
-    form_out += '<fieldset class="fieldset-default">'
-    form_out += '<legend>Entry Row Values</legend>'
+    var form = document.createElementWithAttr('FORM',{'id':'update-table-data'});
+    var fieldset = document.createElementWithAttr('FIELDSET',{'class':'fieldset-wide'});
+    var legend = document.createElement('LEGEND');
+    legend.textContent = 'Table Row Values';
+    var br = document.createElement('BR');
     //
+    fieldset.appendChild(legend);
+    form.appendChild(fieldset);
+    document.getElementById('modify-table-form').replaceChild(form,document.getElementById(form.id));
+    //
+    var label = null;
+    var input = null;
+    var textarea = null;
+    var select = null;
+    var opt = null;
     var first_id = '';
     for (var i = 0; i < meta_data.length; i++) {
+        var form_nodes = [];
         var col = meta_data[i];
-        var disabled = '';
+        var disabled = false;
         //
-        if (col.data_type.match(/locked/)) {disabled = 'disabled';}
+        if (col.data_type.match(/locked/)) {disabled = true;}
         if (!(first_id) && !(disabled)) {first_id = col.column_name+'-input';}
-        form_out += '<label class="label-large">'+col.column_nickname+':</label>';
+        //
+        label = document.createElementWithAttr('LABEL',{'class':'label-large'});
+        label.addTextNode(col.column_nickname+':');
+        form_nodes = [label];
+        //
         if (col.column_type.match(/enum/)) {
             var vals = col.column_type.match(/enum\[(.*?)\]/);
             if (vals.length > 1) {
                 vals = vals[1].split(',');
-                form_out += '<select id="'+col.column_name+'-input" name="'+col.column_name+'" onchange="remove_class(\'invalid-field\',this.id)" '+disabled+'>';
+                select = document.createElementWithAttr('SELECT',{'id':col.column_name+'-input','name':col.column_name});
+                select.addEventListener('change',remove_class.bind(null,'invalid-field',select.id));
+                if (disabled) { select.disabled = true;}
                 for (var j = 0; j < vals.length; j++) {
-                    form_out += '<option value="'+vals[j]+'">'+vals[j]+'</option>'
+                    opt = document.createElementWithAttr('OPTION',{'value':vals[j]});
+                    opt.addTextNode(vals[j]);
+                    select.appendChild(opt);
                 }
-                form_out += '</select>';
+                form_nodes.push(select);
             }
             else {
-                form_out += '<input id="'+col.column_name+'-input" type="text" name="'+col.column_name+'" class="input-long" value="" onkeyup="remove_class(\'invalid-field\',this.id)" onblur="remove_class(\'invalid-field\',this.id)" '+disabled+'></input>';
+                input = document.createElementWithAttr('INPUT',{'id':col.column_name+'-input','type':'text','name':col.column_name});
+                input.className = 'input-long';
+                input.value = '';
+                if (disabled) { input.disabled = true;}
+                input.addEventListener('keyup',remove_class.bind(null,'invalid-field',input.id));
+                input.addEventListener('blur',remove_class.bind(null,'invalid-field',input.id));
+                form_nodes.push(input);
             }
         }
         else if (col.data_type.match(/text/)) {
-            form_out += '<textarea id="'+col.column_name+'-input" name="'+col.column_name+'" rows="4" cols="60" onkeyup="remove_class(\'invalid-field\',this.id)" onblur="remove_class(\'invalid-field\',this.id)"></textarea>'
+            textarea = document.createElementWithAttr('TEXTAREA',{'id':col.column_name+'-input','name':col.column_name,'rows':'4','cols':'60'});
+            textarea.addEventListener('keyup',remove_class.bind(null,'invalid-field',input.id));
+            textarea.addEventListener('blur',remove_class.bind(null,'invalid-field',input.id));
+            form_nodes.push(textarea);
         }
         else {
-            form_out += '<input id="'+col.column_name+'-input" type="text" name="'+col.column_name+'" class="input-long" value="" onkeyup="remove_class(\'invalid-field\',this.id)" onblur="remove_class(\'invalid-field\',this.id)" '+disabled+'></input>';
+            input = document.createElementWithAttr('INPUT',{'id':col.column_name+'-input','type':'text','name':col.column_name});
+            input.className = 'input-long';
+            input.value = '';
+            if (disabled) { input.disabled = true;}
+            input.addEventListener('keyup',remove_class.bind(null,'invalid-field',input.id));
+            input.addEventListener('blur',remove_class.bind(null,'invalid-field',input.id));
+            form_nodes.push(input);
         }
-        if (col.data_type.match(/skip/)) {form_out += '&nbsp;&nbsp;&nbsp;<label class="label-5em">Skip Field</label><input id="'+col.column_name+'-skip-checkbox" type="checkbox" onclick="toggle_disabled(\''+col.column_name+'-input\')">'}
-        form_out += '<br>';
+        //
+        if (col.data_type.match(/skip/)) {
+            label = document.createElementWithAttr('LABEL',{'class':'label-5em'});
+            label.addTextNode('Skip Field');
+            input = document.createElementWithAttr('INPUT',{'id':col.column_name+'-skip-checkbox','type':'checkbox'});
+            input.style['vertical-align'] = 'top';
+            input.addEventListener('click',toggle_disabled.bind(null,col.column_name+'-input'));
+            form_nodes.push(document.createTextNode('\u00A0\u00A0\u00A0'));
+            form_nodes.push(label);
+            form_nodes.push(input)
+        }
+        form_nodes.push(br.cloneNode(true));
+        fieldset.addNodes(form_nodes);
     }
-    //
-    form_out += '</fieldset>'
-    form_out += '</form>';
-    form_out += "<label id=\"form-errors\" class=\"error-msg hidden-elm\">Form errors are highlighted in red</label><br>";
-    document.getElementById('modify-table-form').innerHTML = form_out;
     //
     // adding two buttons onto the page to modify or delete
-    var buttons = '<br>';
+    var submit_button = document.createElementWithAttr('BUTTON',{'id':'submit-changes','type':'button'});
     if (document.getElementById('table-unique-val').value == '') {
-        buttons += "<button id=\"insert-row\" type=\"button\" onclick=\"submit_table_changes('INSERT','"+document.getElementById('table-selected').value+"')\">Insert Row</button>";
+        submit_button.addEventListener('click',submit_table_changes.bind(null,'INSERT',table_name));
+        submit_button.textContent = 'Insert Row';
     }
     else {
-        buttons += "<button id=\"update-row\" type=\"button\" onclick=\"submit_table_changes('UPDATE','"+document.getElementById('table-selected').value+"')\">Update Row</button>";
+        submit_button.addEventListener('click',submit_table_changes.bind(null,'UPDATE',table_name));
+        submit_button.textContent = 'Update Row';
     }
-    buttons += "&nbsp;&nbsp;&nbsp;";
-    buttons += "<button id=\"delete-row\" type=\"button\" onclick=\"submit_table_changes('DELETE','"+document.getElementById('table-selected').value+"')\">Delete Row</button>";
-    document.getElementById('modify-table-form').innerHTML += buttons;
+    var delete_button = document.createElementWithAttr('BUTTON',{'id':'delete-row','type':'button'});
+    delete_button.addEventListener('click',submit_table_changes.bind(null,'DELETE',table_name));
+    delete_button.textContent = 'Delete Row';
+    //    
+    document.getElementById('modify-table-form').replaceChild(submit_button,document.getElementById(submit_button.id));
+    document.getElementById('modify-table-form').replaceChild(delete_button,document.getElementById(delete_button.id));    
     //
     // populating fields on the form
     var populate_form_args = {}

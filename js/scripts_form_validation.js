@@ -423,10 +423,10 @@ function submit_dbuser_form(arg_object) {
             var sort_col = document.getElementById('dbuser-table-page-nav').dataset.sortCol;
             var sort_dir = document.getElementById('dbuser-table-page-nav').dataset.sortDir;
             mod_dbuser_table(curr_page,sort_col,sort_dir);
-            alert("Sucessfully Modifed User: "+name_val_obj.dbuser_first_name+" "+name_val_obj.dbuser_last_name+".");
+            alert('Sucessfully Modifed User: '+name_val_obj.dbuser_first_name+' '+name_val_obj.dbuser_last_name+'.');
             // clearing form off of page
-            document.getElementById('mod-dbuser-form-div').innerHTML = "";
-            document.getElementById('modify-header').innerHTML = "";
+            document.getElementById('mod-dbuser-form-div').removeAll();
+            document.getElementById('modify-header').removeAll();
         }
     }
     else {
@@ -436,7 +436,7 @@ function submit_dbuser_form(arg_object) {
         var callback = function() {
             create_form('add_dbuser','add-new-dbuser-form');
             pop_add_dbuser_dropdowns(false);
-            alert("Sucessfully Created User: "+name_val_obj.dbuser_first_name+" "+name_val_obj.dbuser_last_name+".");
+            alert('Sucessfully Created User: '+name_val_obj.dbuser_first_name+' '+name_val_obj.dbuser_last_name+'.');
         }
     }
     sql_args.table = "dbUsers";
@@ -457,7 +457,7 @@ function submit_dbuser_form(arg_object) {
 // validating the add employee form 
 function init_employee_form_valiation(action) {   
     // checking if strig is only numbers
-    if (document.getElementById('emp-id').value != "") {
+    if (document.getElementById('emp-id').value != '') {
         var int_str_err = check_int_str('emp-id','emp-id-str-err',true);
         if (int_str_err) {return;}
         // checking if ID is unique and then performing additional validation
@@ -590,8 +590,8 @@ function submit_employee_form(arg_object) {
             alert(message);
             mod_emp_table(curr_page,sort_col,sort_dir);
             // clearing form off of page
-            document.getElementById('mod-employee-form').innerHTML = "";
-            document.getElementById('modify-header').innerHTML = "";
+            document.getElementById('mod-employee-form').removeAll();
+            document.getElementById('modify-header').removeAll();
         }
     }
     else {
@@ -1194,13 +1194,13 @@ function submit_data_entry_fom(submit_args) {
         }
         mod_emp_data_table(curr_page,sort_col,sort_dir,emp_id);
         // clearing form off of page
-        document.getElementById('update-entry-form-div').innerHTML = "";
-        document.getElementById('modify-header').innerHTML = "";
+        document.getElementById('update-entry-form-div').removeAll();
+        document.getElementById('modify-header').removeAll();
     }
     //
     // insert callback
     var insert_callback = function() {
-        document.getElementById('data-entry-form-div').innerHTML =  '';
+        document.getElementById('data-entry-form-div').removeAll();
         alert(message);
     }
     //
@@ -1411,8 +1411,8 @@ function submit_backhaul_form(submitArgs) {
         }
         mod_emp_data_table(curr_page,sort_col,sort_dir,emp_id);
         // clearing form off of page
-        document.getElementById('update-entry-form-div').innerHTML = "";
-        document.getElementById('modify-header').innerHTML = "";
+        document.getElementById('update-entry-form-div').removeAll();
+        document.getElementById('modify-header').removeAll();
     }
     // defining the callback function based on action
     var callback = update_callback
@@ -1577,8 +1577,8 @@ function validate_item_form(validate_args) {
         alert(message);
         gen_item_table(curr_page,sort_col,sort_dir);
         // clearing form off of page
-        document.getElementById('content-div').innerHTML = '';
-        document.getElementById('modify-header').innerHTML = '';
+        document.getElementById('content-div').removeAll();
+        document.getElementById('modify-header').removeAll();
     }
     //
     // creating sql statment
@@ -1692,7 +1692,7 @@ function validate_stock_form(action) {
         var sort_dir = document.getElementById(nav_id).dataset.sortDir;
         alert(message);
         table_fun(curr_page,sort_col,sort_dir)
-        document.getElementById('content-div').innerHTML = '';
+        document.getElementById('content-div').removeAll();
     }
     //
     if (action == 'create') {

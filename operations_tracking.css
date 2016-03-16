@@ -292,5 +292,5 @@ input[type="text"]:read-only {
 }
 /*Has to be last so it overrides any other applied display styles*/
 .hidden-elm {
-    display: None;
+    display: None !important;
 }

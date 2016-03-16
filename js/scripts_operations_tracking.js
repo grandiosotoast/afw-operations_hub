@@ -170,7 +170,12 @@ function create_standard_table(table_args) {
         table_args.col_meta_data = response.meta_data;
         //
         var output_table = make_standard_table(table_args);
-        document.getElementById(table_args.table_output_id).innerHTML = output_table;
+        if (document.getElementById(output_table.id)) {
+            document.getElementById(table_args.table_output_id).replaceChild(output_table,document.getElementById(output_table.id));
+        }
+        else {
+            document.getElementById(table_args.table_output_id).appendChild(output_table);
+        }
         //
         if (add_callback) {add_callback(response);}
     }
@@ -181,7 +186,6 @@ function create_standard_table(table_args) {
 function make_standard_table(input_args) {   
     //
     // initializations
-    var table = '';
     var args = {
         no_page_nav : false,
         table_id : 'standard-data-table',
@@ -220,14 +224,18 @@ function make_standard_table(input_args) {
         if (end_index > data_arr.length) {end_index = data_arr.length;};
         //
         var page_nav = create_page_links(page_nav_args);
-        table += page_nav;
+        if (document.getElementById(page_nav.id)) { 
+            document.getElementById(args.table_output_id).replaceChild(page_nav,document.getElementById(page_nav.id));
+        }
+        else {
+            document.getElementById(args.table_output_id).appendChild(page_nav);
+        }
     }
     //
-    table += '<table id="'+args.table_id+'" class="'+args.table_class+'">';
-    //
     // creating column head rows 
-    var head = make_head_rows(col_meta_data,head_row_args)    
-    table += head;
+    var table_attr = {'id' : args.table_id, 'class' : args.table_class}
+    var table = document.createElementWithAttr('TABLE',table_attr);
+    make_head_rows(table,col_meta_data,head_row_args)    
     //
     // populating row data  
     for (var i = start_index; i < end_index; i++) {
@@ -244,21 +252,26 @@ function make_standard_table(input_args) {
             this_row_onmouseleave = this_row_onmouseleave.replace(pat,data_arr[i][prop]);
             this_table_row_appended_cells = this_table_row_appended_cells.replace(pat,data_arr[i][prop]);
         }
-        var table_row = '<tr id="'+data_arr[i]['row_id']+'" onmouseenter="'+this_row_onmouseenter+'" onmouseleave="'+this_row_onmouseleave+'" onclick="'+this_row_onclick+'">';
+        var table_row = document.createElementWithAttr('TR',{'id' : data_arr[i]['row_id']});
+        table_row.addEventListener('mouseenter',exec_fun_str.bind(null,this_row_onmouseenter));
+        table_row.addEventListener('mouseleave',exec_fun_str.bind(null,this_row_onmouseleave));
+        table_row.addEventListener('click',exec_fun_str.bind(null,this_row_onclick));
+        //
         // creating table data cells
         for (var c = 0; c < col_meta_data.length; c++) {
-            var innerHTML = data_arr[i][col_meta_data[c].column_name];
-            if ((col_meta_data[c].data_type.match(/text/)) && (innerHTML.length > CONSTANTS.MAX_STR_LENGTH)) {
-                var td_onlick = "toggle_innerHTML(this.id,'"+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+"...','"+innerHTML+"');"
-                innerHTML = '<span id="'+col_meta_data[c].column_name+'-'+i+'" class="link-blue" onclick="'+td_onlick+'">'+innerHTML.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...</span>'
+            //
+            var td_attr = {
+                'id' : data_arr[i]['row_id']+'-'+col_meta_data[c].column_name,
+                'class' : args.table_data_cell_class,
             }
-            td_str += '<td id = "'+data_arr[i]['row_id']+'-'+col_meta_data[c].column_name+'" class="'+args.table_data_cell_class+'">'+innerHTML+'</td>';
+            var td = document.createElementWithAttr('TD',td_attr);
+            if (!(col_meta_data[c].data_type.match(/text|info/))) { td.style['text-align'] = 'right';}
+            process_data_type(data_arr[i][col_meta_data[c].column_name],col_meta_data[c].data_type,td,false);
+            table_row.appendChild(td);
         }
-        table_row += td_str+this_table_row_appended_cells;
-        table_row += '</tr>';
-        table += table_row;
+        table_row.innerHTML += this_table_row_appended_cells;
+        table.appendChild(table_row);
     }
-    table += '</table>';
     //
     return table;
 }
@@ -306,32 +319,65 @@ function create_page_links(input_args) {
         if (p > num_pages) {break;}
     }
     //
+    var div_attr = {
+        'id' : args.page_nav_div_id,
+        'class' : args.page_nav_class,
+        'data-curr-page' : args.curr_page,
+        'data-sort-col' : args.sort_col,
+        'data-sort-dir' : args.sort_dir,
+        
+        
+    }
+    var page_div = document.createElementWithAttr('DIV',div_attr);
+    var page_link = null
+    var link_attr = {};
+    page_div.appendChild(document.createTextNode('Pages: '));
     if (args.curr_page != 1) {
-        p_class_str = args.class_str.replace('%%',args.curr_page-1)
-        p_onclick_str = args.onclick_str.replace('%%',args.curr_page-1)
-        p_onmouse_str = args.onmouse_str.replace('%%',args.curr_page-1)
-        page_str += '<a id="'+args.id_prefix+'-page-nav-pre" class="'+p_class_str+'" onclick="'+p_onclick_str+'" onmouseover="'+p_onmouse_str+'">&#10094;</a>';
+        p_class_str = args.class_str.replace('%%',args.curr_page-1);
+        p_onclick_str = args.onclick_str.replace('%%',args.curr_page-1);
+        p_onmouse_str = args.onmouse_str.replace('%%',args.curr_page-1);
+        //
+        link_attr.id = args.id_prefix+'-page-nav-pre';
+        link_attr.class = p_class_str;
+        page_link = document.createElementWithAttr('A',link_attr);
+        page_link.addEventListener('click',exec_fun_str.bind(null,p_onclick_str));
+        page_link.addEventListener('mouseover',exec_fun_str.bind(null,p_onmouse_str));
+        page_link.appendChild(document.createTextNode('\u276E'));
+        page_div.appendChild(page_link);
     }
     for (var i = 0; i < page_arr.length; i++) {
         p_class_str = args.class_str.replace('%%',page_arr[i])
         p_onclick_str = args.onclick_str.replace('%%',page_arr[i])
         p_onmouse_str = args.onmouse_str.replace('%%',page_arr[i])
         if (page_arr[i] == args.curr_page) { p_class_str += ' page_nav_link_curr';}
-        page_str += '<a id="'+args.id_prefix+'-page-nav-'+page_arr[i]+'" class="'+p_class_str+'" onclick="'+p_onclick_str+'" onmouseover="'+p_onmouse_str+'">['+page_arr[i]+']</a>';
+        //
+        link_attr.id = args.id_prefix+'-page-nav-'+page_arr[i];
+        link_attr.class = p_class_str;
+        page_link = document.createElementWithAttr('A',link_attr);
+        page_link.addEventListener('click',exec_fun_str.bind(null,p_onclick_str));
+        page_link.addEventListener('mouseover',exec_fun_str.bind(null,p_onmouse_str));
+        page_link.appendChild(document.createTextNode('['+page_arr[i]+']'));
+        page_div.appendChild(page_link);
     }
     if (args.curr_page < num_pages) {
         p_class_str = args.class_str.replace('%%',args.curr_page+1)
         p_onclick_str = args.onclick_str.replace('%%',args.curr_page+1)
         p_onmouse_str = args.onmouse_str.replace('%%',args.curr_page+1)
-        page_str += '<a id="'+args.id_prefix+'-page-nav-next" class="'+p_class_str+'" onclick="'+p_onclick_str+'" onmouseover="'+p_onmouse_str+'">&#10095;</a>';
+        //
+        link_attr.id = args.id_prefix+'-page-nav-next';
+        link_attr.class = p_class_str;
+        page_link = document.createElementWithAttr('A',link_attr);
+        page_link.addEventListener('click',exec_fun_str.bind(null,p_onclick_str));
+        page_link.addEventListener('mouseover',exec_fun_str.bind(null,p_onmouse_str));
+        page_link.appendChild(document.createTextNode('\u276F'));
+        page_div.appendChild(page_link);
     }
     //
-   page_str = '<div id="'+args.page_nav_div_id+'" class="'+args.page_nav_class+'" data-curr-page="'+args.curr_page+'" data-sort-col="'+args.sort_col+'" data-sort-dir="'+args.sort_dir+'">Pages: '+page_str+'</div>';
-   return page_str;
+   return(page_div);
 }
 //
 // creates the header rows for a table
-function make_head_rows(col_data,input_args) { 
+function make_head_rows(output_element,col_data,input_args) { 
     //
     // variable initializations
     var col_meta_data = JSON.parse(JSON.stringify(col_data));
@@ -339,14 +385,14 @@ function make_head_rows(col_data,input_args) {
         row_id : 'table-header',
         id_prefix : '',
         class_str : 'default-table-header',
-        leading_cells : '',
-        tooltip : '',
+        leading_cells : [],
+        tooltip : {'elm':'SPAN','className':'hidden-elm','textNode':''},
         skip_cols : [],
         sortable : true,
         sort_col : '',
         sort_dir : '',
-        asc_arrow  : '&#x25BC;',
-        desc_arrow : '&#x25B2;',
+        asc_arrow  : '\u25BC',
+        desc_arrow : '\u25B2',
         cell_onclick_str : '',
         sort_onclick_str : ''
     };
@@ -375,19 +421,22 @@ function make_head_rows(col_data,input_args) {
         col_meta_data[i].sort_dir = 'ASC';
         col_meta_data[i].sort_onclick = args.sort_onclick_str;
         col_meta_data[i].cell_onclick = args.cell_onclick_str;
-        col_meta_data[i].tooltip = args.tooltip;
+        col_meta_data[i].tooltip = JSON.parse(JSON.stringify(args.tooltip));
         if ((args.sort_col == col_meta_data[i].column_name) && (args.sort_dir == 'ASC')) {
             col_meta_data[i].arrow = args.desc_arrow;
             col_meta_data[i].sort_dir = 'DESC';
         }
+        col_meta_data[i].arrow = {'textContent' : col_meta_data[i].arrow}
+        //
         // stepping through properties of object to sub into values
+        var tooltip_text = col_meta_data[i].tooltip.textNode;
         for (var prop in col_meta_data[i]) {
             col_meta_data[i].cell_onclick = col_meta_data[i].cell_onclick.replace("%"+prop+"%",col_meta_data[i][prop]);
             col_meta_data[i].sort_onclick = col_meta_data[i].sort_onclick.replace("%"+prop+"%",col_meta_data[i][prop]);
-            col_meta_data[i].tooltip = col_meta_data[i].tooltip.replace("%"+prop+"%",col_meta_data[i][prop]);
+            tooltip_text = tooltip_text.replace("%"+prop+"%",col_meta_data[i][prop]);
         }
-        // adding sort onclick to the arrow
-        col_meta_data[i].arrow = '<span onclick="'+col_meta_data[i].sort_onclick+'">'+col_meta_data[i].arrow+'</span>';
+        col_meta_data[i].tooltip.textNode = tooltip_text;
+        col_meta_data[i].arrow.onclick = col_meta_data[i].sort_onclick;
     }
     //
     // processing data array to check for shared columns 
@@ -399,12 +448,6 @@ function make_head_rows(col_data,input_args) {
             n = 1 + col_nick.match(/-/g).length
         }
         if (n > num_rows) {num_rows = n}
-    }
-    //
-    // initializing header rows and adding spacing cell
-    var head_tr = [];
-    for (var i = 0; i < num_rows; i++) {
-        head_tr[i] = '<tr id="'+args.row_id+'">'+args.leading_cells;
     }
     //
     // creating the output cells array
@@ -475,50 +518,129 @@ function make_head_rows(col_data,input_args) {
         }
     }
     //
-    // creating table rows
+    // initializing header rows and adding spacing cell
+    var head_tr = [];
+    for (var i = 0; i < num_rows; i++) {
+        var clones = [];
+        for (var j = 0; j < args.leading_cells.length; j++) { clones.push(args.leading_cells[j].cloneNode(true));}
+        head_tr[i] = document.createElementWithAttr('TR',{'id' : args.row_id});
+        head_tr[i].addNodes(clones);
+    }
+    //
+    // creating table cells
     for (var lvl = 0; lvl < num_rows; lvl++) {
         for (var col = 0; col < output_cells[lvl].length; col++) {
             if (output_cells[lvl][col] == '') { continue;}
             var col_obj = output_cells[lvl][col];
-            head_tr[lvl] += '<td id="'+args.id_prefix+col_obj.id+'" class="'+args.class_str+'" colspan="'+col_obj.colspan+'" rowspan="'+col_obj.rowspan+'" onclick="'+col_obj.cell_onclick+'">'+col_obj.innerHTML+'&nbsp;'+col_obj.arrow+col_obj.tooltip+'</td>';
+            var td = document.createElementWithAttr('TD',{
+                    'id' : args.id_prefix+col_obj.id,
+                    'class' : args.class_str,
+                    'colspan' : col_obj.colspan,
+                    'rowspan' : col_obj.rowspan,
+            });
+            td.addEventListener('click',exec_fun_str.bind(null,col_obj.cell_onclick));
+            td.addTextNode(col_obj.innerHTML+'\u00A0');
+            if (col_obj.arrow) {
+                var span = document.createElement('SPAN');
+                span.addEventListener('click',exec_fun_str.bind(null,col_obj.arrow.onclick));
+                span.addTextNode(col_obj.arrow.textContent);
+                td.appendChild(span);
+            }
+            if (col_obj.tooltip) { addChildren(td,[col_obj.tooltip])}
+            head_tr[lvl].appendChild(td);
         }
     }
     //
-    // closing tags for header table rows
-    var head = '';
-    for (var i = 0; i < num_rows; i++) {
-        head_tr[i] += '</tr>';
-        head += head_tr[i];
-    }
-    //
-    return head;
+    output_element.addNodes(head_tr);
 }
 //
 // this function handles the data types of various cells in the database for reports
-function process_data_type(value,data_type) {
+function process_data_type(value,data_type,element,args) {
     //
-    var right_align = '<span style="display: inline-block; width: 100%; text-align: right">%value%</span>';
+    var node = false;
+    var add_commas = true;
+    var format_str = '%value%';
+    if (!(args)) { args = {};}
+    if (args.hasOwnProperty('add_commas')) { add_commas = args.add_commas;}
+    if (args.hasOwnProperty('format_str')) { format_str = args.format_str;}
+
     //
-    if (trim(data_type).match(/(^|%)float(%|$)/)) {
-        value = round(Number(value),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
-        value = right_align.replace(/%value%/,value)
-    }
-    else if (trim(data_type).match(/(^|%)int(%|$)/)) {
-        value = round(Number(value),0).toFixed(0);
-        value = right_align.replace(/%value%/,value)
-    }
-    else if (trim(data_type).match(/(^|%)percent(%|$)/)) {
+    // handling input pre-processing
+    else if (data_type.match(/(^|%)percent(%|$)/)) {
         value = 100 * Number(value);
-        value = round(value,CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
-        value += '%';
-        value = right_align.replace(/%value%/,value)
+    }    
+    //
+    // handling required rounding
+    var m = data_type.match(/(?:^|%)round\([crf],[0-9]+\)(?:%|$)/)
+    if (data_type.match(/(?:^|%)round\(.+?\)(?:%|$)/)) {
+        value = round_data_type(value,data_type);
+        element.style['text-align'] = 'right';
+    }
+    else if (data_type.match(/(^|%)float|percent(%|$)/)) {
+        value = round(Number(value),CONSTANTS.STD_PRECISION).toFixed(CONSTANTS.STD_PRECISION);
+        element.style['text-align'] = 'right';
+    }
+    else if (data_type.match(/(^|%)int(%|$)/)) {
+        value = round(Number(value),0).toFixed(0);
+        element.style['text-align'] = 'right';
     }
     //
-    return value;
+    // defining final output format
+    if (data_type.match(/(^|%)percent(%|$)/)) {
+        value += ' %';
+    }
+    else if (!(data_type.match(/(^|%)float|percent|int(%|$)/))) {
+        add_commas = false;
+    }
+    else if ((data_type.match(/(?:^|%)text(?:%|$)/)) && (value.length > CONSTANTS.MAX_STR_LENGTH)) {
+        var id = floor(Math.random()*10000,0);
+        node = document.createElementWithAttr('SPAN',{'id' : id, 'class' : 'link-blue'});
+        node.addEventListener('click',toggle_innerHTML.bind(null,id,value.slice(0,CONSTANTS.MAX_STR_LENGTH),value));
+        node.appendChild(document.createTextNode(value.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...'));
+        add_commas = false;
+        element.style['text-align'] = 'left';
+    }
+    //
+    if (add_commas) { value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");}
+    //
+    value = format_str.replace(/%value%/,value);
+    //
+    if (node) {
+        element.appendChild(node);
+    }
+    else {
+        element.appendChild(document.createTextNode(value));
+    }
+}
+//
+// this function handles the rounding logic in table meta data
+function round_data_type(value,data_type) {
+    //
+    value = Number(value);
+    var m = data_type.match(/(?:^|%)round\(([crf]),([0-9]+)\)(?:%|$)/i)
+    var std_perc = CONSTANTS.STD_PRECISION;
+    if (data_type.match(/(?:^|%)int(?:%|$)/i)) {
+        std_perc = 0;
+    }
+    //
+    if (!(m)) { m = ['','r','-1'];}
+    if (m[2] == '-1') { m[2] = std_perc;}
+    //
+    if (m[1].toLowerCase() == 'f') {
+        value = floor(value,m[2])
+    }
+    else if (m[1].toLowerCase() == 'c') {
+        value = ceiling(value,m[2])
+    }
+    else {
+        value = round(value,m[2])
+    }
+    //
+    return(value.toFixed(m[2]));
 }
 //
 // creates the table that allows the user to select viewable columns and totalling type
-function make_data_columns_table(args) {   
+function make_data_columns_table(output_element,args) {   
     //
     // variable definitions 
     var col_meta_data = args.data;  
@@ -540,56 +662,108 @@ function make_data_columns_table(args) {
     }
     //
     // table construction initializations 
-    var table = '<br><table id="data_sel_cols_table" class="report-table">';
-    var view_col_tr = "<tr id=\"data_sel_cols_checkbox_tr\"><td class=\"report-data-td\">Show Column:</td>";
-    var total_type_tr = "<tr id=\"data_sel_cols_radio_tr\"><td class=\"report-data-td\">Sum:<br>or<br>Average:</td>";
-    var sort_by_tr = "<tr id=\"sort-by-col-tr\" ><td class=\"report-data-td\">Sort by Column:</td>";
+    var br = document.createElement('BR');
+    var table = document.createElementWithAttr('TABLE',{'id':'data_sel_cols_table', 'class':'report-table'});
+    var view_col_tr = document.createElementWithAttr('TR',{'id':'data_sel_cols_checkbox_tr'});
+    var total_type_tr = document.createElementWithAttr('TR',{'id':'data_sel_cols_radio_tr'});
+    var sort_by_tr = document.createElementWithAttr('TR',{'id':'sort-by-col-tr'});
+    var td = document.createElementWithAttr('TD',{'class':'report-data-td'});
+    td.textContent = 'Show Column:'
+    view_col_tr.appendChild(td);
+    td = document.createElementWithAttr('TD',{'class':'report-data-td'});
+    td.textContent = 'Sort by Column:';
+    sort_by_tr.appendChild(td);
+    td = document.createElementWithAttr('TD',{'class':'report-data-td'});
+    td.addTextNode('Sum:');
+    td.appendChild(document.createElement('BR'));
+    td.addTextNode('or');
+    td.appendChild(document.createElement('BR'));
+    td.addTextNode('Average:');
+    total_type_tr.appendChild(td);
     //
     // making header rows
+    var lead_td = document.createElementWithAttr('TD',{'class':'report-spacer-td'});
+    lead_td.addTextNode('\u00A0');
     var head_rows_props = {};
     head_rows_props.sortable = false;
     head_rows_props.id_prefix = "sel-cols-";
     head_rows_props.class_str = "report-column-header";
-    head_rows_props.leading_cells = "<td class=\"report-spacer-td\"></td>";
-    var head = make_head_rows(col_meta_data,head_rows_props);
-    table += head;
+    head_rows_props.leading_cells =  [lead_td];
+    make_head_rows(table,col_meta_data,head_rows_props);
     //
     // constructing additional table rows
+    var input = null;
     for (var i = 0; i < col_meta_data.length; i++) {
         var col_obj = col_meta_data[i];
-        var checked = '';
-        if (checked_cols.indexOf(col_obj.column_name) >= 0) {checked = 'checked';}
-        view_col_tr += '<td id="'+col_obj.column_name+'-viewcol-td" class="report-data-td"><input id="'+col_obj.column_name+'-viewcol-checkbox" name="sel_cols" type="checkbox" value="'+col_obj.column_name+'" onclick="'+all_onclick_fun+'" '+checked+'></td>';
-        if (!(col_obj.column_type.match('static'))) {
-            sort_by_tr += '<td id="'+col_obj.column_name+'-sortby-td" class="report-data-td"></td>'; 
-        }
-        else {
-            sort_by_tr += '<td id="'+col_obj.column_name+'-sortby-td" class="report-data-td"><input id="'+col_obj.column_name+'-sortby-radio" name="secd-sort" type="radio" value="'+col_obj.column_name+'" onclick="'+all_onclick_fun+'"></td>'; 
-        }
+        var checked = false;
         //
-        if (!!(col_obj.total_type.match(/sum|avg/))) {
-            var sum_check = "";
-            var avg_check = "";
-            if (col_obj.total_type.match(/avg/)) {avg_check = "checked";}
-            else {sum_check = "checked";}
-            total_type_tr += "<td class=\"report-data-td\"><input id=\""+col_obj.column_name+"-totaltype-sum\" type=\"radio\" name=\""+col_obj.column_name+"\" value=\""+col_obj.column_name+":sum\" onclick=\""+all_onclick_fun+"\" "+sum_check+"><br>";
-            total_type_tr += "<input id=\""+col_obj.column_name+"-totaltype-avg\" type=\"radio\" name=\""+col_obj.column_name+"\" value=\""+col_obj.column_name+":avg\" onclick=\""+all_onclick_fun+"\" "+avg_check+"></td>"
+        // creating view-col table cell
+        if (checked_cols.indexOf(col_obj.column_name) >= 0) {checked = true;}
+        td = document.createElementWithAttr('TD',{'id':col_obj.column_name+'-viewcol-td', 'class':'report-data-td'});
+        input = document.createElementWithAttr('INPUT',{
+                'id' : col_obj.column_name+'-viewcol-checkbox',
+                'name' : 'sel_cols',
+                'type' : 'checkbox',
+                'value' : col_obj.column_name,
+        });
+        if (checked) { input.checked = true;}
+        input.addEventListener('click',exec_fun_str.bind(null,all_onclick_fun));
+        td.appendChild(input);
+        view_col_tr.appendChild(td);
+        //
+        // creating sort col table cell
+        td = document.createElementWithAttr('TD',{'id':col_obj.column_name+'-sortby-td', 'class':'report-data-td'});
+        if (col_obj.column_type.match('static')) {
+            input = document.createElementWithAttr('INPUT',{
+                    'id' : col_obj.column_name+'-sortby-radio',
+                    'name' : 'secd-sort',
+                    'type' : 'radio',
+                    'value' : col_obj.column_name,
+            });
+            input.addEventListener('click',exec_fun_str.bind(null,all_onclick_fun));
+            td.appendChild(input);
         }
-        else {
-            total_type_tr += "<td id=\""+col_obj.column_name+"-total-td\" class=\"report-data-td\">&nbsp;</td>";
+        sort_by_tr.appendChild(td);
+        //
+        // creating total type cell
+        td = document.createElementWithAttr('TD',{'class':'report-data-td'});
+        if (col_obj.total_type.match(/sum|avg/)) {
+            var sum_input = null;
+            var avg_input = null;
+            var sum_check = false;
+            var avg_check = false;
+            if (col_obj.total_type.match(/avg/)) {avg_check = true;}
+            else {sum_check = true;}
+            //
+            sum_input = document.createElementWithAttr('INPUT',{
+                    'id' : col_obj.column_name+'-totaltype-sum',
+                    'name' : col_obj.column_name,
+                    'type' : 'radio',
+                    'value' : col_obj.column_name+':sum',
+            });
+            avg_input = document.createElementWithAttr('INPUT',{
+                    'id' : col_obj.column_name+'-totaltype-avg',
+                    'name' : col_obj.column_name,
+                    'type' : 'radio',
+                    'value' : col_obj.column_name+':avg',
+            });
+            if (sum_check) { sum_input.checked = true;}
+            if (avg_check) { avg_input.checked = true;}
+            sum_input.addEventListener('click',exec_fun_str.bind(null,all_onclick_fun));
+            avg_input.addEventListener('click',exec_fun_str.bind(null,all_onclick_fun));
+            td.appendChild(sum_input);
+            td.appendChild(br.cloneNode());
+            td.appendChild(avg_input);      
         }
+        total_type_tr.appendChild(td)
     }
     //
-    // adding closing tags and appending to table
-    view_col_tr += "</tr>";
-    sort_by_tr += "</tr>";
-    total_type_tr += "</tr>";
-    table += view_col_tr;
-    if (!(args.hide_sort_row)) { table += sort_by_tr;}
-    if (!(args.hide_totals_row)) { table += total_type_tr;}
-    table += "</table>";
+    // appending elements to table
+    table.appendChild(view_col_tr);
+    if (!(args.hide_sort_row)) { table.appendChild(sort_by_tr);}
+    if (!(args.hide_totals_row)) { table.appendChild(total_type_tr);}
     //
-    return table;
+    output_element.appendChild(table);
 }
 //
 // updates the sort_by_col radio button to match drop down list if table exists

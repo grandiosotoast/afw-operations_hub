@@ -88,20 +88,32 @@ check_login('report');
 </select>
 </fieldset>
 <br>
-<button id="show_data_cols" type="button" onclick="show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',true,false);">Show Data Selection Columns</button> 
+<button id="show_data_cols" type="button" onclick="show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',true,true);">Show Data Selection Columns</button> 
 <button id="show_employee_table" type="button" onclick="report_emp_table('1','emp_last_name','ASC',true);">Show Employee Table</button>
 <button id="get_emp_data" type="button" name="get_emp_data" onclick="create_production_report('report_emp_data','report_data_div','','')">Get All Employee Data</button>
 <button id="get_emp_data_all" type="button" class="hidden-elm" name="get_emp_data_all" onclick="create_production_report('report_emp_data','report_data_div','',''); add_class('hidden-elm','get_emp_data_all');">Get All Employee Data</button>
-<input type="button" onclick="print_page('report_data_div')" value="Print" />
+<input id="print-report-button" type="button" onclick="print_page('report_data_div')" value="Print" />
+</form>
+
 <div id="data_sel_cols" class="hidden-elm"></div>
 <br>
-<h4 id="emp-table-header" class="hidden-elm">Click on an employee to generate a report for them.</h4>
-<div id="employee-table-div" class="hidden-elm"></div>
+
+<div id="employee-table-div" class="hidden-elm">
+<h4 id="emp-table-header">Click on an employee to generate a report for them.</h4>
+</div>
+
 <br>
-</form>
 <br>
-<div id="report_data_div" class="report-data-div "></div>
+
+<div id="report_data_div" class="report-data-div ">
+
+<div id="report-header" class="hidden-elm"></div>
+<table id="report-table" class="hidden-elm"></table>
+
+</div>
+
 </div> <!-- Closing main-container div -->
+
 <script language="javascript">
 //
 var input_args = {
