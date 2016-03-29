@@ -87,7 +87,7 @@ var add_employee = ""+
     "<select  id=\"stop-rate-select\" class=\"dropbox-input\" name=\"stop_rate\" onchange=\"show_if_val('stop-rate-select','stop-rate-input','other'); get_option_text('stop-rate-select','stop-rate-level'); remove_class('invalid-field','stop-rate-select');\">" + 
     "</select></td>" + 
     "</tr>"+
-    // custom entry fields
+    //
     "<td><label class=\"label\" style=\"text-align: center;\"></label>" + 
     "<input id=\"base-rate-input\" type=\"text\" class=\"text-input-small hidden-elm\" name=\"base_rate\" placeholder=\"$$$\" onkeyup=\"remove_class('invalid-field','base-rate-input');\" disabled></input></td>" + 
     "<td><label class=\"label\" style=\"text-align: center;\"></label>" + 
@@ -102,6 +102,13 @@ var add_employee = ""+
     "" + 
     "<fieldset class=\"fieldset-default\">" + 
     "<legend>Ancilliary Information (If Applicable) </legend>" + 
+    "<label class=\"label\">Employee Pay Type</label>"+
+    "<select id=\"pay-type\" name=\"pay_type\">"+
+      "<option>Incentive</option>"+
+      "<option>Hourly</option>"+
+      "<option selected>Both</option>"+
+    "</select>"+
+    "<br>"+
     "<label class=\"label\">Hourly Pay Rate</label><input id=\"hourly-pay-rate\" class=\"text-input\"  type=\"text\" name=\"hourly_pay_rate\"><br>" + 
     "<label class=\"label\">Per Diem:</label><input id=\"per-diem\" type=\"text\" name=\"per_diem\" value=\"0.0\" onkeyup=\"check_num_str('per-diem','',false);\" onblur=\"check_num_str('per-diem','',false);\">"+
     "<br>"+

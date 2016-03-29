@@ -48,23 +48,19 @@ if (check_perms($_SESSION["permissions"],$page_perms["warehouse"])) {
     echo '<span class="nav-span"><button id="warehouse" type="button" class="big-button"  onclick="goto_link(this.id);">Shipping Data Entry</button></span>';
 }
     echo '<br>';
-if (check_perms($_SESSION["permissions"],$page_perms["report"])) {
-    echo '<span class="nav-span"><button id="report" type="button" class="big-button"  onclick="goto_link(this.id);">Reporting Options</button></span>'; 
+if (check_perms($_SESSION["permissions"],$page_perms["view_employee"])) {
+    echo '<span class="nav-span"><button id="view_employee" type="button" class="big-button" onclick="goto_link(this.id);">View Employees</button></span>'; 
 }
 if (check_perms($_SESSION["permissions"],$page_perms["edit_emp_data"])) {
     echo '<span class="nav-span"><button id="edit_emp_data" type="button" class="big-button" onclick="goto_link(this.id);">Employee Data Maintenance</button></span>';
 }
-    echo '<br>';
-if (check_perms($_SESSION["permissions"],$page_perms["view_employee"])) {
-    echo '<span class="nav-span"><button id="view_employee" type="button" class="big-button" onclick="goto_link(this.id);">View Employees</button></span>'; 
-}
-if (check_perms($_SESSION["permissions"],$page_perms["add_employee"])) {
-    echo "<span class=\"nav-span\"><button id=\"add_employee\" type=\"button\" class=\"big-button\"  onclick=\"goto_link(this.id);\">Add Employee</button></span>"; 
-}
-if (check_perms($_SESSION["permissions"],$page_perms["mod_employee"])) {
-    echo "<span class=\"nav-span\"><button id=\"mod_employee\" type=\"button\" class=\"big-button\" onclick=\"goto_link(this.id);\">Modify/Delete Employee</button></span>";
+if (check_perms($_SESSION["permissions"],$page_perms["report"])) {
+    echo '<span class="nav-span"><button id="report" type="button" class="big-button"  onclick="goto_link(this.id);">Reporting Options</button></span>'; 
 }
     echo '<br>';
+if (($_SESSION["department"] == 'marketing') or check_perms($_SESSION["permissions"],'0007')) {
+    echo '<span class="nav-span"><button id="marketing" type="button" class="big-button" onclick="goto_link(this.id);">Marketing</button></span>';
+}
 if (check_perms($_SESSION["permissions"],$page_perms["meat_shop"])) {
     echo '<span class="nav-span"><button id="meat_shop" type="button" class="big-button" onclick="goto_link(this.id);">Meat Shop Inventory</button></span>';
 }
@@ -74,7 +70,14 @@ if (check_perms($_SESSION["permissions"],$page_perms["sales_maintenance"])) {
 if (check_perms($_SESSION["permissions"],$page_perms["sales_reporting"])) {
     echo '<span class="nav-span"><button id="sales_reporting" type="button" class="big-button" onclick="goto_link(this.id);">Sales Reporting</button></span>';
 }
-    echo "<br>";    
+    echo '<br>';
+if (check_perms($_SESSION["permissions"],$page_perms["add_employee"])) {
+    echo "<span class=\"nav-span\"><button id=\"add_employee\" type=\"button\" class=\"big-button\"  onclick=\"goto_link(this.id);\">Add Employee</button></span>"; 
+}
+if (check_perms($_SESSION["permissions"],$page_perms["mod_employee"])) {
+    echo "<span class=\"nav-span\"><button id=\"mod_employee\" type=\"button\" class=\"big-button\" onclick=\"goto_link(this.id);\">Modify/Delete Employee</button></span>";
+}
+    //echo "<br>";    
 if (check_perms($_SESSION["permissions"],$page_perms["add_dbuser"])) {
     echo "<span class=\"nav-span\"><button id=\"add_dbuser\" type=\"button\" class=\"big-button\" onclick=\"goto_link(this.id);\">Create New Database User</button></span>";
 }

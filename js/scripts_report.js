@@ -272,19 +272,15 @@ function create_production_report(parent_form_id,report_div_id,department,emp_id
     var sql_args = {};
     sql_args.cmd = 'SELECT';
     sql_args.table = 'table_meta_data';
-    sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)|(^|%)'+report_args.dept_table+'(%|$)'],['use_on_pages','REGEXP','(^|%)report(%|$)'],['use_in_html_tables','REGEXP','(^|%)report_'+report_args.department+'(%|$)']];
-    sql_args.order_by = [['order_index','ASC']];    
-    if (!!(report_args.sel_cols)) {
-        sql_args.where.push(['column_name','REGEXP',report_args.sel_cols.join('$|')]); sql_args.where[sql_args.where.length-1][2] += '$';
-    }
+    sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)|(^|%)'+report_args.dept_table+'(%|$)']];
     meta_sql = gen_sql(sql_args);
     //
     var callback = function(response) {
         report_args.data = response;
         make_data_sql(report_args);
     }
-    var calc_cols_sql = 'SELECT * FROM `report_dynamic_columns` WHERE `department` REGEXP \'(^|%)'+report_args.department+'(%|$)\'';
-    var sql_arr = [preset_sql,meta_sql,calc_cols_sql];
+    var dyn_cols_sql = 'SELECT * FROM `report_dynamic_columns` WHERE `department` REGEXP \'(^|%)'+report_args.department+'(%|$)\'';
+    var sql_arr = [preset_sql,meta_sql,dyn_cols_sql];
     var name_arr = ['preset_data','meta_data','dynamic_array'];
     ajax_fetch(sql_arr,name_arr,callback)
 }
@@ -299,6 +295,11 @@ function make_data_sql(report_args) {
     var col_meta_data = {};
     var dynamic_cols = {};
     //
+    // indexing col_meta_data by name
+    for (var i = 0; i < meta_data.length; i++) {
+        col_meta_data[meta_data[i].column_name] = meta_data[i]
+    }
+    //
     // indexing dynamic cols by name 
     for (var i = 0; i < dynamic_array.length; i++) {
         dynamic_cols[dynamic_array[i].column_name] = dynamic_array[i];
@@ -312,8 +313,9 @@ function make_data_sql(report_args) {
     if (!(sql_args.where instanceof Array)) { sql_args.where = [];}
     sql_args.cmd = 'SELECT';
     sql_args.table = 'employee_data';
+    sql_args.inner_join = Array(['employee_info','employee_data.emp_id','employee_info.emp_id']);
     if (report_args.dept_table != 'none') { 
-        sql_args.inner_join = [[report_args.dept_table,'employee_data.entry_id',report_args.dept_table+'.entry_id']]
+        sql_args.inner_join.push([report_args.dept_table,'employee_data.entry_id',report_args.dept_table+'.entry_id']);
     }
     sql_args.where.push(['department','LIKE',report_args.department]);
     if (preset_data.preset_where != 'null') {
@@ -332,17 +334,54 @@ function make_data_sql(report_args) {
             alert('Error parsing report preset "where" information, check console.');
         }            
     }
-    sql_args.order_by = [[report_args.prime_sort,report_args.prime_sort_dir],[report_args.secd_sort,report_args.secd_sort_dir]];
+    sql_args.order_by = Array([report_args.prime_sort,report_args.prime_sort_dir],
+                              [report_args.secd_sort,report_args.secd_sort_dir]);
+    //
+    // modifying data sql args to make columns table specific
+    for (var i = 0; i < sql_args.where.length; i++) {
+        var name = sql_args.where[i][0]
+        var col = col_meta_data[name]
+        if (col.in_tables.match('(^|%)employee_data(%|$)')) {
+            name = 'employee_data.'+name
+        }
+        else if (col.in_tables.match('(^|%)'+report_args.dept_table+'(%|$)')) {
+            name = report_args.dept_table+'.'+name
+        }
+        sql_args.where[i][0] = name
+    }
+    for (var i = 0; i < sql_args.order_by.length; i++) {
+        var name = sql_args.order_by[i][0]
+        var col = col_meta_data[name]
+        if (col.in_tables.match('(^|%)employee_data(%|$)')) {
+            name = 'employee_data.'+name
+        }
+        else if (col.in_tables.match('(^|%)'+report_args.dept_table+'(%|$)')) {
+            name = report_args.dept_table+'.'+name
+        }
+        sql_args.order_by[i][0] = name
+    }
+    
     data_sql = gen_sql(sql_args);
+    //
+    // fetching table specific meta_data
+    var sql_args = {};
+    sql_args.cmd = 'SELECT';
+    sql_args.table = 'table_meta_data';
+    sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)|(^|%)'+report_args.dept_table+'(%|$)'],['use_on_pages','REGEXP','(^|%)report(%|$)'],['use_in_html_tables','REGEXP','(^|%)report_'+report_args.department+'(%|$)']];
+    sql_args.order_by = [['order_index','ASC']];    
+    if (!!(report_args.sel_cols)) {
+        sql_args.where.push(['column_name','REGEXP',report_args.sel_cols.join('$|')]); sql_args.where[sql_args.where.length-1][2] += '$';
+    }
+    var meta_sql = gen_sql(sql_args);
     //
     // getting data and making report
     var callback = function(response) {
-        report_args.meta_data = meta_data;
+        report_args.meta_data = response.meta_data;
         report_args.data = response.data;
         make_report(report_args);
     }
-    var sql_arr = [data_sql];
-    var name_arr = ['data'];
+    var sql_arr = [data_sql,meta_sql];
+    var name_arr = ['data','meta_data'];
     ajax_fetch(sql_arr,name_arr,callback)
 }
 //
@@ -367,19 +406,6 @@ function make_production_report_header(args) {
     }
     head.appendChild(span);
     head.addTextNode('\u00A0\u00A0\u00A0\u00A0Date Range: '+args.from_ts+' : '+args.to_ts);
-    //
-    // adding crewsize to receiving reports
-    if (args.department == 'warehouse_receiving') {
-        var crew_size = Number(document.getElementById('crew-size').value);
-        if (!(isFinite(crew_size))) {
-            add_class('invalid-field','crew-size'); 
-            crew_size = '*** ERROR: NONE PROVIDED ***';
-        }
-        span = document.createElementWithAttr('SPAN',{'id':'crew-size-line'});
-        span.appendChild(br.cloneNode(true));
-        span.addTextNode('\u00A0\u00A0\u00A0\u00A0Crew Size: '+crew_size);
-        head.appendChild(span);
-    }
     head.appendChild(br.cloneNode('true'));
     head.appendChild(br.cloneNode('true'));
     //

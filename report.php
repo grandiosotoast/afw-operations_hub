@@ -30,7 +30,7 @@ check_login('report');
 <fieldset class="fieldset-default">
 <legend>Report Data Parameters</legend>
 <label class="label">Employee Department</label>
-<select id="department" class="dropbox-input" name="department" onchange="report_emp_table('1','emp_last_name','ASC',false); show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',false,true); show_update_button('get_emp_data','report-table','Show Changes'); show_if_val('department','crew-size-input','warehouse_receiving');">
+<select id="department" class="dropbox-input" name="department" onchange="report_emp_table('1','emp_last_name','ASC',false); show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',false,true); show_update_button('get_emp_data','report-table','Show Changes');">
     <option value="freight_backhaul">Freight Logistics</option>
     <option value="general">Occupancy</option>
     <option value="transportation">Transportation</option>
@@ -38,7 +38,6 @@ check_login('report');
     <option value="warehouse_shipping">Warehouse Shipping</option>
 </select>
 <br>
-<span id="crew-size-input" class="hidden-elm"><label class="label">Crew Size:</label><input id="crew-size" value="5" onkeyup="remove_class('invalid-field','crew-size'); show_update_button('get_emp_data','report-table','Show Changes');"></span>
 <div id="time-range-inputs">
 </div>
 </fieldset>

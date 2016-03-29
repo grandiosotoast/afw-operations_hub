@@ -558,8 +558,19 @@ function calc_receiving_incentive(col_name,report_args) {
     if (report_args.called_funs.hasOwnProperty([report_args.dynamic_cols[col_name].col_function])) { return;}
     check_dependency_bulk(col_name,report_args,report_args.dynamic_cols);
     //
+    // calculating crew size based off of incentive employees
+    var emps = {}
+    var crewSize = 0
+    for (var i = 0; i < report_args.data.length; i++) {
+        emps[report_args.data[i]['emp_id']] = {'emp_id':report_args.data[i]['emp_id'], 'pay_type':report_args.data[i]['pay_type']};
+    }
+    for (var id in emps) {
+        if (emps[id]['pay_type'].match('both|incentive')) { crewSize += 1;}
+    }
+    console.log(emps);
+    console.log(crewSize);   
+    //
     // creating the incentive pay object
-    var crewSize = parseInt(document.getElementById('crew-size').value);
     var incentive_pay = {
         'level_1' : {'maxOTP': 0.00, 'minMPH': 18.00, 'rec_perc': 0.75, 'move_rate': 0.25},
         'level_2' : {'maxOTP': 0.05, 'minMPH': 17.00, 'rec_perc': 0.55, 'move_rate': 0.25},
@@ -590,6 +601,7 @@ function calc_receiving_incentive(col_name,report_args) {
     var entry_date = new Date(data_arr[0].date.split('-')[0],data_arr[0].date.split('-')[1]-1,data_arr[0].date.split('-')[2]);
     var exit_date = new Date(entry_date.getFullYear(),entry_date.getMonth(),(entry_date.getDate()+6-entry_date.getDay()));
     for (var i = 0; i < data_arr.length; i++) {
+        if (data_arr[i].pay_type.match('hourly')) { continue;}
         entry_date = new Date(data_arr[i].date.split('-')[0],(data_arr[i].date.split('-')[1]-1),data_arr[i].date.split('-')[2]);
         //
         // outputting incentive data if a sunday is crossed
@@ -626,6 +638,7 @@ function calc_receiving_incentive(col_name,report_args) {
         var weekIncentive = weekMoves * level.rec_perc * level.move_rate;
         var workerIncentive = ceiling(weekIncentive/crewSize,2);
         var dailyIncentive = workerIncentive/5.0;
+        console.log(weekOvertime,weekMoves,weekProdTime,weekIncentive)
         //
         // outputting stuff for current week
         for (var j = startIndex; j < i; j++) {
@@ -633,7 +646,8 @@ function calc_receiving_incentive(col_name,report_args) {
             var date = new Date(data_arr[j].date.split('-')[0],(data_arr[j].date.split('-')[1]-1),data_arr[j].date.split('-')[2]);
             if (date.getDay() > 5) { di = 0.0;}
             if (data_arr[j].error_code != '0') { di = 0.0;}
-            if (data_arr[j].attendance_error != 'none') { di = 0.0}
+            if (data_arr[j].attendance_error != 'none') { di = 0.0;}
+            if (data_arr[j].pay_type.match('hourly')) { di = 0.0;}
             data_arr[j][col_name] = di;
             data_arr[j]['total'] = Number.parse(data_arr[j]['total']) + data_arr[j][col_name];
         }
