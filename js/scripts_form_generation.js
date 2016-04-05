@@ -1,6 +1,6 @@
 "use strict";
 //
-// database user creation and modifcation form 
+// database user creation and modifcation form
 var add_dbuser = ""+
     "<form id=\"add-new-user\" method=\"POST\">"+
     "<fieldset class=\"fieldset-default\">"+
@@ -8,14 +8,14 @@ var add_dbuser = ""+
     "<br>"+
     "<label class=\"label\">First Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"dbuser-first-name\" class=\"text-input\" type=\"text\" name=\"dbuser_first_name\" onkeyup=\"remove_class('invalid-field',this.id);\"><br>"+
     "<label class=\"label\">Last Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"dbuser-last-name\" class=\"text-input\" type=\"text\" name=\"dbuser_last_name\" onkeyup=\"remove_class('invalid-field',this.id);\"><br>"+
-    "<label class=\"label\">Email<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"email\" class=\"text-input\"  type=\"text\" name=\"email\" onkeyup=\"remove_class('invalid-field',this.id); check_email_str(this.id,'email-err-str',false)\">"+
+    "<label class=\"label\">Email<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"email\" class=\"text-input\"  type=\"text\" name=\"user_email\" onkeyup=\"remove_class('invalid-field',this.id); check_email_str(this.id,'email-err-str',false)\">"+
     "<label id=\"email-err-str\" class=\"error-msg hidden-elm\">&nbsp;&nbsp;&nbsp;Error - Invalid Email Format, Valid Format: example@foo.bar</label><br>"+
     "<br>"+
     "<label class=\"label\">Employee Department<span style=\"color: red;\"><sup>*</sup></span></label>"+
     "<select id=\"department-select\" class=\"dropbox-input\" name=\"department\" onchange=\"show_if_val('department-select','department-input','other'); set_default_perms('department-select','dbuser-permissons'); remove_class('invalid-field',this.id); remove_class('invalid-field','dbuser-permissons'); add_class('hidden-elm','dbuser-permissons-str-err')\">"+
     "</select>"+
     "<br>"+
-    "<label class=\"label\" style=\"text-align: center;\"></label>" + 
+    "<label class=\"label\" style=\"text-align: center;\"></label>" +
     "<input id=\"department-input\" type=\"text\" class=\"text-input hidden-elm\" name=\"department\" placeholder=\"Department\" onkeyup=\"remove_class('invalid-field','department-input');\" disabled></input>"+
     "<br>"+
     "<br>"+
@@ -42,66 +42,66 @@ var add_dbuser = ""+
     "</form>";
 //
 //
-// employee creation and modifcation form 
+// employee creation and modifcation form
 var add_employee = ""+
-    "<form id=\"add_employee\" name=\"add_employee\" method=\"POST\" OnSubmit=\" return validate_employee_form(this.form)\">" + 
-    "<fieldset class=\"fieldset-default\">" + 
-    "<legend>Basic Information</legend>" + 
+    "<form id=\"add_employee\" name=\"add_employee\" method=\"POST\" OnSubmit=\" return validate_employee_form(this.form)\">" +
+    "<fieldset class=\"fieldset-default\">" +
+    "<legend>Basic Information</legend>" +
     "<label class=\"label\">Employee ID<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"emp-id\" class=\"text-input\" type=\"text\" name=\"emp_id\" onkeyup=\"remove_class('invalid-field','emp-id'); check_int_str('emp-id','emp-id-str-err',false);\">"+
     "&nbsp;&nbsp;&nbsp;"+
     "<label id=\"emp-id-uni-err\" class=\"error-msg hidden-elm\"><sup>*</sup>Unique Employee ID Required</label>"+
     "<label id=\"emp-id-str-err\" class=\"error-msg hidden-elm\"><sup>*</sup>Only Numbers Allowed in Employee ID</label>"+
-    "<br>" + 
-    "<br>" + 
-    "<label class=\"label\">First Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"emp-first-name\" class=\"text-input\" type=\"text\" name=\"emp_first_name\" onkeyup=\"remove_class('invalid-field','emp-first-name');\"><br>" + 
-    "<label class=\"label\">Last Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"emp-last-name\" class=\"text-input\" type=\"text\" name=\"emp_last_name\" onkeyup=\"remove_class('invalid-field','emp-last-name');\"><br>" + 
-    "<label class=\"label\">Middle Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"emp-middle-name\" class=\"text-input\"  type=\"text\" name=\"emp_middle_name\" onkeyup=\"remove_class('invalid-field','emp-middle-name');\"><br>" + 
-    "<br>" + 
-    "<label class=\"label\">Employee Department<span style=\"color: red;\"><sup>*</sup></span></label>" + 
-    "<select id=\"department-select\"class=\"dropbox-input\" name=\"department\" onchange=\"show_if_val('department-select','department-input','other'); remove_class('invalid-field','department-select');\">" + 
-    "  <option value= \"\" disabled selected>Select Department</option>" + 
-    "  <option value=\"transportation\">Transportation</option>" + 
-    "  <option value=\"warehouse_receiving\">Warehouse Receiving</option>" + 
-    "  <option value=\"warehouse_shipping\">Warehouse Shipping</option>" + 
-    "  <option value=\"office\">Office</option>" + 
-    "  <option value=\"other\">Other</option>" + 
-    "</select>" + 
+    "<br>" +
+    "<br>" +
+    "<label class=\"label\">First Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"emp-first-name\" class=\"text-input\" type=\"text\" name=\"emp_first_name\" onkeyup=\"remove_class('invalid-field','emp-first-name');\"><br>" +
+    "<label class=\"label\">Last Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"emp-last-name\" class=\"text-input\" type=\"text\" name=\"emp_last_name\" onkeyup=\"remove_class('invalid-field','emp-last-name');\"><br>" +
+    "<label class=\"label\">Middle Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"emp-middle-name\" class=\"text-input\"  type=\"text\" name=\"emp_middle_name\" onkeyup=\"remove_class('invalid-field','emp-middle-name');\"><br>" +
+    "<br>" +
+    "<label class=\"label\">Employee Department<span style=\"color: red;\"><sup>*</sup></span></label>" +
+    "<select id=\"department-select\"class=\"dropbox-input\" name=\"department\" onchange=\"show_if_val('department-select','department-input','other'); remove_class('invalid-field','department-select');\">" +
+    "  <option value= \"\" disabled selected>Select Department</option>" +
+    "  <option value=\"transportation\">Transportation</option>" +
+    "  <option value=\"warehouse_receiving\">Warehouse Receiving</option>" +
+    "  <option value=\"warehouse_shipping\">Warehouse Shipping</option>" +
+    "  <option value=\"office\">Office</option>" +
+    "  <option value=\"other\">Other</option>" +
+    "</select>" +
     "<br>"+
-    "<label class=\"label\" style=\"text-align: center;\"></label>" + 
+    "<label class=\"label\" style=\"text-align: center;\"></label>" +
     "<input id=\"department-input\" type=\"text\" class=\"text-input hidden-elm\" name=\"department\" placeholder=\"Department\" onkeyup=\"remove_class('invalid-field','department-input');\" disabled></input>"+
-    "</fieldset>" + 
-    "" + 
-    "<br>" + 
-    "" + 
-    "<fieldset class=\"fieldset-trans\">" + 
-    "<legend>Transporation Information (If Applicable) </legend>" + 
+    "</fieldset>" +
+    "" +
+    "<br>" +
+    "" +
+    "<fieldset class=\"fieldset-trans\">" +
+    "<legend>Transporation Information (If Applicable) </legend>" +
     "<table>"+
     "<tr>"+
-    "<td><label class=\"label\" style=\"text-align: center;\">Base Rate Level</label>" + 
+    "<td><label class=\"label\" style=\"text-align: center;\">Base Rate Level</label>" +
     "<select id=\"base-rate-select\" class=\"dropbox-input\" name=\"base_rate\" onchange=\"show_if_val('base-rate-select','base-rate-input','other'); get_option_text('base-rate-select','base-rate-level'); remove_class('invalid-field','base-rate-select');\">" + //need to make this stuff auto populated from database to allow for more levels
-    "</select></td>" + 
-    "<td><label class=\"label\" style=\"text-align: center;\">Case Rate Level</label>" + 
-    "<select id=\"case-rate-select\" class=\"dropbox-input\" name=\"case_rate\" onchange=\"show_if_val('case-rate-select','case-rate-input','other'); get_option_text('case-rate-select','case-rate-level'); remove_class('invalid-field','case-rate-select');\">" + 
-    "</select></td>" + 
-    "<td><label class=\"label\" style=\"text-align: center;\">Stop Rate Level</label>" + 
-    "<select  id=\"stop-rate-select\" class=\"dropbox-input\" name=\"stop_rate\" onchange=\"show_if_val('stop-rate-select','stop-rate-input','other'); get_option_text('stop-rate-select','stop-rate-level'); remove_class('invalid-field','stop-rate-select');\">" + 
-    "</select></td>" + 
+    "</select></td>" +
+    "<td><label class=\"label\" style=\"text-align: center;\">Case Rate Level</label>" +
+    "<select id=\"case-rate-select\" class=\"dropbox-input\" name=\"case_rate\" onchange=\"show_if_val('case-rate-select','case-rate-input','other'); get_option_text('case-rate-select','case-rate-level'); remove_class('invalid-field','case-rate-select');\">" +
+    "</select></td>" +
+    "<td><label class=\"label\" style=\"text-align: center;\">Stop Rate Level</label>" +
+    "<select  id=\"stop-rate-select\" class=\"dropbox-input\" name=\"stop_rate\" onchange=\"show_if_val('stop-rate-select','stop-rate-input','other'); get_option_text('stop-rate-select','stop-rate-level'); remove_class('invalid-field','stop-rate-select');\">" +
+    "</select></td>" +
     "</tr>"+
     //
-    "<td><label class=\"label\" style=\"text-align: center;\"></label>" + 
-    "<input id=\"base-rate-input\" type=\"text\" class=\"text-input-small hidden-elm\" name=\"base_rate\" placeholder=\"$$$\" onkeyup=\"remove_class('invalid-field','base-rate-input');\" disabled></input></td>" + 
-    "<td><label class=\"label\" style=\"text-align: center;\"></label>" + 
-    "<input id=\"case-rate-input\" type=\"text\" class=\"text-input-small hidden-elm\" name=\"case_rate\" placeholder=\"$$$\" onkeyup=\"remove_class('invalid-field','case-rate-input');\" disabled></input></td>" + 
-    "<td><label class=\"label\" style=\"text-align: center;\"></label>" + 
-    "<input id=\"stop-rate-input\" type=\"text\" class=\"text-input-small hidden-elm\" name=\"stop_rate\" placeholder=\"$$$\" onkeyup=\"remove_class('invalid-field','stop-rate-input');\" disabled></input></td>" + 
+    "<td><label class=\"label\" style=\"text-align: center;\"></label>" +
+    "<input id=\"base-rate-input\" type=\"text\" class=\"text-input-small hidden-elm\" name=\"base_rate\" placeholder=\"$$$\" onkeyup=\"remove_class('invalid-field','base-rate-input');\" disabled></input></td>" +
+    "<td><label class=\"label\" style=\"text-align: center;\"></label>" +
+    "<input id=\"case-rate-input\" type=\"text\" class=\"text-input-small hidden-elm\" name=\"case_rate\" placeholder=\"$$$\" onkeyup=\"remove_class('invalid-field','case-rate-input');\" disabled></input></td>" +
+    "<td><label class=\"label\" style=\"text-align: center;\"></label>" +
+    "<input id=\"stop-rate-input\" type=\"text\" class=\"text-input-small hidden-elm\" name=\"stop_rate\" placeholder=\"$$$\" onkeyup=\"remove_class('invalid-field','stop-rate-input');\" disabled></input></td>" +
     "</tr>"+
     "</table>"+
-    "</fieldset>" + 
-    "" + 
-    "<br>" + 
-    "" + 
-    "<fieldset class=\"fieldset-default\">" + 
-    "<legend>Ancilliary Information (If Applicable) </legend>" + 
+    "</fieldset>" +
+    "" +
+    "<br>" +
+    "" +
+    "<fieldset class=\"fieldset-default\">" +
+    "<legend>Ancilliary Information (If Applicable) </legend>" +
     "<label class=\"label\">Employee Pay Type</label>"+
     "<select id=\"pay-type\" name=\"pay_type\">"+
       "<option>Incentive</option>"+
@@ -109,12 +109,12 @@ var add_employee = ""+
       "<option selected>Both</option>"+
     "</select>"+
     "<br>"+
-    "<label class=\"label\">Hourly Pay Rate</label><input id=\"hourly-pay-rate\" class=\"text-input\"  type=\"text\" name=\"hourly_pay_rate\"><br>" + 
+    "<label class=\"label\">Hourly Pay Rate</label><input id=\"hourly-pay-rate\" class=\"text-input\"  type=\"text\" name=\"hourly_pay_rate\"><br>" +
     "<label class=\"label\">Per Diem:</label><input id=\"per-diem\" type=\"text\" name=\"per_diem\" value=\"0.0\" onkeyup=\"check_num_str('per-diem','',false);\" onblur=\"check_num_str('per-diem','',false);\">"+
     "<br>"+
-    "<label class=\"label\">Comments:</lable><textarea id = \"comments\" name=\"comments\" rows=\"4\" cols=\"60\"></textarea>" + 
-    "</fieldset>" + 
-    "<br>" + 
+    "<label class=\"label\">Comments:</lable><textarea id = \"comments\" name=\"emp_comments\" rows=\"4\" cols=\"60\"></textarea>" +
+    "</fieldset>" +
+    "<br>" +
     // hidden data fields
     "<input id=\"base-rate-level\" type=\"hidden\" name=\"base_rate_level\" value=\"N\\A\"></input>"+
     "<input id=\"case-rate-level\" type=\"hidden\" name=\"case_rate_level\" value=\"N\\A\"></input>"+
@@ -123,7 +123,7 @@ var add_employee = ""+
     "<input id=\"emp-internal-id\" type=\"hidden\" name=\"emp_internal_id\" value=\"\"></input>"+
     // err msg and button
     "<label id=\"form-errors\" class=\"error-msg hidden-elm\">Form errors are highlighted in red</label>"+
-    "<button id=\"add-emp\" type=\"button\" onclick = \"init_employee_form_valiation('create')\">Add Employee</button>" + 
+    "<button id=\"add-emp\" type=\"button\" onclick = \"init_employee_form_valiation('create')\">Add Employee</button>" +
     "&nbsp;&nbsp;&nbsp;"+
     "</form>";
 //
@@ -149,7 +149,7 @@ var general_data_form = ''+
     '<label class="label">Attendance Error:</label>'+
     '<select id="attendance-select" name="attendance_error" onchange="show_if_val(\'attendance-select\',\'attendance-input\',\'other\');" onblur="">'+
     '</select>'+
-    '<label class="label" style="text-align: center;"></label>'+ 
+    '<label class="label" style="text-align: center;"></label>'+
     '<input id="attendance-input" type="text" class="text-input hidden-elm" name="attendance_error" placeholder="Attendance Error" onkeyup="remove_class(\'invalid-field\',\'attendance-input\');" disabled></input>'+
     '</fieldset>'+
     '<br>'+
@@ -215,7 +215,7 @@ var receiving_data = ''+
     '<select id="attendance-select" name="attendance_error" onchange="show_if_val(\'attendance-select\',\'attendance-input\',\'other\');" onblur="">'+
     '</select>'+
     '<br>'+
-    '<label class="label" style="text-align: center;"></label>'+ 
+    '<label class="label" style="text-align: center;"></label>'+
     '<input id="attendance-input" type="text" class="text-input hidden-elm" name="attendance_error" placeholder="Attendance Error" onkeyup="remove_class(\'invalid-field\',\'attendance-input\');" disabled></input>'+
     '</fieldset>'+
     '<br>'+
@@ -295,7 +295,7 @@ var receiving_data = ''+
     '<button id="submit-data-button" type="button">Submit Shift Information</button>'+
     '</form>';
 //
-// 
+//
 var transportation_data = ''+
     '<form id="input-emp-data">'+
     '<fieldset class="fieldset-default">'+
@@ -328,7 +328,7 @@ var transportation_data = ''+
     '<select id="attendance-select" name="attendance_error" onchange="show_if_val(\'attendance-select\',\'attendance-input\',\'other\'); recalc_transportation_form(true);" onblur="recalc_transportation_form(true);">'+
     '</select>'+
     '<br>'+
-    '<label class="label" style="text-align: center;"></label>'+ 
+    '<label class="label" style="text-align: center;"></label>'+
     '<input id="attendance-input" type="text" class="text-input hidden-elm" name="attendance_error" placeholder="Attendance Error" onkeyup="remove_class(\'invalid-field\',\'attendance-input\');" disabled></input>'+
     '</fieldset>'+
     '<br>'+
@@ -398,7 +398,7 @@ var transportation_data = ''+
     '<br>'+
     '<label class="label">Total Pay:</label><input id="total-pay" type="text" name="total" value="0.0" onblur="recalc_transportation_form(true);" readonly><br>'+
     '<br>'+
-    '<label class="label">Comments:</label><textarea id = "comments" name="comments" rows="4" cols="60" value="" onkeyup="remove_class(\'invalid-field\',this.id);"></textarea>'+    
+    '<label class="label">Comments:</label><textarea id = "comments" name="comments" rows="4" cols="60" value="" onkeyup="remove_class(\'invalid-field\',this.id);"></textarea>'+
     '</fieldset>'+
     '<input id="base-rate-orig" type="hidden" name="base_rate" disabled>'+
     '<input id="case-rate-orig" type="hidden" name="case_rate" disabled>'+
@@ -441,7 +441,7 @@ var warehouse_data = ''+
     '<select id="attendance-select" name="attendance_error" onchange="recalc_warehouse_form(true)" onblur="recalc_warehouse_form(true);">'+
     '</select>'+
     '<br>'+
-    '<label class="label" style="text-align: center;"></label>'+ 
+    '<label class="label" style="text-align: center;"></label>'+
     '<input id="attendance-input" type="text" class="text-input hidden-elm" name="attendance_error" placeholder="Attendance Error" onkeyup="remove_class(\'invalid-field\',\'attendance-input\');" disabled></input>'+
     '</fieldset>'+
     '<br>'+
@@ -567,7 +567,7 @@ var stock_change_form = ''+
     '<label class="label-12em">Current Quantity:</label><input id="curr-quantity" type="text" value="" name="quantity" disabled>'+
     '</fieldset>'+
     '<fieldset class="fieldset-default">'+
-    '<legend>Stock Changes</legend>'+  
+    '<legend>Stock Changes</legend>'+
     '<label class="label-12em">Date:</label><input id="date" type="text" name="date" value="" maxlength="10" onkeyup="check_date_str(\'date\',\'\',false);" onblur="check_date_str(\'date\',\'\',false);" readonly>'+
     '&nbsp&nbsp&nbsp<label class="label-5em">Edit Date:</label><input id="edit-date" type="checkbox" onclick="toggle_readonly(\'date\');">'+
     '<br>'+
@@ -598,7 +598,7 @@ var sales_rep_form = ''+
     "<br>"+
     "<label class=\"label\">Last Name<span style=\"color: red;\"><sup>*</sup></span></label><input id=\"dbuser-last-name\" class=\"text-input\" type=\"text\" name=\"dbuser_last_name\" onkeyup=\"remove_class('invalid-field',this.id);\">"+
     "<br>"+
-    "<label class=\"label\">Email</label><input id=\"email\" class=\"text-input\"  type=\"text\" name=\"email\" onkeyup=\"remove_class('invalid-field',this.id); check_email_str(this.id,'email-err-str',false)\">"+
+    "<label class=\"label\">Email</label><input id=\"email\" class=\"text-input\"  type=\"text\" name=\"user_email\" onkeyup=\"remove_class('invalid-field',this.id); check_email_str(this.id,'email-err-str',false)\">"+
     "<label id=\"email-err-str\" class=\"error-msg hidden-elm\">&nbsp;&nbsp;&nbsp;Error - Invalid Email Format, Valid Format: example@foo.bar</label><br>"+
     "<br>"+
     "</fieldset>"+
@@ -654,7 +654,7 @@ var sales_customer_form = ''+
     '</form>';
 //
 // this function will return one of the above forms to a page
-function create_form(form_name,out_id) {    
+function create_form(form_name,out_id) {
     var forms = {}
     forms.add_employee = add_employee;
     forms.add_dbuser = add_dbuser;
@@ -672,7 +672,7 @@ function create_form(form_name,out_id) {
         document.getElementById(out_id).innerHTML = forms[form_name];
     }
     else {
-       document.getElementById(out_id).innerHTML = "No form with that name found."; 
+       document.getElementById(out_id).innerHTML = "No form with that name found.";
     }
     return;
 }
@@ -689,7 +689,7 @@ function addChildren(parentNode,elementsArray) {
         // adding events to element
         if (elm_obj.hasOwnProperty('events')) {
             for (var e = 0; e < elm_obj['events'].length; e++) {
-                element.addEventListener(elm_obj['events'][e]['event'] , elm_obj['events'][e]['function']);   
+                element.addEventListener(elm_obj['events'][e]['event'] , elm_obj['events'][e]['function']);
             }
             delete elm_obj['events'];
         }
@@ -734,9 +734,9 @@ function create_time_range_inputs(input_args) {
     //
     // creating date objects for time range inputs
     var today = new Date();
-    var first = new Date(today.getFullYear(),today.getMonth(),1); 
+    var first = new Date(today.getFullYear(),today.getMonth(),1);
     var curr_wk  = [new Date(today.getFullYear(),today.getMonth(),(today.getDate()-today.getDay()))];
-    curr_wk[1]   = new Date(curr_wk[0].getFullYear(),curr_wk[0].getMonth(),(curr_wk[0].getDate()+6)) 
+    curr_wk[1]   = new Date(curr_wk[0].getFullYear(),curr_wk[0].getMonth(),(curr_wk[0].getDate()+6))
     var last_2wk = [new Date(today.getFullYear(),today.getMonth(),(today.getDate()-today.getDay()-7)),curr_wk[1]];
     var last_4wk = [new Date(today.getFullYear(),today.getMonth(),(today.getDate()-today.getDay()-21)),curr_wk[1]];
     var curr_mth = [new Date(first.getFullYear(),first.getMonth(),(first.getDate()-first.getDay()))];
@@ -745,7 +745,7 @@ function create_time_range_inputs(input_args) {
     var curr_pp = new Date(CONSTANTS.FIRST_BUSINESS_DAY[0],+CONSTANTS.FIRST_BUSINESS_DAY[1]-1,CONSTANTS.FIRST_BUSINESS_DAY[2]);
     var test_date = curr_pp;
     curr_pp = [curr_pp]
-    for (var w = 0; w < 60; w+=2) { 
+    for (var w = 0; w < 60; w+=2) {
         test_date = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()+14));
         curr_pp[1] = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()-1));
         if (test_date > today) {break;}
@@ -821,7 +821,7 @@ function create_time_range_inputs(input_args) {
         '<option id ="8" value="08">August</option>'+
         '<option id ="9" value="09">September</option>'+
         '<option id ="10" value="10">October</option>'+
-        '<option id ="11" value="11">November</option>'+                                 
+        '<option id ="11" value="11">November</option>'+
         '<option id ="12" value="12">December</option>'+
       '</select>'+
       '&nbsp;'+
@@ -856,21 +856,21 @@ function find_pay_period(date) {
     var test_date = st_pp;
     ts_arr = [st_pp]
     if (date < st_pp) {
-        while (true) { 
+        while (true) {
             ts_arr[1] = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()));
             test_date = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()-14));
             ts_arr[0] = test_date;
             if ((date >= ts_arr[0]) && (date <= ts_arr[1])) {break;}
             if (date >= ts_arr[0]) { break;}
-        }  
+        }
     }
     else {
-        while (true) { 
+        while (true) {
             test_date = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()+14));
             ts_arr[1] = new Date(test_date.getFullYear(),test_date.getMonth(),(test_date.getDate()-1));
             if (test_date >= date) { break;}
             ts_arr = [test_date];
-        }    
+        }
     }
     //
     ts_arr[0] = ts_arr[0].yyyymmdd();
@@ -882,7 +882,7 @@ function find_pay_period(date) {
 // this creates the haul information area on the backhaul form
 function create_haul_fields(out_id,entry_num) {
     //
-    // building the form by element so it doesn't reset the exiting entries 
+    // building the form by element so it doesn't reset the exiting entries
     // creating elements
     var fieldset = document.createElement('FIELDSET');
     var formElements = Array(
@@ -930,7 +930,7 @@ function create_calander(out_id,mon_shift,day_id,mon_id,year_id) {
     var cal_table = '';
     var mon_shift = parseInt(mon_shift);
     var mon_arr = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    var dow_arr = ['SUN','MON','TUE','WED','THU','FRI','SAT']; 
+    var dow_arr = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
     var todays_date = new Date();
     todays_date = new Date(todays_date.getFullYear(),todays_date.getMonth(),todays_date.getDate());
     var adj_date = new Date(todays_date.getFullYear(),todays_date.getMonth()+mon_shift,1);
@@ -945,7 +945,7 @@ function create_calander(out_id,mon_shift,day_id,mon_id,year_id) {
     var head_onclick = "create_calander('"+out_id+"','%mon_shift%','"+day_id+"','"+mon_id+"','"+year_id+"');";
     var day_onclick = "set_date('%day%','%month%','%year%','"+day_id+"','"+mon_id+"','"+year_id+"','"+out_id+"');";
     var day_onmouseenter = "add_class('cal-day-highlight','year-%year%-mon-%month%-day-%day%');";
-    var day_onmouseleave = "remove_class('cal-day-highlight','year-%year%-mon-%month%-day-%day%');";  
+    var day_onmouseleave = "remove_class('cal-day-highlight','year-%year%-mon-%month%-day-%day%');";
     //
     // creating calander header
     cal_table =  '<table id="calander" class="cal-table" cellpadding="0">';
@@ -962,17 +962,17 @@ function create_calander(out_id,mon_shift,day_id,mon_id,year_id) {
         cal_table += '<td class="cal-table-wkhead">'+dow_arr[i]+'</td>';
     }
     //
-    // outputting the rows of days 
+    // outputting the rows of days
     adj_date = new Date(adj_date.getFullYear(),adj_date.getMonth(),1-adj_date.getDay());
     cal_table += '<tr>';
     for (var d = 0; d < 42; d++) {
         //console.log(d,adj_date);
         if (d%7 == 0) {cal_table += '</tr><tr>';}
         //
-        // updating date specific functions 
-        var onclick_str = day_onclick;        
+        // updating date specific functions
+        var onclick_str = day_onclick;
         var onmouseenter_str = day_onmouseenter;
-        var onmouseleave_str = day_onmouseleave;   
+        var onmouseleave_str = day_onmouseleave;
         onclick_str = onclick_str.replace(/%day%/,adj_date.getDate());
         onclick_str = onclick_str.replace(/%month%/,adj_date.getMonth());
         onclick_str = onclick_str.replace(/%year%/,adj_date.getFullYear());
@@ -991,7 +991,7 @@ function create_calander(out_id,mon_shift,day_id,mon_id,year_id) {
     }
     //
     cal_table += '</table>';
-    document.getElementById(out_id).innerHTML = cal_table; 
+    document.getElementById(out_id).innerHTML = cal_table;
     //
     if (document.getElementById('year-'+todays_date.getFullYear()+'-mon-'+todays_date.getMonth()+'-day-'+todays_date.getDate())) {add_class('cal-table-today','year-'+todays_date.getFullYear()+'-mon-'+todays_date.getMonth()+'-day-'+todays_date.getDate())}
 }
@@ -1014,13 +1014,13 @@ function set_date(day,mon,year,day_id,mon_id,year_id,cal_id) {
     document.getElementById(year_id).dispatchEvent(event);
     //
     show_hide(cal_id)
-    remove_class_all('selected-field');  
+    remove_class_all('selected-field');
 }
 //
 // this function gets a row from a table using the unique col and data entry
-function populate_form(populate_form_args) {  
+function populate_form(populate_form_args) {
     //
-    // processing arg object 
+    // processing arg object
     var table = populate_form_args.table
     var unique_col = populate_form_args.unique_col
     var unique_data = populate_form_args.unique_data
@@ -1037,7 +1037,7 @@ function populate_form(populate_form_args) {
     var callback_fun = function(response) {
         populate_form_args.data_arr = response.data[0];
         process_form_data(populate_form_args)
-        if (!!(populate_form_args.add_callback_funs)) { 
+        if (!!(populate_form_args.add_callback_funs)) {
         populate_form_args.add_callback_funs();
         }
     }
@@ -1045,8 +1045,8 @@ function populate_form(populate_form_args) {
 }
 //
 // this function processes the response from populate form
-// it is assumed that the fields name matches the respoective column name 
-function process_form_data(populate_form_args) {    
+// it is assumed that the fields name matches the respoective column name
+function process_form_data(populate_form_args) {
     //
     var data_arr = populate_form_args.data_arr;
     var form_id = populate_form_args.form_id;
@@ -1092,7 +1092,7 @@ function process_form_data(populate_form_args) {
                 if (populate_form_args.trigger_events == true) {
                     var event = document.createEvent("HTMLEvents");
                     event.initEvent("click",true,false);
-                    all_children[i].dispatchEvent(event); 
+                    all_children[i].dispatchEvent(event);
                 }
             }
         }
@@ -1104,7 +1104,7 @@ function process_form_data(populate_form_args) {
                 event.initEvent("keyup",true,false);
                 all_children[i].dispatchEvent(event);
             }
-        }   
+        }
     }
 }
 //
@@ -1121,8 +1121,8 @@ function toggle_children(parent_id,skip_ids,disable) {
     }
 }
 //
-// this function will get database data and fill the dropbox with it 
-function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_holder,add_args) {    
+// this function will get database data and fill the dropbox with it
+function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_holder,add_args) {
     //
     // creating SQL statment
     var sql = '';
@@ -1136,6 +1136,7 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
     sql_args.table = table;
     sql_args.cols = [value_col,text_col];
     // processing additional arguments
+    if (!(add_args)) { add_args = {};}
     if (!!(add_args.value_format)) { value_format = add_args.value_format;}
     if (!!(add_args.format_str)) { text_format = add_args.format_str;}
     if (!!(add_args.add_cols)) { sql_args.cols = sql_args.cols.concat(add_args.add_cols);}
@@ -1143,7 +1144,7 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
     if (!!(add_args.place_holder_value)) {place_holder_value = add_args.place_holder_value;}
     if (!!(add_args.place_holder_status)) {place_holder_status = add_args.place_holder_status;}
     if (!!(add_args.add_callback)) {callback = add_args.add_callback;}
-    if (!!(add_args.sql_args)) { 
+    if (!!(add_args.sql_args)) {
         for (var arg in add_args.sql_args) { sql_args[arg] = add_args.sql_args[arg];}
     }
     sql = gen_sql(sql_args);
@@ -1170,7 +1171,7 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
             var value = value_format;
             for (var prop in data_arr[i]) { text = text.replace('%'+prop+'%',data_arr[i][prop]); value = value.replace('%'+prop+'%',data_arr[i][prop]);}
             opt_attr = {'value' : value}
-            opt = document.createElementWithAttr('OPTION',opt_attr);            
+            opt = document.createElementWithAttr('OPTION',opt_attr);
             opt.addTextNode(text);
             dropbox.appendChild(opt);
         }
@@ -1179,7 +1180,7 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
         if (!!(add_args.add_opts_val)) {
             for (var i = 0;  i < add_args.add_opts_val.length; i++) {
                 opt_attr = {'value' : add_args.add_opts_val[i]}
-                opt = document.createElementWithAttr('OPTION',opt_attr);            
+                opt = document.createElementWithAttr('OPTION',opt_attr);
                 opt.addTextNode(add_args.add_opts_text[i]);
                 dropbox.appendChild(opt);
             }
@@ -1192,7 +1193,7 @@ function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_hold
     ajax_fetch([sql],['data'],pop_dropbox)
 }
 //
-// this function specifically populates the year dropboxes 
+// this function specifically populates the year dropboxes
 // based on the first_year_with_data value in operations_constants table
 function populate_year_dropboxes(dropbox_id) {
     //

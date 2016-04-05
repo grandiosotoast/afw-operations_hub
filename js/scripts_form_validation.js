@@ -5,7 +5,7 @@
 "use strict";
 //
 // checks if two input fields have the same text
-function check_equality(elm_id1,elm_id2,err_str_id,ret_val) {   
+function check_equality(elm_id1,elm_id2,err_str_id,ret_val) {
     var v1 = trim(document.getElementById(elm_id1).value);
     var v2 = trim(document.getElementById(elm_id2).value);
     var error = false
@@ -25,9 +25,9 @@ function check_equality(elm_id1,elm_id2,err_str_id,ret_val) {
     if (ret_val == true) {return error;}
 }
 //
-// checks if a value is unquie in the tables column 
+// checks if a value is unquie in the tables column
 // add in the fetch_db javacript to this eventually to handle the ajax request
-function check_unique(form_id,uni_elm_id,cmpr_elm_id,table,validate_callback_fun) {    
+function check_unique(form_id,uni_elm_id,cmpr_elm_id,table,validate_callback_fun) {
     //
     //
     var unique_err = false
@@ -51,7 +51,7 @@ function check_unique(form_id,uni_elm_id,cmpr_elm_id,table,validate_callback_fun
     var callback = function(response) {
         var data_arr = response[0];
         //
-        // checking values returned 
+        // checking values returned
         if ((cmpr_col == '') && !!(data_arr[0])) {unique_err = true;}
         else if (!!(data_arr[0])) {
             if (data_arr[0][cmpr_col] != cmpr_val) {
@@ -60,7 +60,7 @@ function check_unique(form_id,uni_elm_id,cmpr_elm_id,table,validate_callback_fun
             }
         }
         //
-        // performing additional form validation and submitting the 
+        // performing additional form validation and submitting the
         validate_callback_fun(unique_err);
         return;
     }
@@ -115,7 +115,7 @@ function check_num_str(input_id,unhide_id,ret_val) {
 }
 //
 // this function checks if a text entry has only numbers in it
-function check_int_str(input_id,unhide_id,ret_val) {    
+function check_int_str(input_id,unhide_id,ret_val) {
     //
     // getting the input string from the element
     var input_str = trim(document.getElementById(input_id).value);
@@ -141,9 +141,9 @@ function check_int_str(input_id,unhide_id,ret_val) {
     if (ret_val == true) { return error;}
 }
 //
-// checks if a date string is in valid format 
+// checks if a date string is in valid format
 // also checks for roughly valid values no month > 12, day > 31 or either equal to 0
-function check_date_str(input_id,err_str_id,ret_val) {    
+function check_date_str(input_id,err_str_id,ret_val) {
     //
     // getting the input string from the element
     var input_str = trim(document.getElementById(input_id).value);
@@ -182,7 +182,7 @@ function check_date_str(input_id,err_str_id,ret_val) {
 }
 //
 // checks if an email appears to have valid formatting text@text.text
-function check_email_str(input_id,err_str_id,ret_val) {    
+function check_email_str(input_id,err_str_id,ret_val) {
     //
     // getting the input string from the element
     var input_str = trim(document.getElementById(input_id).value);
@@ -204,14 +204,14 @@ function check_email_str(input_id,err_str_id,ret_val) {
     if (ret_val == true) {return error;}
 }
 //
-// validates and formats a time entry to hh:mm 
-function format_time(elm_id,ret_val) {    
+// validates and formats a time entry to hh:mm
+function format_time(elm_id,ret_val) {
     var error = false;
     var time_str = document.getElementById(elm_id).value;
     time_str = trim(time_str);
     if (time_str.match(/^\d\d\d\d$/)) {
         time_str = time_str.slice(0,2)+':'+time_str.slice(2,4);
-        remove_class('invalid-field',elm_id); 
+        remove_class('invalid-field',elm_id);
     }
     else if (time_str.match(/^\d\d\:\d\d$/)) {
         remove_class('invalid-field',elm_id);
@@ -243,7 +243,7 @@ function format_time(elm_id,ret_val) {
 }
 //
 //
-function to_and_from_timestamps() {    
+function to_and_from_timestamps() {
     var from_ts = '';
     var to_ts = '';
     var today = new Date()
@@ -274,7 +274,7 @@ function to_and_from_timestamps() {
 //
 // this steps through non disabled form elements of each input type skipping buttons
 // storing the value and name of element in an object
-function get_all_form_values(parent_id,skip_elm_ids) {    
+function get_all_form_values(parent_id,skip_elm_ids) {
     var all_children = document.getElementById(parent_id).getElementsByTagName("*");
     var skip_id_arr = skip_elm_ids.split(',');
     var name_val_obj = {};
@@ -303,7 +303,7 @@ function get_all_form_values(parent_id,skip_elm_ids) {
 /// supply the parent id of the form and iterate through children
 /// also supply a comma seperated list of IDs that can have empty string values
 /// excludes checkboxes and buttons
-function basic_validate(parent_id,empty_elms_id) {   
+function basic_validate(parent_id,empty_elms_id) {
     var all_children = document.getElementById(parent_id).getElementsByTagName("*");
     var error = false;
     var empty_id_arr = empty_elms_id.split(',');
@@ -324,13 +324,32 @@ function basic_validate(parent_id,empty_elms_id) {
     return error;
 }
 //
+// checks the parent element for any fields with an invalid-field class
+function check_for_invalid_fields(form_id) {
+    //
+    var error = false;
+    //
+    // stepping through input tags to see if any fields have the invalid class
+    var all_inputs = document.getElementById(form_id).getElementsByTagName("*");
+    for (var i = 0; i < all_inputs.length; i++) {
+        // checking if child node is an element
+        if (all_inputs[i].disabled == true) {continue;}
+        if (all_inputs[i].className.match('invalid-field')) {
+            console.log("Invalid Error: ",all_inputs[i].id);
+            error = true;
+        }
+    }
+    //
+    return(error);
+}
 //
-function validate_login() {  
+//
+function validate_login() {
    if (trim(document.login_form.username.value) == "") {
       alert("Username is required.");
       document.login_form.username.focus();
       return(false);
-   } 
+   }
    if (trim(document.login_form.password.value) == "") {
       alert("Password is required.");
       document.login_form.password.focus();
@@ -340,7 +359,7 @@ function validate_login() {
 }
 //
 // validating the add dbuser form
-function init_dbuser_form_valiation(update) {    
+function init_dbuser_form_valiation(update) {
     var arg_object = {}
     arg_object.update = update
     // passing anonymous function to check_unique to finish validation  !!!!!
@@ -351,8 +370,8 @@ function init_dbuser_form_valiation(update) {
     check_unique('add-new-user','username','dbuser-internal-id','dbUsers',validate_fun);
 }
 //
-// validates the dbuser form 
-function validate_dbuser_form(arg_object) {     
+// validates the dbuser form
+function validate_dbuser_form(arg_object) {
     var error = false;
     //
     // checking if username was unique
@@ -399,8 +418,8 @@ function validate_dbuser_form(arg_object) {
     }
 }
 //
-// submitting the dbuser form 
-function submit_dbuser_form(arg_object) {    
+// submitting the dbuser form
+function submit_dbuser_form(arg_object) {
     //
     var update = arg_object.update;
     //
@@ -454,8 +473,8 @@ function submit_dbuser_form(arg_object) {
     ajax_exec_db(sql,callback)
 }
 //
-// validating the add employee form 
-function init_employee_form_valiation(action) {   
+// validating the add employee form
+function init_employee_form_valiation(action) {
     // checking if strig is only numbers
     if (document.getElementById('emp-id').value != '') {
         var int_str_err = check_int_str('emp-id','emp-id-str-err',true);
@@ -476,14 +495,14 @@ function init_employee_form_valiation(action) {
 }
 // callback function used in check unique to complete form validation
 // and submit the form if valid
-function validate_employee_form(arg_object) { 
+function validate_employee_form(arg_object) {
     //
     var error = false;
     var basic_val_error = false;
     var emp_id_str_err = false;
     var unique_id_error = arg_object.unique_id_error;
     //
-    // performning basic empty value validation for all input and select elements
+    // performing basic empty value validation for all input and select elements
     if (document.getElementById('department-select').value == 'transportation') {
         basic_val_error = basic_validate('add_employee','pay_rate,comments,emp-internal-id,base-rate-level,case-rate-level,stop-rate-level');
     }
@@ -513,11 +532,11 @@ function validate_employee_form(arg_object) {
         add_class('hidden-elm','form-errors');
         submit_employee_form(arg_object)
     }
-    
+
 }
 //
-// submit add_employee form 
-function submit_employee_form(arg_object) {   
+// submit add_employee form
+function submit_employee_form(arg_object) {
     //
     var action = arg_object.action;
     //
@@ -575,7 +594,7 @@ function submit_employee_form(arg_object) {
     }
     else if (action == 'reinstate') {
         message = 'Sucessfully Reinstated Employee: '+document.getElementById('emp-id').value+' - '+name_val_obj.emp_first_name+' '+name_val_obj.emp_last_name+'.';
-    }   
+    }
     //
     // creating sql statment
     if (action != 'create') {
@@ -618,15 +637,15 @@ function submit_employee_form(arg_object) {
     ajax_exec_db(sql,callback)
 }
 //
-// this recalculates all of the fields on the general form 
-function recalc_general_form(truncate) { 
+// this recalculates all of the fields on the general form
+function recalc_general_form(truncate) {
     //
     var sql_args = {};
     var data_sql = '';
     var precision = 9;
     if (truncate) { precision = CONSTANTS.STD_PRECISION;}
     //
-    // performing validation steps 
+    // performing validation steps
     remove_class_all('invalid-field');
     check_date_str('date','',false);
     //
@@ -672,19 +691,19 @@ function recalc_general_form(truncate) {
     ajax_fetch([data_sql],['wk_data'],callback);
 }
 //
-// this recalculates all of the fields on the receving form 
-function recalc_receving_form(truncate) { 
+// this recalculates all of the fields on the receving form
+function recalc_receving_form(truncate) {
     //
     var sql_args = {};
     var data_sql = '';
     var precision = 9;
     if (truncate) {precision = CONSTANTS.STD_PRECISION}
     //
-    // performing validation steps 
+    // performing validation steps
     remove_class_all('invalid-field');
     check_date_str('date','',false);
     //
-    // doing initial calculations 
+    // doing initial calculations
     total_fields('letdowns-moves,putaways-moves,restocks-moves,receiving-moves,counts-moves','total-moves');
     total_fields('letdowns-units,putaways-units,restocks-units,receiving-units,counts-units','total-units');
     //
@@ -863,13 +882,13 @@ function recalc_transportation_form(truncate) {
     document.getElementById('pre-inspection').value = pre;
     document.getElementById('post-inspection').value = post;
     document.getElementById('incentive-pay').value = round(incentive_pay,2).toFixed(2);
-    document.getElementById('hourly-pay').value = round(hourly_pay,2).toFixed(2);  
-    document.getElementById('reimbursement').value = round(reimbursement,2).toFixed(2);      
-    document.getElementById('total-pay').value = round(tot_pay,precision).toFixed(precision);   
+    document.getElementById('hourly-pay').value = round(hourly_pay,2).toFixed(2);
+    document.getElementById('reimbursement').value = round(reimbursement,2).toFixed(2);
+    document.getElementById('total-pay').value = round(tot_pay,precision).toFixed(precision);
 }
 //
 // this handles all the the validation and calculations for the warehouse form
-function recalc_warehouse_form(truncate) { 
+function recalc_warehouse_form(truncate) {
     //
     var sql_args = {};
     var data_sql = '';
@@ -878,7 +897,7 @@ function recalc_warehouse_form(truncate) {
     var precision = 9;
     if (truncate) {precision = CONSTANTS.STD_PRECISION}
     //
-    show_if_val('attendance-select','attendance-input','other'); 
+    show_if_val('attendance-select','attendance-input','other');
     show_if_val('error-code','other-error-code-msg','99');
     remove_class_all('invalid-field');
     check_date_str('date','',false);
@@ -972,7 +991,7 @@ function calc_overtime(hours,pay_rate,wk_data) {
 }
 //
 // validates and calculates a selection rate for warehouse data
-function calc_sel_rate(sel_data) { 
+function calc_sel_rate(sel_data) {
     var tot_pay = sel_data.tot_pay;
     var err = document.getElementById('error-code').value;
     var cases_hr = +document.getElementById('cases-hr').value;
@@ -981,7 +1000,7 @@ function calc_sel_rate(sel_data) {
     //
     // calculating case pay
     if ((document.getElementById('rem-case-pay').checked) || (err != '0')) {
-        document.getElementById('sel-rate').value = '0.00'; 
+        document.getElementById('sel-rate').value = '0.00';
         document.getElementById('total-pay').value = round(tot_pay,precision).toFixed(precision);
     }
     else if (document.getElementById('edit-sel-rate').checked) {
@@ -1031,7 +1050,7 @@ function disable_all_data_entry(disable) {
 }
 //
 // this function will validate one of the data entry forms
-function init_data_form_validation(department,action) {    
+function init_data_form_validation(department,action) {
     //
     var error = false;
     var time_error = false;
@@ -1051,7 +1070,7 @@ function init_data_form_validation(department,action) {
         recalc_receving_form(false);
     }
     else if (department == 'warehouse_shipping') {
-        recalc_warehouse_form(false);    
+        recalc_warehouse_form(false);
     }
     //
     // checking if there is an error_code/ attendance_error and requring comments
@@ -1115,12 +1134,12 @@ function init_data_form_validation(department,action) {
     else {
         var sql_arr = [meta_sql];
         var name_arr = ['meta_data'];
-        ajax_fetch(sql_arr,name_arr,submit_callback) 
+        ajax_fetch(sql_arr,name_arr,submit_callback)
     }
 }
 //
 // this submits the data entry form
-function submit_data_entry_fom(submit_args) {   
+function submit_data_entry_fom(submit_args) {
     //
     var dept_table = submit_args.dept_table;
     var data_form = submit_args.data_form;
@@ -1144,7 +1163,7 @@ function submit_data_entry_fom(submit_args) {
     // preventing the submit box from firing twice on restoration of entry
     if (!!(action != 'create')) {
         var cont = true;
-    } 
+    }
     else {
         var cont = confirm('Are you sure you want to submit this form?');
     }
@@ -1163,7 +1182,7 @@ function submit_data_entry_fom(submit_args) {
     document.getElementById('entry-id').disabled = false;
     var name_val_obj = get_all_form_values('input-emp-data','');
     //
-    // defining messages for specfic actions 
+    // defining messages for specfic actions
     var message = '';
     if (action == 'create') {
         message = 'Sucessfully Created Record for: '+name_val_obj.emp_first_name+" "+name_val_obj.emp_last_name+'.';
@@ -1245,7 +1264,7 @@ function submit_data_entry_fom(submit_args) {
     // adding this if it is a new entry
     if (action == 'create') {
         dept_sql_args.cols.push('entry_id');
-        dept_sql_args.vals.push('LAST_INSERT_ID()'); 
+        dept_sql_args.vals.push('LAST_INSERT_ID()');
     }
     var main_sql = gen_sql(main_sql_args);
     var dept_sql = gen_sql(dept_sql_args);
@@ -1365,7 +1384,7 @@ function init_backhaul_form_validation(department,action) {
     else {
         var sql_arr = [meta_sql];
         var name_arr = ['meta_data'];
-        ajax_fetch(sql_arr,name_arr,submit_callback) 
+        ajax_fetch(sql_arr,name_arr,submit_callback)
     }
 }
 //
@@ -1379,7 +1398,7 @@ function submit_backhaul_form(submitArgs) {
     var colMetaData = {};
     var groupID = round(Math.random()*Math.pow(10,9),0);
     //
-    // defining messages for specfic actions 
+    // defining messages for specfic actions
     var message = '';
     if (action == 'create') {
         message = 'Sucessfully Created Freight Record for: '+document.getElementById('emp-first-name').value+" "+document.getElementById('emp-last-name').value+'.';
@@ -1394,7 +1413,7 @@ function submit_backhaul_form(submitArgs) {
         message = 'Sucessfully Deleted all POs for Employee: '+document.getElementById('emp-first-name').value+' '+document.getElementById('emp-last-name').value+'.';
     }
     //
-    // creating the two callback functions  
+    // creating the two callback functions
     var insert_callback = function() {
         get_backhaul_form('999999','data-entry-form-div',false);
         alert(message);
@@ -1504,7 +1523,7 @@ function init_item_form_validation(action) {
     }
 }
 //
-// this completes the validation of the form 
+// this completes the validation of the form
 function validate_item_form(validate_args) {
     //
     var action = validate_args.action;
@@ -1523,7 +1542,7 @@ function validate_item_form(validate_args) {
     if (basic_val_error) {error = true;}
     //
     if (error) { remove_class('hidden-elm','form-errors'); return;}
-    else { add_class('hidden-elm','form-errors');} 
+    else { add_class('hidden-elm','form-errors');}
     //
     // defining messages based on action type
     var confirm_message = '';
@@ -1567,7 +1586,7 @@ function validate_item_form(validate_args) {
     // ensuring ID field is enabled temporarily to get its value
     document.getElementById('item-number').disabled = false;
     name_val_obj = get_all_form_values('meat-shop-item','');
-    document.getElementById('item-number').disabled = true;  
+    document.getElementById('item-number').disabled = true;
     //
     // update item callback
     var callback = function() {
@@ -1659,7 +1678,7 @@ function validate_stock_form(action) {
         // updating value of quantity but not changing amount
         elementArithmetic('new-quantity','orig-amount','new-quantity','-');
         document.getElementById('amount').value = document.getElementById('orig-amount').value
-        // 
+        //
         // changing value of entry status
         document.getElementById('entry-status').value = 'deleted';
     }
@@ -1675,7 +1694,7 @@ function validate_stock_form(action) {
         // updating value of quantity but not changing amount
         elementArithmetic('new-quantity','orig-amount','new-quantity','+');
         document.getElementById('amount').value = document.getElementById('orig-amount').value
-        // 
+        //
         // changing value of entry status
         document.getElementById('entry-status').value = 'submitted'
     }

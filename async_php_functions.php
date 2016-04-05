@@ -3,7 +3,7 @@ session_start();
 require 'operations_tracking.php'; 
 //
 // values in the session array that can not be over written
-$protected_vars = ['username','password','permissions','email','department','dbuser_last_name','dbuser_first_name','dbuser_internal_id'];
+$protected_vars = ['username','password','permissions','user_email','department','dbuser_last_name','dbuser_first_name','dbuser_internal_id'];
 //
 // asnyc execution of exec_db
 if (isset($_POST["exec_db"])) {

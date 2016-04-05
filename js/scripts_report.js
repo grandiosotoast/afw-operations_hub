@@ -816,10 +816,12 @@ function make_report_total_tr(total_args,totals_obj,col_meta_data) {
     for (var i = 0; i < col_meta_data.length; i++) {
         if (total_args.skip_cols.indexOf(col_meta_data[i].column_name) >= 0) {continue;}
         if (sect_cols.indexOf(col_meta_data[i].column_name) >= 0) {continue;}
-        if (col_meta_data[i]['column_type'].match(/dynamic/)) { 
-            if (dynamic_cols[col_meta_data[i]['column_name']]['column_type'].match(/special/)) { continue;}
-            else if (dynamic_cols[col_meta_data[i]['column_name']]['column_type'].match(/total/)) { dynamic += 1; continue;}
-        }
+        //if (col_meta_data[i]['column_type'].match(/dynamic/)) { 
+        //    if (dynamic_cols[col_meta_data[i]['column_name']]['column_type'].match(/special/)) { continue;}
+        //    else if (dynamic_cols[col_meta_data[i]['column_name']]['column_type'].match(/total/)) { dynamic += 1; continue;}
+        //} dynamic-total
+        if (col_meta_data[i]['column_type'].match(/^dynamic-total$/)) { dynamic += 1; continue;}
+        if (col_meta_data[i]['column_type'].match(/^dynamic-special$/)) { continue;}
         regular += 1;
         //
         var col = col_meta_data[i];
@@ -866,7 +868,7 @@ function make_report_total_tr(total_args,totals_obj,col_meta_data) {
             if (col_meta_data[i].column_type.match(/^dynamic-total$/)) {
                 span = document.createElementWithAttr('SPAN',{'id':total_args.total_id+'-'+col_meta_data[i].column_name});
                 span.style['display'] = 'inline-block';
-                span.style['with'] = (100/dynamic)+'%';
+                span.style['width'] = (100/dynamic)+'%';
                 span.textContent = 'X';
                 td.appendChild(span);
             }

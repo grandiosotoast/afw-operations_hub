@@ -61,7 +61,7 @@ function exec_fun_str(func_str) {
     //
     var funs = func_str.split(';');
     for (var i = 0; i < funs.length; i++) {
-        if (funs[i] === '') { continue;}
+        if (trim(funs[i]) === '') { continue;}
         //
         var m = funs[i].match(/([A-Z_]+)[(](.*?)[)]/i);
         var name = m[1];

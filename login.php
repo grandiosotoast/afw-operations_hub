@@ -77,7 +77,7 @@ if ($pass == $results[0]["password"]) {
     $_SESSION["department"] = $results[0]["department"];
     $_SESSION["dbuser_first_name"] = $results[0]["dbuser_first_name"];
     $_SESSION["dbuser_last_name"] = $results[0]["dbuser_last_name"];
-    $_SESSION["email"] = $results[0]["email"];
+    $_SESSION["user_email"] = $results[0]["user_email"];
     $_SESSION["permissions"] = $results[0]["permissions"];
     //
     echo "<script>goto_link('administration')</script>";

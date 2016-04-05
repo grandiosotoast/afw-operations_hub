@@ -273,7 +273,7 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     data_table_args.table_class = 'default-table';
     data_table_args.row_id_prefix = 'emp-data-row-';
     data_table_args.table_data_cell_class = 'default-table-td'; 
-    data_table_args.table_row_appended_cells = "<td style=\"background-color: rgb(255,255,255); box-shadow: 3px 3px 0px 3.25px rgb(255,255,255);\" onclick = \"view_to_edit_entry('%emp_id%','%department%','%entry_id%')\" ><a id = \"link-blue\" class =\"link-blue\">Edit </a></td>";
+    data_table_args.table_row_appended_cells = "<td class =\"link-blue edit-link-td\" onclick = \"view_to_edit_entry('%emp_id%','%department%','%entry_id%')\" >Edit</td>";
     data_table_args.row_onclick = "view_employee_data_entry('%entry_id%','%department%','%row_id%')";
     data_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
     data_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
@@ -1759,7 +1759,7 @@ function submit_suggestion() {
     // getting values
     var name_val_obj = {
         submission_date : new Date().yyyymmdd(),
-        suggestion_description : document.getElementById('description').value,
+        suggestion_description : document.getElementById('description').value.toLowerCase(),
         entering_user : document.getElementById('user-username').value
     };
     console.log(name_val_obj);

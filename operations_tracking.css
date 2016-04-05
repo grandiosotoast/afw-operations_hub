@@ -91,6 +91,10 @@
     background: rgb(239, 234, 222);
     white-space: nowrap;
 }
+.edit-link-td {
+    background-color: rgb(255,255,255);
+    box-shadow: 3px 3px 0px 3.25px rgb(255,255,255);
+}
 .error-msg {
     color: rgb(255,0,0)
 }

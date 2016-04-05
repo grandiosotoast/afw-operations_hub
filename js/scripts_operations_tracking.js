@@ -269,7 +269,9 @@ function make_standard_table(input_args) {
             process_data_type(data_arr[i][col_meta_data[c].column_name],col_meta_data[c].data_type,td,false);
             table_row.appendChild(td);
         }
-        table_row.innerHTML += this_table_row_appended_cells;
+        if (this_table_row_appended_cells) {
+            table_row.innerHTML += this_table_row_appended_cells;
+        }
         table.appendChild(table_row);
     }
     //
@@ -589,16 +591,17 @@ function process_data_type(value,data_type,element,args) {
     if (data_type.match(/(^|%)percent(%|$)/)) {
         value += ' %';
     }
-    else if (!(data_type.match(/(^|%)float|percent|int(%|$)/))) {
-        add_commas = false;
-    }
     else if ((data_type.match(/(?:^|%)text(?:%|$)/)) && (value.length > CONSTANTS.MAX_STR_LENGTH)) {
         var id = floor(Math.random()*10000,0);
         node = document.createElementWithAttr('SPAN',{'id' : id, 'class' : 'link-blue'});
-        node.addEventListener('click',toggle_innerHTML.bind(null,id,value.slice(0,CONSTANTS.MAX_STR_LENGTH),value));
+        node.addEventListener('click',toggle_innerHTML.bind(null,id,value.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...',value));
         node.appendChild(document.createTextNode(value.slice(0,CONSTANTS.MAX_STR_LENGTH)+'...'));
         add_commas = false;
         element.style['text-align'] = 'left';
+    }
+    //
+    if (!(data_type.match(/(^|%)float|percent|int(%|$)/))) {
+        add_commas = false;
     }
     //
     if (add_commas) { value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");}
