@@ -12,7 +12,7 @@ function enter_data_emp_table(page,sort_col,sort_dir,department) {
     var data_sql_args = {};
     var meta_sql_args = {};
     var form_department = department;
-    if (department == '.') { form_department = 'general';} 
+    if (department == '.') { form_department = 'general';}
     var row_onclick = "remove_class_all('selected-field'); add_class('selected-field','%row_id%'); get_data_entry_form('%emp_id%','"+form_department+"','data-entry-form-div',false)";
     //
     // sql argument objects
@@ -29,15 +29,15 @@ function enter_data_emp_table(page,sort_col,sort_dir,department) {
     emp_table_args.data_sql_args = data_sql_args;
     emp_table_args.meta_sql_args = meta_sql_args;
     //
-    // creating table argument object   
+    // creating table argument object
     emp_table_args.table_output_id = 'employee-table-div';
     emp_table_args.table_id = 'employee_table';
     emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
-    emp_table_args.table_data_cell_class = 'default-table-td';  
+    emp_table_args.table_data_cell_class = 'default-table-td';
     emp_table_args.table_row_appended_cells = '';
     emp_table_args.row_onclick = row_onclick;
-    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     emp_table_args.head_row_args = {
         'sortable' : true,
@@ -63,8 +63,8 @@ function enter_data_emp_table(page,sort_col,sort_dir,department) {
     create_standard_table(emp_table_args);
 }
 //
-// this creates and populates the data form for the data entry pages 
-function get_data_entry_form(emp_id,department,form_div_id,update) {  
+// this creates and populates the data form for the data entry pages
+function get_data_entry_form(emp_id,department,form_div_id,update) {
     //
     // variable initializations
     var table = '';
@@ -88,7 +88,7 @@ function get_data_entry_form(emp_id,department,form_div_id,update) {
     document.getElementById('date').value = d.getFullYear()+'-'+mon+'-'+day;
     document.getElementById('entering-user').value = document.getElementById('user-username').value
     document.getElementById('submit-data-button').addEventListener('click', function () {
-        init_data_form_validation(department,'create');  
+        init_data_form_validation(department,'create');
     });
     //
     // nesting this in a callback so populate form can never execute before dropboxes are populated
@@ -197,15 +197,15 @@ function view_emp_table(page,sort_col,sort_dir) {
     emp_table_args.data_sql_args = data_sql_args;
     emp_table_args.meta_sql_args = meta_sql_args;
     //
-    // creating argument object   
+    // creating argument object
     emp_table_args.table_output_id = 'employee-table-div';
     emp_table_args.table_id = 'employee_table';
     emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
-    emp_table_args.table_data_cell_class = 'default-table-td';  
+    emp_table_args.table_data_cell_class = 'default-table-td';
     emp_table_args.row_onclick = "view_emp_data_table(1,'date','DESC','%emp_id%','%department%')";
-    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
-    emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
+    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
+    emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     emp_table_args.add_callback = function(){store_session(session_obj);}
     emp_table_args.head_row_args = {
         'sortable' : true,
@@ -232,7 +232,7 @@ function view_emp_table(page,sort_col,sort_dir) {
 //
 // this function creates the data table for the view_employee page
 function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
-    
+
     //
     // creating argument objects
     var data_table_args = {};
@@ -248,7 +248,7 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     //
     // getting page elements
     num_per_page = Number(document.getElementById('res-per-page').value);
-    // 
+    //
     // getting time range information
     ts_obj = to_and_from_timestamps();
     //
@@ -263,7 +263,7 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)'],['use_on_pages','REGEXP','.'],['use_in_html_tables','REGEXP','employee_data_table']];
-    meta_sql_args.order_by = [['order_index','ASC']];    
+    meta_sql_args.order_by = [['order_index','ASC']];
     data_table_args.data_sql_args = data_sql_args;
     data_table_args.meta_sql_args = meta_sql_args;
     //
@@ -272,10 +272,10 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     data_table_args.table_id = 'employee-data-table';
     data_table_args.table_class = 'default-table';
     data_table_args.row_id_prefix = 'emp-data-row-';
-    data_table_args.table_data_cell_class = 'default-table-td'; 
+    data_table_args.table_data_cell_class = 'default-table-td';
     data_table_args.table_row_appended_cells = "<td class =\"link-blue edit-link-td\" onclick = \"view_to_edit_entry('%emp_id%','%department%','%entry_id%')\" >Edit</td>";
     data_table_args.row_onclick = "view_employee_data_entry('%entry_id%','%department%','%row_id%')";
-    data_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    data_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     data_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     data_table_args.add_callback = function(){ store_session(session_obj);}
     data_table_args.head_row_args = {
@@ -307,14 +307,14 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     adj_button.className = 'hidden-elm'
     adj_button.appendChild(document.createTextNode('Adjust Viewable Range'));
     adj_button.addEventListener("click", function () {
-        view_emp_data_table(page,sort_col,sort_dir,emp_id,department); 
+        view_emp_data_table(page,sort_col,sort_dir,emp_id,department);
         add_class('hidden-elm','adj_view_range');
     });
     curr_adj_button.parentNode.replaceChild(adj_button,curr_adj_button);
 }
 //
 // defining the row onclick for the view data entries table
-function view_employee_data_entry(entry_id,department,row_id) {  
+function view_employee_data_entry(entry_id,department,row_id) {
     //
     // variable initializations
     var table = '';
@@ -344,7 +344,7 @@ function view_employee_data_entry(entry_id,department,row_id) {
     var submit_button = document.getElementById('submit-data-button');
     var hide_button = document.createElement('BUTTON');
     //
-    // creating header 
+    // creating header
     name = ''
     if (row_id != '') {
         var name = document.getElementById(row_id+'-emp_first_name').innerHTML+" "+document.getElementById(row_id+'-emp_last_name').innerHTML;
@@ -376,7 +376,7 @@ function view_employee_data_entry(entry_id,department,row_id) {
             // determining group ID and populating static fields
             for (var i = 0; i < data.length; i++) {
                 if (data[i]['entry_id'] == entry_id) {
-                    groupID = data[i]['group_id']; 
+                    groupID = data[i]['group_id'];
                     var args = {
                         'data_arr' : data[i],
                         'form_id' : 'input-emp-data',
@@ -406,7 +406,7 @@ function view_employee_data_entry(entry_id,department,row_id) {
                 if ((all_children[i].nodeName.toUpperCase() != 'INPUT') && (all_children[i].nodeName.toUpperCase() != 'SELECT') && (all_children[i].nodeName.toUpperCase() != 'TEXTAREA')) {continue;}
                 all_children[i].readOnly = true;
             }
-           
+
         }
         ajax_fetch([data_sql],['data'],callback);
     }
@@ -473,7 +473,7 @@ function view_employee_data_entry(entry_id,department,row_id) {
 //
 // allows user to edit a data entry directly from the view employee data page
 function view_to_edit_entry(emp_id,department,entry_id) {
-    
+
     var session_str = '';
     var curr_page = '1';
     var sort_col = 'emp_last_name';
@@ -547,7 +547,7 @@ function create_edit_page_from_view(session_arr) {
 }
 //
 // creates the employee table for the edit_emp_data page
-function edit_data_emp_table(page,sort_col,sort_dir) { 
+function edit_data_emp_table(page,sort_col,sort_dir) {
     //
     // creating argument objects
     var emp_table_args = {};
@@ -586,14 +586,14 @@ function edit_data_emp_table(page,sort_col,sort_dir) {
     emp_table_args.data_sql_args = data_sql_args;
     emp_table_args.meta_sql_args = meta_sql_args;
     //
-    // creating argument object 
+    // creating argument object
     emp_table_args.table_output_id = 'employee-table-div';
     emp_table_args.table_id = 'employee_table';
     emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
-    emp_table_args.table_data_cell_class = 'default-table-td';  
+    emp_table_args.table_data_cell_class = 'default-table-td';
     emp_table_args.row_onclick = "mod_emp_data_table(1,'date','DESC',%emp_id%); remove_class('hidden-elm','edit-emp-data-div'); add_emp_id('%emp_id%','employee_table');";
-    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     emp_table_args.head_row_args = {
         'sortable' : true,
@@ -621,12 +621,12 @@ function edit_data_emp_table(page,sort_col,sort_dir) {
 // adds emp_id to employee table dataset
 // think this might be able to be removed
 function add_emp_id(emp_id,table_id) {
-    document.getElementById(table_id).dataset.empId = emp_id;   
+    document.getElementById(table_id).dataset.empId = emp_id;
 }
 //
 // generates the data table for the edit_emp_data page
 function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
-    
+
     //
     // creating argument objects
     var data_table_args = {};
@@ -640,7 +640,7 @@ function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
     //
     department = data_table_args.department;
     if (data_table_args.department == 'all') {department = '.';}
-    // 
+    //
     // processing time range information
     var ts_obj = to_and_from_timestamps();
     //
@@ -674,9 +674,9 @@ function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
     data_table_args.table_id = 'employee-data-table';
     data_table_args.table_class = 'default-table';
     data_table_args.row_id_prefix = 'emp-data-row-';
-    data_table_args.table_data_cell_class = 'default-table-td';  
+    data_table_args.table_data_cell_class = 'default-table-td';
     data_table_args.row_onclick = "mod_employee_data_entry('%entry_id%','%department%','%row_id%')";
-    data_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    data_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     data_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     data_table_args.add_callback = function() { document.getElementById(data_table_args.table_id).dataset.empId = emp_id; }
     data_table_args.head_row_args = {
@@ -703,7 +703,7 @@ function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
 }
 //
 // defining the row onclick for the edit data entry table
-function mod_employee_data_entry(entry_id,department,row_id) { 
+function mod_employee_data_entry(entry_id,department,row_id) {
     //
     // variable initializations
     var action = '';
@@ -727,7 +727,7 @@ function mod_employee_data_entry(entry_id,department,row_id) {
     if (CONSTANTS.DEPT_FORMS.hasOwnProperty(department)) { var validation_function = CONSTANTS.DEPT_VAL_FUNS[department];}
     else { console.log(' Department has no set validation function: '+department); return;}
     //
-    // creating header 
+    // creating header
     name = ''
     if (row_id != '') {
         var name = document.getElementById(row_id+'-emp_first_name').innerHTML+' '+document.getElementById(row_id+'-emp_last_name').innerHTML;
@@ -755,10 +755,10 @@ function mod_employee_data_entry(entry_id,department,row_id) {
     delete_button.addEventListener("click", function () {
         var cont = confirm('Confirm Deletion of Entry: '+entry_id);
         if (!(cont)) {return;}
-        // 
+        //
         // changing value of entry status
         document.getElementById('entry-status').value = 'deleted';
-        validation_function(department,'delete');     
+        validation_function(department,'delete');
     });
     // creating modify button
     mod_button.id = "mod-entry";
@@ -767,9 +767,9 @@ function mod_employee_data_entry(entry_id,department,row_id) {
     mod_button.addEventListener('click', function () {
         var cont = confirm("Confirm Modification of Entry: "+entry_id);
         if (!(cont)) {return;}
-        // 
+        //
         // changing value of entry status
-        validation_function(department,'update');  
+        validation_function(department,'update');
     });
     // creating restore button for deleted records
     restore_button.id = "restore-entry"
@@ -778,10 +778,10 @@ function mod_employee_data_entry(entry_id,department,row_id) {
     restore_button.addEventListener("click", function () {
         var cont = confirm("Confirm Restoration of Entry: "+entry_id);
         if (!(cont)) {return;}
-        // 
+        //
         // changing value of entry status
         document.getElementById('entry-status').value = 'submitted'
-        validation_function(department,'restore'); 
+        validation_function(department,'restore');
     });
     //
     // putting all three buttons onto the form
@@ -796,10 +796,10 @@ function mod_employee_data_entry(entry_id,department,row_id) {
         'department' : department,
         'table' : table
     };
-    mod_fun(args);   
+    mod_fun(args);
 }
 //
-// 
+//
 function mod_backhaul_form(args) {
     //
     var table = args.table
@@ -842,9 +842,9 @@ function mod_backhaul_form(args) {
     delete_button.addEventListener("click", function () {
         var cont = confirm('Confirm Deletion of Freight Record');
         if (!(cont)) {return;}
-        // 
+        //
         update_statuses('deleted');
-        init_backhaul_form_validation(department,'delete');     
+        init_backhaul_form_validation(department,'delete');
     });
     // creating restore button for deleted records
     restore_button.id = "restore-entry"
@@ -853,9 +853,9 @@ function mod_backhaul_form(args) {
     restore_button.addEventListener("click", function () {
         var cont = confirm("Confirm Restoration of Entry: "+entry_id);
         if (!(cont)) {return;}
-        // 
+        //
         update_statuses('submitted');
-        init_backhaul_form_validation(department,'restore'); 
+        init_backhaul_form_validation(department,'restore');
     });
     old_delete_button.parentNode.replaceChild(delete_button,old_delete_button);
     old_restore_button.parentNode.replaceChild(restore_button,old_restore_button);
@@ -915,7 +915,7 @@ function add_freight_pos(response) {
               var entry_id = document.getElementById('entry-id-{'+num+'}').value
               var user = document.getElementById('entering-user').value;
               var ts = get_current_timestamp();
-              document.getElementById('entry-status-{'+num+'}').value = 'deleted'; 
+              document.getElementById('entry-status-{'+num+'}').value = 'deleted';
               add_class('hidden-elm','delete-po-'+num);
               remove_class('hidden-elm','restore-po-'+num);
               recalc_backhaul_form(true);
@@ -931,7 +931,7 @@ function add_freight_pos(response) {
               var entry_id = document.getElementById('entry-id-{'+num+'}').value
               var user = document.getElementById('entering-user').value;
               var ts = get_current_timestamp();
-              document.getElementById('entry-status-{'+num+'}').value = 'submitted';  
+              document.getElementById('entry-status-{'+num+'}').value = 'submitted';
               remove_class('hidden-elm','delete-po-'+num);
               add_class('hidden-elm','restore-po-'+num);
               recalc_backhaul_form(true);
@@ -972,7 +972,7 @@ function mod_regular_data_form(args) {
         event.initEvent("blur",true,false);
         document.getElementById('total-pay').dispatchEvent(event);
         document.getElementById('department').value = department;
-        // 
+        //
         if (document.getElementById('entry-status').value == 'submitted') {
             add_class('hidden-elm','restore-entry');
         }
@@ -990,7 +990,7 @@ function mod_regular_data_form(args) {
         populate_form_args.unique_data = entry_id;
         populate_form_args.form_id = 'input-emp-data';
         populate_form_args.trigger_events = false;
-        populate_form(populate_form_args)
+        populate_form(populate_form_args);
         // populating form based on department specific table
         populate_form_args = {};
         populate_form_args.table = table;
@@ -999,7 +999,7 @@ function mod_regular_data_form(args) {
         populate_form_args.unique_data = entry_id;
         populate_form_args.form_id = 'input-emp-data';
         populate_form_args.trigger_events = false; //this is set to false to prevent an obscene number of rapid AJAX calls
-        populate_form_args.add_callback_funs = button_fun; 
+        populate_form_args.add_callback_funs = button_fun;
         populate_form(populate_form_args)
     }
     //
@@ -1020,7 +1020,7 @@ function mod_regular_data_form(args) {
 //
 // creates the database user table for the mod_dbuser page
 function mod_dbuser_table(page,sort_col,sort_dir) {
-    
+
     //
     // creating argument objects
     var dbuser_table_args = {};
@@ -1045,14 +1045,14 @@ function mod_dbuser_table(page,sort_col,sort_dir) {
     dbuser_table_args.meta_sql_args = meta_sql_args;
     //
     // creating argument object
-    dbuser_table_args.table_output_id = 'dbuser-table-div';    
+    dbuser_table_args.table_output_id = 'dbuser-table-div';
     dbuser_table_args.table_id = 'dbuser-table';
     dbuser_table_args.table_class = 'default-table';
     dbuser_table_args.row_id_prefix = 'dbuser-row-';
-    dbuser_table_args.table_data_cell_class = 'default-table-td';                                                                                                                                                                                             
+    dbuser_table_args.table_data_cell_class = 'default-table-td';
     dbuser_table_args.row_onclick = "remove_class_all('selected-field'); add_class('selected-field','%row_id%'); mod_dbuser_info('%dbuser_internal_id%','%row_id%');";
-    dbuser_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
-    dbuser_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";  
+    dbuser_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
+    dbuser_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     dbuser_table_args.head_row_args = {
         'sortable' : true,
         'sort_col' : sort_col,
@@ -1071,9 +1071,9 @@ function mod_dbuser_table(page,sort_col,sort_dir) {
         'class_str' : 'page_nav_link',
         'onclick_str' : "mod_dbuser_table(%%,'"+sort_col+"','"+sort_dir+"');",
         'onmouse_str' : ''
-    };  
+    };
     //
-    create_standard_table(dbuser_table_args)   
+    create_standard_table(dbuser_table_args)
 }
 //
 // defining the row onclick for the employee table
@@ -1081,7 +1081,7 @@ function mod_dbuser_info(user_id,row_id) {
     //
     create_form('add_dbuser','mod-dbuser-form-div');
     //
-    // creating header 
+    // creating header
     var name = document.getElementById(row_id+'-dbuser_first_name').innerHTML+' '+document.getElementById(row_id+'-dbuser_last_name').innerHTML;
     remove_all_children(document.getElementById('modify-header'));
     document.getElementById('modify-header').appendChild(document.createTextNode('Modfiying User: '+name));
@@ -1114,7 +1114,7 @@ function mod_dbuser_info(user_id,row_id) {
             mod_dbuser_table(curr_page,sort_col,sort_dir);
             init_dbuser_form_valiation(true)
         }
-        ajax_exec_db(sql,callback);     
+        ajax_exec_db(sql,callback);
     });
     // creating modify button
     mod_button.id = 'mod-dbuser';
@@ -1122,7 +1122,7 @@ function mod_dbuser_info(user_id,row_id) {
     mod_button.appendChild(document.createTextNode('Submit Changes'))
     mod_button.addEventListener('click', function () {
         init_dbuser_form_valiation(true);
-    });   
+    });
     // creating reinstate button for inactive employees
     reinstate_button.id = 'reinstate-dbuser'
     reinstate_button.type = 'button';
@@ -1155,7 +1155,7 @@ function mod_dbuser_info(user_id,row_id) {
     //
     // temporary function to determine what buttons to show or hide based on emp status
     var button_fun = function() {
-        // 
+        //
         if (document.getElementById('dbuser-status').value != 'active') {
             add_class('hidden-elm',delete_button.id);
         }
@@ -1173,7 +1173,7 @@ function mod_dbuser_info(user_id,row_id) {
         populate_form_args.form_id = 'add-new-user';
         populate_form_args.skip_fields_str = 'password'
         populate_form_args.trigger_events = true;
-        populate_form_args.add_callback_funs = button_fun; 
+        populate_form_args.add_callback_funs = button_fun;
         //
         populate_form(populate_form_args);
         document.getElementById('dbuser-first-name').focus();
@@ -1186,7 +1186,7 @@ function mod_dbuser_info(user_id,row_id) {
 //
 // creates the employee table for the mod_employee page
 function mod_emp_table(page,sort_col,sort_dir) {
-    
+
     //
     // creating argument objects
     var emp_table_args = {};
@@ -1216,14 +1216,14 @@ function mod_emp_table(page,sort_col,sort_dir) {
     emp_table_args.data_sql_args = data_sql_args;
     emp_table_args.meta_sql_args = meta_sql_args;
     //
-    // creating argument object  
+    // creating argument object
     emp_table_args.table_output_id = 'employee-table-div';
     emp_table_args.table_id = 'employee_table';
     emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
-    emp_table_args.table_data_cell_class = 'default-table-td';                                                                                                                                                                                              
+    emp_table_args.table_data_cell_class = 'default-table-td';
     emp_table_args.row_onclick = "remove_class_all('selected-field'); add_class('selected-field','%row_id%'); mod_employee_info('%emp_id%');";
-    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     emp_table_args.head_row_args = {
         'sortable' : true,
@@ -1243,17 +1243,17 @@ function mod_emp_table(page,sort_col,sort_dir) {
         'class_str' : 'page_nav_link',
         'onclick_str' : "mod_emp_table(%%,'"+sort_col+"','"+sort_dir+"');",
         'onmouse_str' : ''
-    }; 
+    };
     //
     create_standard_table(emp_table_args);
 }
 //
 // defining the row onclick for the employee table
-function mod_employee_info(emp_id) {    
+function mod_employee_info(emp_id) {
     //
     create_form('add_employee','mod-employee-form');
     //
-    // creating header 
+    // creating header
     remove_all_children(document.getElementById('modify-header'));
     document.getElementById('modify-header').appendChild(document.createTextNode('Modfiying Employee: '+emp_id));
     //
@@ -1273,7 +1273,7 @@ function mod_employee_info(emp_id) {
         var cont = confirm("Confirm Deletion of Employee: "+emp_id+" - "+document.getElementById('emp-first-name').value+" "+document.getElementById('emp-last-name').value);
         if (!(cont)) {return;}
         document.getElementById('emp-status').value = 'inactive';
-        init_employee_form_valiation('delete');   
+        init_employee_form_valiation('delete');
     });
     // creating modify button
     mod_button.id = "mod-emp";
@@ -1283,7 +1283,7 @@ function mod_employee_info(emp_id) {
         var cont = confirm("Confirm Modifcation of Employee: "+emp_id+" - "+document.getElementById('emp-first-name').value+" "+document.getElementById('emp-last-name').value);
         if (!(cont)) {return;}
         init_employee_form_valiation('update');
-    });   
+    });
     // creating reinstate button for inactive employees
     reinstate_button.id = "reinstate-emp"
     reinstate_button.type = "button";
@@ -1304,7 +1304,7 @@ function mod_employee_info(emp_id) {
     //
     // temporary function to determine what buttons to show or hide based on emp status
     var button_fun = function() {
-        // 
+        //
         if (document.getElementById('emp-status').value != 'active') {
             add_class('hidden-elm',delete_button.id);
         }
@@ -1362,7 +1362,7 @@ function pop_add_emp_dropdowns(args) {
 //
 //
 function pop_add_dbuser_dropdowns(args) {
-    
+
     var add_args = {
       add_opts_val : ['other'],
       add_opts_text : ['Other']
@@ -1373,7 +1373,7 @@ function pop_add_dbuser_dropdowns(args) {
     populate_dropbox_options('department-select','departments','department','department_name','Select Department',add_args);
 }
 //
-// this creates the table select box on te table_maintenance page 
+// this creates the table select box on te table_maintenance page
 function list_all_tables() {
     //
     var sql = "SELECT `TABLE_NAME` FROM `INFORMATION_SCHEMA`.`TABLES` WHERE `TABLE_SCHEMA` LIKE 'afwl3_operations' AND `TABLE_TYPE` LIKE 'BASE TABLE'";
@@ -1413,7 +1413,7 @@ function reset_table_maintence_inputs() {
 }
 //
 // creates the selected table using the meta_data and its data
-function create_table(page,sort_col,sort_dir) {    
+function create_table(page,sort_col,sort_dir) {
     //
     // creating argument objects
     var table_args = {};
@@ -1448,14 +1448,14 @@ function create_table(page,sort_col,sort_dir) {
     table_args.data_sql_args = data_sql_args;
     table_args.meta_sql_args = meta_sql_args;
     //
-    // creating argument object  
+    // creating argument object
     table_args.table_output_id = 'table-div';
     table_args.table_id = 'db-table';
     table_args.table_class = 'default-table';
     table_args.row_id_prefix = 'tm-row-';
-    table_args.table_data_cell_class = 'default-table-td';                                                                                                                                                                                                
+    table_args.table_data_cell_class = 'default-table-td';
     table_args.row_onclick = "mod_table_entry('"+table_name+"','%row_id%');";
-    table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     table_args.head_row_args = {
         'sortable' : true,
@@ -1508,7 +1508,7 @@ function create_table(page,sort_col,sort_dir) {
     create_standard_table(table_args);
 }
 //
-// this function adds the column name to the a serch box if the cell is clicked 
+// this function adds the column name to the a serch box if the cell is clicked
 function col_name_to_search_box(col_name) {
     //
     var box1_id  = 'column-name-1';
@@ -1528,7 +1528,7 @@ function col_name_to_search_box(col_name) {
 }
 //
 // gets all of the entry data to generate the form with
-function mod_table_entry(table_name,row_id) {    
+function mod_table_entry(table_name,row_id) {
     //
     var sql_args = {};
     var meta_args = {};
@@ -1538,7 +1538,7 @@ function mod_table_entry(table_name,row_id) {
     meta_args.cmd = 'SELECT';
     meta_args.table = 'table_meta_data';
     meta_args.where = [['column_type','NOT REGEXP','dynamic'],['in_tables','REGEXP','(^|%)'+table_name+'(%|$)'],['use_on_pages','REGEXP','table_maintenance'],['data_type','NOT REGEXP','hidden']];
-    meta_args.order_by = [['order_index','ASC']]; 
+    meta_args.order_by = [['order_index','ASC']];
     meta_sql = gen_sql(meta_args);
     //
     // setting table name in hidden field
@@ -1551,8 +1551,8 @@ function mod_table_entry(table_name,row_id) {
         //
         // setting unique val into hidden field
         document.getElementById('table-unique-val').value = unique_val;
-        // 
-        // creating data and meta sql statments 
+        //
+        // creating data and meta sql statments
         sql_args.cmd = 'SELECT';
         sql_args.table = table_name;
         sql_args.where = [[unique_col,'LIKE',unique_val]];
@@ -1566,7 +1566,7 @@ function mod_table_entry(table_name,row_id) {
         //
         ajax_fetch([meta_sql],['meta_data'],create_table_edit_form);
     }
-    
+
 }
 //
 // creates the edit table row form
@@ -1677,9 +1677,9 @@ function create_table_edit_form(response) { //!!!! start re-writting this to use
     var delete_button = document.createElementWithAttr('BUTTON',{'id':'delete-row','type':'button'});
     delete_button.addEventListener('click',submit_table_changes.bind(null,'DELETE',table_name));
     delete_button.textContent = 'Delete Row';
-    //    
+    //
     document.getElementById('modify-table-form').replaceChild(submit_button,document.getElementById(submit_button.id));
-    document.getElementById('modify-table-form').replaceChild(delete_button,document.getElementById(delete_button.id));    
+    document.getElementById('modify-table-form').replaceChild(delete_button,document.getElementById(delete_button.id));
     //
     // populating fields on the form
     var populate_form_args = {}
@@ -1693,7 +1693,7 @@ function create_table_edit_form(response) { //!!!! start re-writting this to use
 //
 // this fuction excecutes the desired command on the data table
 function submit_table_changes(cmd,table_name) {
-    
+
     //
     var name_val_obj = {};
     var sql_args = {};
@@ -1739,7 +1739,7 @@ function submit_table_changes(cmd,table_name) {
         cont = confirm("Are you sure you want to DELETE this data from table: "+table_name);
     }
     else {
-        cont = confirm("Are you sure you want to execute the "+cmd+" command on table: "+table_name);        
+        cont = confirm("Are you sure you want to execute the "+cmd+" command on table: "+table_name);
     }
     if (!(cont)) {return;}
     //
@@ -1782,7 +1782,7 @@ function submit_suggestion() {
     ajax_exec_db(sql,callback);
 }
 //
-// this takes the user to the table maintence page to view the suggestions 
+// this takes the user to the table maintence page to view the suggestions
 function view_suggestions(status) {
     //
     var session_obj = {
@@ -1797,13 +1797,13 @@ function view_suggestions(status) {
 //
 // this makes the suggestion table when the link was clicked
 function gen_suggestions_table(session_data) {
-    var status = '.+'    
+    var status = '.+'
     //
-    // checking if the sugesstion link was clicked 
+    // checking if the sugesstion link was clicked
     if (!(session_data.hasOwnProperty('gen_suggestions'))) { return;}
     if (session_data.hasOwnProperty('status')) { status = session_data['status'];}
     //
-    // clearing session data 
+    // clearing session data
     ajax_call("clear_session=true");
     document.getElementById('column-name-1').value = 'suggestion_status';
     document.getElementById('column-value-1').value = status;

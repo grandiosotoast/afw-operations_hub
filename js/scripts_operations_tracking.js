@@ -33,7 +33,7 @@ var CONSTANTS =  {
         'warehouse_receiving' : 'receiving_data',
         'warehouse_shipping' : 'warehouse_data'
     },
-    DEPT_MOD_FUNS : { 
+    DEPT_MOD_FUNS : {
         'general'  : mod_regular_data_form,
         'freight_backhaul' : mod_backhaul_form,
         'transportation'  : mod_regular_data_form,
@@ -53,12 +53,12 @@ var CONSTANTS =  {
 function set_default_perms(dept_id,user_perm_id) {
     //
     var perms;
-    var dept = document.getElementById(dept_id).value; 
+    var dept = document.getElementById(dept_id).value;
     //
     if (dept == 'administration') {
         perms = '7777';
     }
-    else if (dept == 'operations') { 
+    else if (dept == 'operations') {
         perms = '7000';
     }
     else if (dept == 'sales_admin') {
@@ -101,7 +101,7 @@ function calc_hours(st_id,en_id,out_id) {
         add_class('invalid-field',en_id)
         return;
     }
-    // calculating difference 
+    // calculating difference
     if (st_hr > en_hr) {
         time_diff = (23 - st_hr) + (60 - st_mm)/60;
         time_diff += (en_hr - 0) + (en_mm - 0)/60;
@@ -135,7 +135,7 @@ function calc_per_hr(num_id,time_id,out_id) {
 }
 //
 // sums all of the values in the provided ID string
-function total_fields(id_arr_str,out_id) {  
+function total_fields(id_arr_str,out_id) {
     //
     var id_arr = id_arr_str.split(',')
     var total;
@@ -148,7 +148,7 @@ function total_fields(id_arr_str,out_id) {
     document.getElementById(out_id).value = total
 }
 //
-// function to generate a standard table 
+// function to generate a standard table
 function create_standard_table(table_args) {
     //
     var sql_args = {};
@@ -179,11 +179,11 @@ function create_standard_table(table_args) {
         //
         if (add_callback) {add_callback(response);}
     }
-    ajax_fetch([data_sql,meta_sql],['data','meta_data'],callback) 
+    ajax_fetch([data_sql,meta_sql],['data','meta_data'],callback)
 }
 //
 // makes the employee table itself
-function make_standard_table(input_args) {   
+function make_standard_table(input_args) {
     //
     // initializations
     var args = {
@@ -202,12 +202,13 @@ function make_standard_table(input_args) {
     var data_arr = [];
     var col_meta_data = [];
     //
-    // putting arguments into variables 
+    // putting arguments into variables
     data_arr = input_args.data_arr;
     col_meta_data = input_args.col_meta_data;
     head_row_args = input_args.head_row_args;
     page_nav_args = input_args.page_nav_args;
-    page_nav_args.data_length = data_arr.length    
+    page_nav_args.data_length = data_arr.length;
+    page_nav_args.col_meta_data = col_meta_data;
     //
     // putting table arguments properities into defaults variable
     for (var arg in input_args) {
@@ -217,14 +218,14 @@ function make_standard_table(input_args) {
     // calculating number of pages and what to display
     var page = page_nav_args.curr_page;
     var start_index = 0;
-    var end_index = data_arr.length; 
+    var end_index = data_arr.length;
     if (!(args.no_page_nav)) {
         start_index = (page - 1)*page_nav_args.num_per_page;
-        end_index = page * page_nav_args.num_per_page; 
+        end_index = page * page_nav_args.num_per_page;
         if (end_index > data_arr.length) {end_index = data_arr.length;};
         //
         var page_nav = create_page_links(page_nav_args);
-        if (document.getElementById(page_nav.id)) { 
+        if (document.getElementById(page_nav.id)) {
             document.getElementById(args.table_output_id).replaceChild(page_nav,document.getElementById(page_nav.id));
         }
         else {
@@ -232,16 +233,16 @@ function make_standard_table(input_args) {
         }
     }
     //
-    // creating column head rows 
+    // creating column head rows
     var table_attr = {'id' : args.table_id, 'class' : args.table_class}
     var table = document.createElementWithAttr('TABLE',table_attr);
-    make_head_rows(table,col_meta_data,head_row_args)    
+    make_head_rows(table,col_meta_data,head_row_args)
     //
-    // populating row data  
+    // populating row data
     for (var i = start_index; i < end_index; i++) {
         data_arr[i]['row_id'] =  args.row_id_prefix+i;
         var td_str = '';
-        var this_table_row_appended_cells = args.table_row_appended_cells; 
+        var this_table_row_appended_cells = args.table_row_appended_cells;
         var this_row_onclick = args.row_onclick;
         var this_row_onmouseenter = args.row_onmouseenter;
         var this_row_onmouseleave = args.row_onmouseleave;
@@ -288,6 +289,8 @@ function create_page_links(input_args) {
         data_length : 10,
         tot_pages_shown : 1,
         data_length : 0,
+        meta_data : {},
+        sort_col_table : '',
         sort_col : '',
         sort_dir : '',
         page_nav_div_id : 'table-page-nav',
@@ -327,9 +330,8 @@ function create_page_links(input_args) {
         'data-curr-page' : args.curr_page,
         'data-sort-col' : args.sort_col,
         'data-sort-dir' : args.sort_dir,
-        
-        
     }
+    //
     var page_div = document.createElementWithAttr('DIV',div_attr);
     var page_link = null
     var link_attr = {};
@@ -379,7 +381,7 @@ function create_page_links(input_args) {
 }
 //
 // creates the header rows for a table
-function make_head_rows(output_element,col_data,input_args) { 
+function make_head_rows(output_element,col_data,input_args) {
     //
     // variable initializations
     var col_meta_data = JSON.parse(JSON.stringify(col_data));
@@ -390,6 +392,7 @@ function make_head_rows(output_element,col_data,input_args) {
         leading_cells : [],
         tooltip : {'elm':'SPAN','className':'hidden-elm','textNode':''},
         skip_cols : [],
+        column_tables : [],
         sortable : true,
         sort_col : '',
         sort_dir : '',
@@ -403,6 +406,25 @@ function make_head_rows(output_element,col_data,input_args) {
     for (var arg in input_args) {
         args[arg] = input_args[arg];
         if (typeof args[arg] == 'string') { args[arg] = args[arg].replace(/%%/g,'1');}
+    }
+    //
+    // linking a table to the cols in meta data
+    console.log(col_meta_data);
+    if (args.column_tables) {
+        for (var i in col_meta_data) {
+            col_data[i]['table'] = '';
+            for (var j in args.column_tables) {
+                var pat = '(^|%)'+args.column_tables[j]+'(%|$)';
+                if (col_meta_data[i]['in_tables'].match(pat)) {
+                    col_meta_data[i]['table'] = args.column_tables[j];
+                    break;
+                }
+            }
+            if (col_meta_data[i]['column_name'] == args.sort_col) {
+                args.sort_col = col_data[i]['table']+'.'+args.sort_col;
+            }
+            col_meta_data[i]['column_name'] = col_meta_data[i]['table'] +'.'+ col_meta_data[i]['column_name']
+        }
     }
     //
     // modifying args if table is not sortable
@@ -441,12 +463,12 @@ function make_head_rows(output_element,col_data,input_args) {
         col_meta_data[i].arrow.onclick = col_meta_data[i].sort_onclick;
     }
     //
-    // processing data array to check for shared columns 
+    // processing data array to check for shared columns
     var num_rows = 1;
     for (var i = 0; i < col_meta_data.length; i++) {
         var n = 0;
         if (col_meta_data[i].column_nickname.match(/-/g)) {
-            var col_nick = col_meta_data[i].column_nickname;  
+            var col_nick = col_meta_data[i].column_nickname;
             n = 1 + col_nick.match(/-/g).length
         }
         if (n > num_rows) {num_rows = n}
@@ -570,7 +592,7 @@ function process_data_type(value,data_type,element,args) {
     // handling input pre-processing
     else if (data_type.match(/(^|%)percent(%|$)/)) {
         value = 100 * Number(value);
-    }    
+    }
     //
     // handling required rounding
     var m = data_type.match(/(?:^|%)round\([crf],[0-9]+\)(?:%|$)/)
@@ -643,10 +665,10 @@ function round_data_type(value,data_type) {
 }
 //
 // creates the table that allows the user to select viewable columns and totalling type
-function make_data_columns_table(output_element,args) {   
+function make_data_columns_table(output_element,args) {
     //
-    // variable definitions 
-    var col_meta_data = args.data;  
+    // variable definitions
+    var col_meta_data = args.data;
     var preset_data = args.preset_data;
     var checked_cols = [];
     var all_onclick_fun = '';
@@ -658,13 +680,13 @@ function make_data_columns_table(output_element,args) {
     if (preset_data.data_columns.match(/\*/)) {
         for (var i = 0; i < col_meta_data.length; i++) {
             checked_cols.push(col_meta_data[i].column_name);
-        }        
+        }
     }
     else {
         checked_cols = preset_data.data_columns.split(',');
     }
     //
-    // table construction initializations 
+    // table construction initializations
     var br = document.createElement('BR');
     var table = document.createElementWithAttr('TABLE',{'id':'data_sel_cols_table', 'class':'report-table'});
     var view_col_tr = document.createElementWithAttr('TR',{'id':'data_sel_cols_checkbox_tr'});
@@ -756,7 +778,7 @@ function make_data_columns_table(output_element,args) {
             avg_input.addEventListener('click',exec_fun_str.bind(null,all_onclick_fun));
             td.appendChild(sum_input);
             td.appendChild(br.cloneNode());
-            td.appendChild(avg_input);      
+            td.appendChild(avg_input);
         }
         total_type_tr.appendChild(td)
     }
@@ -771,11 +793,11 @@ function make_data_columns_table(output_element,args) {
 //
 // updates the sort_by_col radio button to match drop down list if table exists
 function update_sort_by_col(table_row_id,drop_down_id) {
-    
+
     if (!!(document.getElementById(table_row_id))) {
-        var secd_sort = document.getElementById(drop_down_id).value;  
+        var secd_sort = document.getElementById(drop_down_id).value;
         if (!!(document.getElementById(secd_sort+'-sortby-radio'))) {
-            document.getElementById(secd_sort+'-sortby-radio').checked = true;       
+            document.getElementById(secd_sort+'-sortby-radio').checked = true;
         }
     }
 }

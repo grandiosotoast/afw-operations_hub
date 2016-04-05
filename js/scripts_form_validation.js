@@ -1401,16 +1401,16 @@ function submit_backhaul_form(submitArgs) {
     // defining messages for specfic actions
     var message = '';
     if (action == 'create') {
-        message = 'Sucessfully Created Freight Record for: '+document.getElementById('emp-first-name').value+" "+document.getElementById('emp-last-name').value+'.';
+        message = 'Successfully Created Freight Record for: '+document.getElementById('emp-first-name').value+" "+document.getElementById('emp-last-name').value+'.';
     }
     else if (action == 'update') {
-        message = 'Sucessfully Modifed Freight Record for Employee: '+document.getElementById('emp-first-name').value+' '+document.getElementById('emp-last-name').value+'.';
+        message = 'Successfully Modifed Freight Record for Employee: '+document.getElementById('emp-first-name').value+' '+document.getElementById('emp-last-name').value+'.';
     }
     else if (action == 'restore') {
-        message = 'Sucessfully Restored all POs for Employee: '+document.getElementById('emp-first-name').value+' '+document.getElementById('emp-last-name').value+'.';
+        message = 'Successfully Restored all POs for Employee: '+document.getElementById('emp-first-name').value+' '+document.getElementById('emp-last-name').value+'.';
     }
     else if (action == 'delete') {
-        message = 'Sucessfully Deleted all POs for Employee: '+document.getElementById('emp-first-name').value+' '+document.getElementById('emp-last-name').value+'.';
+        message = 'Successfully Deleted all POs for Employee: '+document.getElementById('emp-first-name').value+' '+document.getElementById('emp-last-name').value+'.';
     }
     //
     // creating the two callback functions
