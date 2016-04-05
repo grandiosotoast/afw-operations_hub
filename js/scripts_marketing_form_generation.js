@@ -40,13 +40,17 @@ var setup_vendor_broker = ''+
     '<br>'+
     '<label class="label">Amount per Unit<span style="float: right; text-align: right;">$&nbsp;</span></label>'+
     '<input id="amount-per-unit" name="dollars_per_unit" class="text-input" value="  0.00" onkeyup="check_num_str(this.id,false,false);" onblur="validate_setup_vendor_broker(true);">'+
+    '<br>'+
+    '<br>'+
+    '<label class="label">Notes</label>'+
+    '<textarea id="growth-notes" name="growth_notes" rows=4 cols=60 value=""></textarea>'+
     '</fieldset>'+
     '<br>'+
 
     '<fieldset class="fieldset-default">'+
     '<legend>Food Show Information</legend>'+
     '<label class="label">Booth Size</label>'+
-    '<select id="marketing-level" name="marketing_level" class="dropbox-input">'+
+    '<select id="booth-size" name="booth_size" class="dropbox-input">'+
         '<option value="0">None</option>'+
         '<option value="1">Half</option>'+
         '<option value="2">Full</option>'+
@@ -70,7 +74,7 @@ var setup_vendor_broker = ''+
     '<br>'+
     '<br>'+
     '<label class="label">Notes</label>'+
-    '<textarea id="notes" name="notes" rows=4 cols=60 value=""></textarea>'+
+    '<textarea id="food-show-notes" name="food_show_notes" rows=4 cols=60 value=""></textarea>'+
     '</fieldset>'+
 
     '<input id="vendor-status" name="vendor_status" type="hidden" value="active">'+
@@ -97,7 +101,7 @@ function create_marketing_form(form_name,out_id) {
 function validate_setup_vendor_broker(truncate) {
     //
     var form_id = 'vendor-broker-setup-form';
-    var skip_ids = 'notes,vendor-status,vendor-internal-id';
+    var skip_ids = 'growth-notes,food-show-notes,vendor-status,vendor-internal-id';
     var basic_val_error = false;
     var value_error = false;
     var float_input_ids = ['volume-percent','purchase-percent','amount-per-unit',
@@ -136,6 +140,8 @@ function submit_vendor_broker_form(action) {
     var form_id = 'vendor-broker-setup-form';
     var errors = false;
     var form_values = null;
+    var cont = false;
+    var act = 'modification'
     var sql_args = null;
     var sql = '';
     var callback = null;
@@ -145,10 +151,16 @@ function submit_vendor_broker_form(action) {
     errors = check_for_invalid_fields(form_id);
     //
     // returning early if there are errors
-    //if (errors) { remove_class('hidden-elm','form-errors'); return;}
-    //else { add_class('hidden-elm','form-errors');}
+    if (errors) { remove_class('hidden-elm','form-errors'); return;}
+    else { add_class('hidden-elm','form-errors');}
     //
     form_values = get_all_form_values(form_id,'');
+    //
+    if (action == 'create') { act = 'creation'; form_values['vendor_status'] = 'active';}
+    if (action == 'delete') { act = 'deletion'; form_values['vendor_status'] = 'inactive';}
+    if (action == 'restore') { act = 'restoration'; form_values['vendor_status'] = 'active';}
+    cont = confirm('Confirm '+act+' of Broker/ Vendor.');
+    if (!(cont)) { validate_setup_vendor_broker(true); return;}
     //
     // using callback to assign tables to columns
     callback = function(response) {
@@ -162,17 +174,18 @@ function submit_vendor_broker_form(action) {
         var sql_arr = null;
         args.action = action;
         args.meta_data = meta_data;
+        args.form_values = form_values;
         sql_arr = create_vendor_broker_form_sql(args);
         //
-        //exec_transaction(sql_arr,reset_vendor_broker_form)
+        exec_transaction(sql_arr,reset_vendor_broker_form.bind(null,act));
     }
     //
     sql_args = {
         'cmd' : 'SELECT',
         'table' : 'table_meta_data',
         'cols' : ['column_name','in_tables'],
-        'where' : [['in_tables','REGEXP','marketing'],['column_name','REGEXP',Object.getOwnPropertyNames(form_values).join('|')]]
     }
+    //
     sql = gen_sql(sql_args);
     ajax_fetch([sql],['meta_data'],callback);
 }
@@ -180,18 +193,107 @@ function submit_vendor_broker_form(action) {
 // creates the SQL statements to submit the vendor broker form
 function create_vendor_broker_form_sql(args) {
     //
-    var sql_arr = null;
-    console.log(args);
+    var include_tables = ['marketing_vendor_broker_table','marketing_accounting',
+                          'marketing_food_show','marketing_growth',
+                          'marketing_services_performed','marketing_alacarte_commitment'];
+    var sql_arr = [];
+    var cmd = 'UPDATE';
+    var where = null;
+    var username = document.getElementById('user-username').value
     //
+    if (args.action == 'create') {
+        cmd = 'INSERT';
+        args.form_values['vendor_internal_id'] = 'LAST_INSERT_ID()';
+    }
+    else {
+        where = [['vendor_internal_id','LIKE',args.form_values['vendor_internal_id']]];
+        delete args.form_values['vendor_internal_id'];
+    }
     //
+    // determining which table(s) each form value belongs to.
+    var meta_data = args.meta_data
+    var pat = new RegExp('(?:^|%)(marketing.*?)(?:%|$)','gi')
+    var tables = null;
+    var table_data = {};
+    for (var col in meta_data) {
+        col = meta_data[col];
+        tables = col['in_tables'].match(/(?:^|%)(marketing.*?)(?=%|$)/g);
+        for (var i in tables) {
+            tables[i] = tables[i].replace(/%/g,'');
+            if (!(table_data.hasOwnProperty(tables[i]))) {
+                table_data[tables[i]] = {};
+                table_data[tables[i]]['cols'] = {};
+            }
+            // adding the last modified by columns to table data
+            if (col['column_name'].match(/last_modified_by/)) {
+                table_data[tables[i]]['cols'][col['column_name']] = username;
+            }
+        }
+        col['in_tables'] = tables
+    }
     //
+    // grouping form values by table
+    var col = null;
+    for (var name in args.form_values) {
+        col = meta_data[name];
+        for (var i in col['in_tables']) {
+            table_data[col['in_tables'][i]]['cols'][name] = args.form_values[name];
+        }
+    }
+    //
+    // removing tables not in include list and enforcing order defined in include_tables
+    var temp_arr = []
+    for (var i in include_tables) {
+        table_data[include_tables[i]]['table'] = include_tables[i];
+        temp_arr.push(table_data[include_tables[i]]);
+    }
+    table_data = temp_arr;
+    console.log(table_data)
+    //
+    // setting action specific params
+    if (args.action == 'create') {
+        delete table_data[0]['cols']['vendor_internal_id']
+    }
+    //
+    // generating sql statements
+    var sql_args = {};
+    var table = null
+    for (var i in table_data) {
+        table = table_data[i];
+        //
+        sql_args = {};
+        sql_args['cmd'] = cmd;
+        sql_args['table'] = table['table'];
+        if (where) { sql_args['where'] = where;}
+        sql_args['cols'] = [];
+        sql_args['vals'] = [];
+        for (var col in table['cols']) {
+            sql_args['cols'].push(col);
+            sql_args['vals'].push(table['cols'][col]);
+        }
+        sql_arr.push(gen_sql(sql_args));
+    }
     //
     return(sql_arr)
 }
 //
 // resets the vendor broker from
-function reset_vendor_broker_form() {
+function reset_vendor_broker_form(act) {
     //
-    console.log('successful submission, now do stuff')
+    alert('Successful '+act+' of Vendor/ Broker.');
     //
+    var curr_page = document.getElementById('vbt-table-page-nav').dataset.currPage;
+    var sort_col = document.getElementById('vbt-table-page-nav').dataset.sortCol;
+    var sort_dir = document.getElementById('vbt-table-page-nav').dataset.sortDir;
+    create_vendor_broker_table(curr_page,sort_col,sort_dir);
+    //
+    // recreating form
+    if (act == 'creation') {
+        var args = {'sql_args' : {'order_by':[['marketing_level','ASC']]}};
+        create_marketing_form('setup_vendor_broker','content-div');
+        populate_dropbox_options('marketing-level','marketing_tiers','marketing_level','marketing_level','Select Level',args);
+    }
+    else {
+        document.getElementById('content-div').removeAll();
+    }
 }
