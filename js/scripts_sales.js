@@ -52,7 +52,7 @@ function new_rep() {
     document.getElementById('modify-header').textContent = 'Creating a New Sales Rep';
     create_form('sales_rep_form','content-div');
 }
-// 
+//
 // this sets up the page for rep modification
 function mod_rep() {
     //
@@ -110,7 +110,7 @@ function mod_customer() {
     // adding refinement fields
     var fieldset = document.createElement('FIELDSET');
     var formElements = Array(
-            {'elm' : 'legend','textNode' : 'Rep Selection Parameters'}, 
+            {'elm' : 'legend','textNode' : 'Rep Selection Parameters'},
             //
             {'elm' : 'label', 'className' : 'label-12em','textNode' : 'Refine by Customer ID:'},
             {'elm' : 'input', 'id' : 'refine-by-cid', 'type' : 'text'},
@@ -147,7 +147,7 @@ function mod_customer() {
     addChildren(fieldset,formElements);
     document.getElementById('input-div').appendChild(fieldset);
     //
-    create_customer_table(1,'rep_id','ASC')
+    create_customer_table(1,'sales_customer_table.rep_id','ASC')
 }
 //
 // this function sets up the page for a sales rep report
@@ -201,7 +201,7 @@ function rep_report() {
         {'elm' : 'br'},
         //
         {'elm' : 'label', 'className' : 'label', 'textNode' : 'Sales Reps to Show:'},
-        {'elm' : 'select', 'id' : 'rep-status', 'className' : 'dropbox-input', 'name' : 'rep-status' , 'events' : [{'event' : 'change', 'function' : function(){ show_update_button('create-rep-report','sales-rep-report','Show Changes');}}]},        
+        {'elm' : 'select', 'id' : 'rep-status', 'className' : 'dropbox-input', 'name' : 'rep-status' , 'events' : [{'event' : 'change', 'function' : function(){ show_update_button('create-rep-report','sales-rep-report','Show Changes');}}]},
         //
         {'elm' : 'br'},
         //
@@ -264,7 +264,8 @@ function rep_report() {
             where : [['column_type','REGEXP','(^|%)static(%|$)'],['in_tables','REGEXP','(^|%)sales_rep_data(%|$)'],['use_on_pages','REGEXP','(^|%)sales_reporting(%|$)'],['use_in_html_tables','REGEXP','(^|%)sales_rep_report(%|$)']],
             order_by : [['order_index','ASC']]
         },
-        value_format : 'sales_rep_data.%column_name%'
+        value_format : 'sales_rep_data.%column_name%',
+        add_callback : rep_report_data_columns.bind(null,'sel-cols-div','show-data-sel-cols',false,true)
     };
     populate_dropbox_options('sort-column','table_meta_data','column_name','column_nickname','',dropbox_args);
 }
@@ -281,7 +282,7 @@ function customer_report() {
 }
 //
 // this function creates the sales rep table
-function create_rep_table(page,sort_col,sort_dir) {   
+function create_rep_table(page,sort_col,sort_dir) {
     //
     // initializating argument objects
     var rep_table_args = {};
@@ -290,35 +291,40 @@ function create_rep_table(page,sort_col,sort_dir) {
     //
     // creating sql statements
     rep_table_args.show_inactive = document.getElementById('show-inactive').checked;
-    var where = '';
     if (!(rep_table_args.show_inactive)) {
-        data_sql_args.where = [['rep_status','LIKE','active']];
-        var where = "WHERE dbUsers.dbuser_status LIKE 'active' " 
+        data_sql_args.where = [['dbUsers.dbuser_status','LIKE','active']];
     }
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)sales_rep_table(%|$)|(^|%)dbusers(%|$)'],['use_on_pages','REGEXP','sales_maintenance|sales_reporting'],['use_in_html_tables','REGEXP','sales_rep_table']];
     meta_sql_args.order_by = [['order_index','ASC']]
-    
-    rep_table_args.data_sql = "SELECT * FROM sales_rep_table INNER JOIN dbUsers ON sales_rep_table.dbuser_internal_id=dbUsers.dbuser_internal_id "+where+" ORDER BY sales_rep_table."+sort_col+" "+sort_dir;
+    //
+    data_sql_args.cmd = 'SELECT';
+    data_sql_args.table = 'sales_rep_table';
+    data_sql_args.inner_join = [['dbUsers','sales_rep_table.dbuser_internal_id','dbUsers.dbuser_internal_id']]
+    data_sql_args.order_by = [[sort_col,sort_dir]]
+    //
+    rep_table_args.data_sql = gen_sql(data_sql_args);
     rep_table_args.meta_sql = gen_sql(meta_sql_args);
     //
-    // creating table argument object   
+    // creating table argument object
     rep_table_args.table_output_id = 'table-div';
     rep_table_args.table_id = 'sales_rep_table';
     rep_table_args.table_class = 'default-table';
     rep_table_args.row_id_prefix = 'rep-row-';
-    rep_table_args.table_data_cell_class = 'default-table-td';  
+    rep_table_args.table_data_cell_class = 'default-table-td';
     rep_table_args.row_onclick = "modify_rep_form('%dbuser_internal_id%','%row_id%')";
-    rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
-    rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')"; 
+    rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
+    rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     rep_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['sales_rep_table','dbUsers'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "create_rep_table(%%,'%column_name%','%sort_dir%')"
-    }; 
+    };
     rep_table_args.page_nav_args = {
+        'tables_referenced' : ['sales_rep_table','dbUsers'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -336,7 +342,7 @@ function create_rep_table(page,sort_col,sort_dir) {
 }
 //
 // this function creates the sales rep table
-function create_customer_table(page,sort_col,sort_dir) {   
+function create_customer_table(page,sort_col,sort_dir) {
     //
     // initializating argument objects
     var customer_table_args = {};
@@ -344,50 +350,65 @@ function create_customer_table(page,sort_col,sort_dir) {
     var meta_sql_args = {};
     var ref_customer_id = '.';
     var ref_rep_id = '.';
+    var ref_rep_name = '.';
     var ref_customer_name = '.';
     var ref_customer_status = '.';
+    //
+    // getting refinement values
+    if (trim(document.getElementById('refine-by-cid').value) != '') {
+        ref_customer_id = trim(document.getElementById('refine-by-cid').value);
+    }
+    if (trim(document.getElementById('refine-by-rid').value) != '') {
+        ref_rep_id = trim(document.getElementById('refine-by-rid').value);
+    }
+    if (trim(document.getElementById('refine-by-name').value) != '') {
+        ref_customer_name = trim(document.getElementById('refine-by-name').value);
+    }
+    if (trim(document.getElementById('refine-by-status').value) != '') {
+        ref_customer_status = trim(document.getElementById('refine-by-status').value);
+    }
     //
     // creating sql statements
     meta_sql_args.cmd = 'SELECT';
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [];
-    meta_sql_args.where.push(['in_tables','REGEXP','(^|%)sales_customer_table(%|$)|(^|%)dbusers(%|$)']);
+    meta_sql_args.where.push(['in_tables','REGEXP','(^|%)sales_customer_table(%|$)|(^|%)sales_rep_table(%|$)']);
     meta_sql_args.where.push(['use_on_pages','REGEXP','sales_maintenance|sales_reporting']);
     meta_sql_args.where.push(['use_in_html_tables','REGEXP','sales_customer_table']);
     meta_sql_args.order_by = [['order_index','ASC']]
     //
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'sales_customer_table';
-    if (trim(document.getElementById('refine-by-cid').value) != '') { ref_customer_id = trim(document.getElementById('refine-by-cid').value);}
-    if (trim(document.getElementById('refine-by-rid').value) != '') { ref_rep_id = trim(document.getElementById('refine-by-rid').value);}
-    if (trim(document.getElementById('refine-by-name').value) != '') { ref_customer_name = trim(document.getElementById('refine-by-name').value);}
-    if (trim(document.getElementById('refine-by-status').value) != '') { ref_customer_status = trim(document.getElementById('refine-by-status').value);}
-    data_sql_args.where = [];
-    data_sql_args.where.push(['customer_id',document.getElementById('cid-match-type').value,ref_customer_id]);
-    data_sql_args.where.push(['rep_id',document.getElementById('rid-match-type').value,ref_rep_id]);
-    data_sql_args.where.push(['customer_name',document.getElementById('name-match-type').value,ref_customer_name]);
-    data_sql_args.where.push(['customer_status',document.getElementById('status-match-type').value,ref_customer_status]);
+    data_sql_args.inner_join = [['sales_rep_table','sales_customer_table.rep_id','sales_rep_table.rep_id']];
+    data_sql_args.where = [
+        ['customer_id',document.getElementById('cid-match-type').value,ref_customer_id],
+        ['sales_customer_table.rep_id',document.getElementById('rid-match-type').value,ref_rep_id],
+        ['customer_name',document.getElementById('name-match-type').value,ref_customer_name],
+        ['customer_status',document.getElementById('status-match-type').value,ref_customer_status]
+    ];
     data_sql_args.order_by = [[sort_col,sort_dir]];
     //
     customer_table_args.data_sql = gen_sql(data_sql_args);
     customer_table_args.meta_sql = gen_sql(meta_sql_args);
     //
-    // creating table argument object   
+    // creating table argument object
     customer_table_args.table_output_id = 'table-div';
     customer_table_args.table_id = 'sales_customer_table';
     customer_table_args.table_class = 'default-table';
     customer_table_args.row_id_prefix = 'customer-row-';
-    customer_table_args.table_data_cell_class = 'default-table-td';  
+    customer_table_args.table_data_cell_class = 'default-table-td';
     customer_table_args.row_onclick = "modify_customer_form('%customer_internal_id%','%row_id%')";
-    customer_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    customer_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     customer_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     customer_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['sales_rep_table','sales_customer_table'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "create_customer_table(%%,'%column_name%','%sort_dir%')"
-    }; 
+    };
     customer_table_args.page_nav_args = {
+        'tables_referenced' : ['sales_rep_table','sales_customer_table'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -399,7 +420,7 @@ function create_customer_table(page,sort_col,sort_dir) {
         'class_str' : 'page_nav_link',
         'onclick_str' : "create_customer_table(%%,'"+sort_col+"','"+sort_dir+"');",
         'onmouse_str' : ''
-    };  
+    };
     //
     create_standard_table(customer_table_args);
 }
@@ -407,7 +428,7 @@ function create_customer_table(page,sort_col,sort_dir) {
 // sets the page to modify a rep's information
 function modify_rep_form(dbuser_internal_id,row_id) {
     //
-    // creating header 
+    // creating header
     name = ''
     if (row_id != '') {
         var name = document.getElementById(row_id+'-rep_name').innerHTML;
@@ -438,7 +459,7 @@ function modify_rep_form(dbuser_internal_id,row_id) {
     //
     // callback function to determine what buttons to show or hide based on dbuser status
     var button_fun = function() {
-        // 
+        //
         if (document.getElementById('dbuser-status').value == 'active') { add_class('hidden-elm','restore-rep');}
         else { add_class('hidden-elm','delete-rep');}
         //
@@ -451,7 +472,7 @@ function modify_rep_form(dbuser_internal_id,row_id) {
     populate_form_args.unique_data = dbuser_internal_id;
     populate_form_args.form_id = 'sales-rep-form';
     populate_form_args.trigger_events = false;
-    populate_form_args.add_callback_funs = button_fun; 
+    populate_form_args.add_callback_funs = button_fun;
     populate_form(populate_form_args);
     // populating form based on department specific table
     populate_form_args = {};
@@ -466,7 +487,7 @@ function modify_rep_form(dbuser_internal_id,row_id) {
 // sets the page to modify a rep's information
 function modify_customer_form(customer_internal_id,row_id) {
     //
-    // creating header 
+    // creating header
     name = ''
     if (row_id != '') {
         var name = document.getElementById(row_id+'-customer_name').innerHTML;
@@ -497,7 +518,7 @@ function modify_customer_form(customer_internal_id,row_id) {
     //
     // callback function to determine what buttons to show or hide based on dbuser status
     var button_fun = function() {
-        // 
+        //
         if (document.getElementById('customer-status').value != 'inactive') { add_class('hidden-elm','restore-customer');}
         else if (document.getElementById('customer-status').value == 'inactive') { add_class('hidden-elm','delete-customer');}
     }
@@ -511,7 +532,7 @@ function modify_customer_form(customer_internal_id,row_id) {
         populate_form_args.unique_data = customer_internal_id;
         populate_form_args.form_id = 'sales-customer-form';
         populate_form_args.trigger_events = false;
-        populate_form_args.add_callback_funs = button_fun; 
+        populate_form_args.add_callback_funs = button_fun;
         populate_form(populate_form_args)
     }
     //
@@ -654,7 +675,7 @@ function submit_sales_rep_form(args) {
     var user_sql_args = {};
     var rep_sql_args  = {};
     //
-    // creating the two callback functions  
+    // creating the two callback functions
     var insert_callback = function() {
         create_form('sales_rep_form','content-div');
         alert(args.return_message);
@@ -706,12 +727,12 @@ function submit_sales_rep_form(args) {
         }
     }
     rep_sql_args.cols.push('rep_name');
-    rep_sql_args.vals.push(name_val_obj['dbuser_first_name']+' '+name_val_obj['dbuser_last_name']);    
+    rep_sql_args.vals.push(name_val_obj['dbuser_first_name']+' '+name_val_obj['dbuser_last_name']);
     //
     // adding this if it is a new entry
     if (action == 'create') {
         rep_sql_args.cols.push('dbuser_internal_id');
-        rep_sql_args.vals.push('LAST_INSERT_ID()'); 
+        rep_sql_args.vals.push('LAST_INSERT_ID()');
     }
     var user_sql = gen_sql(user_sql_args);
     var rep_sql = gen_sql(rep_sql_args);
@@ -827,7 +848,7 @@ function submit_sales_customer_form(args) {
     var callback = '';
     var sql_args  = {'table' : 'sales_customer_table'};
     //
-    // creating the two callback functions  
+    // creating the two callback functions
     var insert_callback = function() {
         create_form('sales_customer_form','content-div');
         alert(args.return_message);
@@ -871,7 +892,7 @@ function submit_sales_customer_form(args) {
 }
 //
 //
-function report_rep_table(page,sort_col,sort_dir,toggle) {   
+function report_rep_table(page,sort_col,sort_dir,toggle) {
     //
     // initializating argument objects
     var rep_table_args = {};
@@ -885,26 +906,35 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
     meta_sql_args.table = 'table_meta_data';
     meta_sql_args.where = [['in_tables','REGEXP','(^|%)sales_rep_table(%|$)|(^|%)dbusers(%|$)'],['use_on_pages','REGEXP','sales_maintenance|sales_reporting'],['use_in_html_tables','REGEXP','sales_rep_table']];
     meta_sql_args.order_by = [['order_index','ASC']]
-    
-    rep_table_args.data_sql = "SELECT * FROM sales_rep_table INNER JOIN dbUsers ON sales_rep_table.dbuser_internal_id=dbUsers.dbuser_internal_id WHERE dbUsers.dbuser_status REGEXP '^"+status+"$' ORDER BY sales_rep_table."+sort_col+" "+sort_dir;
+    //
+    //
+    data_sql_args.cmd = 'SELECT';
+    data_sql_args.table = 'sales_rep_table';
+    data_sql_args.inner_join = [['dbUsers','sales_rep_table.dbuser_internal_id','dbUsers.dbuser_internal_id']]
+    data_sql_args.where = [['dbUsers.dbuser_status','REGEXP','^'+status+'$']];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
+    //
+    rep_table_args.data_sql = gen_sql(data_sql_args);
     rep_table_args.meta_sql = gen_sql(meta_sql_args);
     //
-    // creating table argument object   
+    // creating table argument object
     rep_table_args.table_output_id = 'table-div';
     rep_table_args.table_id = 'sales-rep-table';
     rep_table_args.table_class = 'default-table';
     rep_table_args.row_id_prefix = 'rep-row-';
-    rep_table_args.table_data_cell_class = 'default-table-td';  
+    rep_table_args.table_data_cell_class = 'default-table-td';
     rep_table_args.row_onclick = "create_rep_report('%rep_id%')";
-    rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
-    rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')"; 
+    rep_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
+    rep_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     rep_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['sales_rep_table','dbUsers'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "report_rep_table(%%,'%column_name%','%sort_dir%')"
-    }; 
+    };
     rep_table_args.page_nav_args = {
+        'tables_referenced' : ['sales_rep_table','dbUsers'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -943,7 +973,7 @@ function report_rep_table(page,sort_col,sort_dir,toggle) {
 }
 //
 // creates the data columns table for the report page
-function rep_report_data_columns(out_id,button_id,toggle,reset) { 
+function rep_report_data_columns(out_id,button_id,toggle,reset) {
     var meta_sql = '';
     var preset_sql = '';
     var preset = document.getElementById('preset-report').value;
@@ -992,6 +1022,7 @@ function rep_report_data_columns(out_id,button_id,toggle,reset) {
     var callback = function(response) {
         var args = {};
         args.data = response.meta_data;
+        args.tables_referenced = ['sales_rep_data','sales_rep_table'];
         args.preset_data = response.preset_data[0];
         args.hide_sort_row = true;
         args.hide_totals_row = true;
@@ -1005,7 +1036,7 @@ function rep_report_data_columns(out_id,button_id,toggle,reset) {
     }
 }
 //
-// this creates the rep report 
+// this creates the rep report
 function create_rep_report(rep_id) {
     //
     var name_val_obj = get_all_form_values('report-inputs','');
@@ -1016,7 +1047,7 @@ function create_rep_report(rep_id) {
     new_btn.appendChild(document.createTextNode('Create All Rep Report'));
     new_btn.id = 'create-rep-report';
     new_btn.className = 'hidden-elm';
-    new_btn.addEventListener("click",function(){ 
+    new_btn.addEventListener("click",function(){
         create_rep_report(rep_id);
     });
     document.getElementById('create-rep-report').parentNode.replaceChild(new_btn,document.getElementById('create-rep-report'));
@@ -1063,7 +1094,7 @@ function create_rep_report(rep_id) {
             h3.addTextNode('No available data')
             table.appendChild(h3);
             document.getElementById('content-div').removeAll();
-            document.getElementById('content-div').appendChild(table); 
+            document.getElementById('content-div').appendChild(table);
             return;
         }
         report_args.end_date = response[0][0]['date'];
@@ -1073,7 +1104,7 @@ function create_rep_report(rep_id) {
     ajax_fetch([sql],[0],callback);
 }
 //
-// this function uses the inputs from the previous function to fetch the required data 
+// this function uses the inputs from the previous function to fetch the required data
 function rep_report_get_data(args) {
     //
     // determining start and end dates for YTD and LYTD totals
@@ -1084,7 +1115,7 @@ function rep_report_get_data(args) {
     var lyd = new Date(date.getFullYear(),date.getMonth(),date.getDate()-7*52);
     var last_year_date = lyd.yyyymmdd();
     //
-    // setting up sql statements 
+    // setting up sql statements
     var LYTD_sql = '';
     var YTD_sql  = '';
     var rep_data_sql = '';
@@ -1196,17 +1227,18 @@ function build_rep_report(args) {
     //
     var table_args = {};
     //
-    // creating table argument object   
+    // creating table argument object
     table_args.table_output_id = 'content-div';
     table_args.table_id = 'sales-rep-report';
     table_args.table_class = 'default-table';
     table_args.row_id_prefix = 'reports-row-';
-    table_args.table_data_cell_class = 'default-table-td';  
+    table_args.table_data_cell_class = 'default-table-td';
     table_args.data_arr = args.rep_data;
     table_args.col_meta_data = args.meta_data;
     table_args.no_page_nav = true;
     table_args.page_nav_args = {};
     table_args.head_row_args = {
+        tables_referenced : ['sales_rep_data','sales_rep_table'],
         head_row_class_str : 'default-table-header',
         class_str : 'default-table-header',
         sortable  : false

@@ -41,11 +41,13 @@ function enter_data_emp_table(page,sort_col,sort_dir,department) {
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     emp_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['employee_info'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "enter_data_emp_table(%%,'%column_name%','%sort_dir%','"+department+"');"
     }
     emp_table_args.page_nav_args = {
+        'tables_referenced' : ['employee_info'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -209,11 +211,13 @@ function view_emp_table(page,sort_col,sort_dir) {
     emp_table_args.add_callback = function(){store_session(session_obj);}
     emp_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['employee_info'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "view_emp_table(%%,'%column_name%','%sort_dir%');"
     }
     emp_table_args.page_nav_args = {
+        'tables_referenced' : ['employee_info'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -280,11 +284,13 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
     data_table_args.add_callback = function(){ store_session(session_obj);}
     data_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['employee_data'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "view_emp_data_table(%%,'%column_name%','%sort_dir%','"+emp_id+"','"+department+"')"
     }
     data_table_args.page_nav_args = {
+        'tables_referenced' : ['employee_data'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -597,11 +603,13 @@ function edit_data_emp_table(page,sort_col,sort_dir) {
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     emp_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['employee_info'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "edit_data_emp_table(%%,'%column_name%','%sort_dir%')"
     }
     emp_table_args.page_nav_args = {
+        'tables_referenced' : ['employee_info'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -681,11 +689,13 @@ function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
     data_table_args.add_callback = function() { document.getElementById(data_table_args.table_id).dataset.empId = emp_id; }
     data_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['employee_data'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "mod_emp_data_table(%%,'%column_name%','%sort_dir%','"+emp_id+"')"
     }
     data_table_args.page_nav_args = {
+        'tables_referenced' : ['employee_data'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -1055,11 +1065,13 @@ function mod_dbuser_table(page,sort_col,sort_dir) {
     dbuser_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     dbuser_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['dbUsers'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "mod_dbuser_table(%%,'%column_name%','%sort_dir%')"
     }
     dbuser_table_args.page_nav_args = {
+        'tables_referenced' : ['dbUsers'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -1227,11 +1239,13 @@ function mod_emp_table(page,sort_col,sort_dir) {
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     emp_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['employee_info'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "mod_emp_table(%%,'%column_name%','%sort_dir%')"
     };
     emp_table_args.page_nav_args = {
+        'tables_referenced' : ['employee_info'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -1459,6 +1473,7 @@ function create_table(page,sort_col,sort_dir) {
     table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : [table_name],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'cell_onclick_str' : "col_name_to_search_box('%column_name%')",
@@ -1467,6 +1482,7 @@ function create_table(page,sort_col,sort_dir) {
         'tooltip' : {'elm' : 'SPAN', 'className':'default-table-tooltip','textNode':'%column_name%'}
     };
     table_args.page_nav_args = {
+        'tables_referenced' : [table_name],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,

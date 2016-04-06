@@ -208,7 +208,7 @@ function make_standard_table(input_args) {
     head_row_args = input_args.head_row_args;
     page_nav_args = input_args.page_nav_args;
     page_nav_args.data_length = data_arr.length;
-    page_nav_args.col_meta_data = col_meta_data;
+    page_nav_args.meta_data = col_meta_data;
     //
     // putting table arguments properities into defaults variable
     for (var arg in input_args) {
@@ -289,8 +289,8 @@ function create_page_links(input_args) {
         data_length : 10,
         tot_pages_shown : 1,
         data_length : 0,
+        tables_referenced : [],
         meta_data : {},
-        sort_col_table : '',
         sort_col : '',
         sort_dir : '',
         page_nav_div_id : 'table-page-nav',
@@ -302,9 +302,35 @@ function create_page_links(input_args) {
     }
     //
     // processing the argument object
-    for (var arg in input_args) {
-        args[arg] = input_args[arg]+'' //converting to string to ensure .match method always exists
-        if (args[arg].match(/^-?\d+$/)) {args[arg] = Number(args[arg]);}
+    var arg = null;
+    for (var prop in input_args) {
+        arg = input_args[prop];
+        if (typeof arg == 'string') {
+            if (arg.match(/^-?\d+$/)) {arg = Number(arg);}
+        }
+        args[prop] = arg
+    }
+    //
+    // making independent copy of meta_data and then indexing by name
+    var meta_data = {};
+    var col_name = '';
+    for (var i in args.meta_data) {
+        col_name = args.meta_data[i]['column_name'];
+        meta_data[col_name] = JSON.parse(JSON.stringify(args.meta_data[i]));
+        //
+        for (var j in args.tables_referenced) {
+            var pat = '(^|%)'+args.tables_referenced[j]+'(%|$)';
+            if (meta_data[col_name]['in_tables'].match(pat)) {
+                meta_data[col_name]['table'] = args.tables_referenced[j];
+                break;
+            }
+        }
+        if (meta_data[col_name]['table']) {
+            meta_data[col_name]['column_name'] = meta_data[col_name]['table']+'.'+col_name;
+        }
+        if (col_name == args.sort_col) {
+            args.sort_col = meta_data[col_name]['column_name'];
+        }
     }
     //
     var num_pages = Math.ceil(args.data_length/args.num_per_page);
@@ -392,7 +418,7 @@ function make_head_rows(output_element,col_data,input_args) {
         leading_cells : [],
         tooltip : {'elm':'SPAN','className':'hidden-elm','textNode':''},
         skip_cols : [],
-        column_tables : [],
+        tables_referenced : [],
         sortable : true,
         sort_col : '',
         sort_dir : '',
@@ -409,21 +435,23 @@ function make_head_rows(output_element,col_data,input_args) {
     }
     //
     // linking a table to the cols in meta data
-    console.log(col_meta_data);
-    if (args.column_tables) {
-        for (var i in col_meta_data) {
-            col_data[i]['table'] = '';
-            for (var j in args.column_tables) {
-                var pat = '(^|%)'+args.column_tables[j]+'(%|$)';
-                if (col_meta_data[i]['in_tables'].match(pat)) {
-                    col_meta_data[i]['table'] = args.column_tables[j];
-                    break;
-                }
+    for (var i in col_meta_data) {
+        col_meta_data[i]['table'] = '';
+        for (var j in args.tables_referenced) {
+            var pat = '(^|%)'+args.tables_referenced[j]+'(%|$)';
+            if (col_meta_data[i]['in_tables'].match(pat)) {
+                col_meta_data[i]['table'] = args.tables_referenced[j];
+                break;
             }
-            if (col_meta_data[i]['column_name'] == args.sort_col) {
-                args.sort_col = col_data[i]['table']+'.'+args.sort_col;
-            }
-            col_meta_data[i]['column_name'] = col_meta_data[i]['table'] +'.'+ col_meta_data[i]['column_name']
+        }
+        if (col_meta_data[i]['table']) {
+            col_meta_data[i]['column_name'] = col_meta_data[i]['table']+'.'+col_meta_data[i]['column_name'];
+        }
+        else {
+            console.log('Warning: could not find a maching table for column - '+col_meta_data[i]['column_name']);
+        }
+        if (col_meta_data[i]['column_name'].match('(?:[.])'+args.sort_col+'$')) {
+            args.sort_col = col_meta_data[i]['column_name'];
         }
     }
     //
@@ -669,6 +697,7 @@ function make_data_columns_table(output_element,args) {
     //
     // variable definitions
     var col_meta_data = args.data;
+    var tables_referenced = args.tables_referenced;
     var preset_data = args.preset_data;
     var checked_cols = [];
     var all_onclick_fun = '';
@@ -711,6 +740,7 @@ function make_data_columns_table(output_element,args) {
     lead_td.addTextNode('\u00A0');
     var head_rows_props = {};
     head_rows_props.sortable = false;
+    head_rows_props.tables_referenced = tables_referenced;
     head_rows_props.id_prefix = "sel-cols-";
     head_rows_props.class_str = "report-column-header";
     head_rows_props.leading_cells =  [lead_td];
@@ -719,6 +749,18 @@ function make_data_columns_table(output_element,args) {
     // constructing additional table rows
     var input = null;
     for (var i = 0; i < col_meta_data.length; i++) {
+        var table_name = '';
+        for (var j in tables_referenced) {
+            var pat = '(^|%)'+args.tables_referenced[j]+'(%|$)';
+            if (col_meta_data[i]['in_tables'].match(pat)) {
+                table_name = args.tables_referenced[j]+'.';
+                break;
+            }
+        }
+        if (!(table_name)) {
+            console.log('Warning: could not find a maching table for column - '+col_meta_data[i]['column_name']);
+        }
+        //
         var col_obj = col_meta_data[i];
         var checked = false;
         //
@@ -729,7 +771,7 @@ function make_data_columns_table(output_element,args) {
                 'id' : col_obj.column_name+'-viewcol-checkbox',
                 'name' : 'sel_cols',
                 'type' : 'checkbox',
-                'value' : col_obj.column_name,
+                'value' : col_obj.column_name
         });
         if (checked) { input.checked = true;}
         input.addEventListener('click',exec_fun_str.bind(null,all_onclick_fun));
@@ -743,7 +785,7 @@ function make_data_columns_table(output_element,args) {
                     'id' : col_obj.column_name+'-sortby-radio',
                     'name' : 'secd-sort',
                     'type' : 'radio',
-                    'value' : col_obj.column_name,
+                    'value' : table_name+col_obj.column_name,
             });
             input.addEventListener('click',exec_fun_str.bind(null,all_onclick_fun));
             td.appendChild(input);
@@ -764,13 +806,13 @@ function make_data_columns_table(output_element,args) {
                     'id' : col_obj.column_name+'-totaltype-sum',
                     'name' : col_obj.column_name,
                     'type' : 'radio',
-                    'value' : col_obj.column_name+':sum',
+                    'value' :'sum'
             });
             avg_input = document.createElementWithAttr('INPUT',{
                     'id' : col_obj.column_name+'-totaltype-avg',
                     'name' : col_obj.column_name,
                     'type' : 'radio',
-                    'value' : col_obj.column_name+':avg',
+                    'value' :'avg'
             });
             if (sum_check) { sum_input.checked = true;}
             if (avg_check) { avg_input.checked = true;}

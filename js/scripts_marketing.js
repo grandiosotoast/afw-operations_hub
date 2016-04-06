@@ -163,12 +163,13 @@ function create_vendor_broker_table(page,sort_col,sort_dir) {
     table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     table_args.head_row_args = {
         'sortable' : true,
-        'column_tables' : ['marketing_vendor_broker_table'],
+        'tables_referenced' : ['marketing_vendor_broker_table'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "create_vendor_broker_table(%%,'%column_name%','%sort_dir%')"
     };
     table_args.page_nav_args = {
+        'tables_referenced' : ['marketing_vendor_broker_table'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
