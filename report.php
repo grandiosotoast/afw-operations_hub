@@ -18,7 +18,7 @@ link_external_files();
 </head>
 <body>
 <div id="head" class="head">
-<?php 
+<?php
 page_head();
 check_login('report');
 ?>
@@ -62,9 +62,9 @@ check_login('report');
 <br>
 <label class="label">Report Section Headers:</label>
 <select id="prime-sort" class="dropbox-input" name="prime-sort" onchange="show_update_button('get_emp_data','report-table','Show Changes');">
-    <option value="emp_id">Employee ID</option>
-    <option value="date">Date</option>
-    <option value="emp_last_name">Employee Name</option>
+    <option value="employee_data.emp_id">Employee ID</option>
+    <option value="employee_data.date">Date</option>
+    <option value="employee_data.emp_last_name">Employee Name</option>
 </select>
 &nbsp;&nbsp;
 <label class="label-large">Section Sorting Direction:</label>
@@ -75,9 +75,9 @@ check_login('report');
 <br>
 <label class="label">Internal Sorting:</label>
 <select id="secd-sort" class="dropbox-input" name="secd-sort" onchange="update_sort_by_col('sort-by-col-tr','secd-sort'); show_update_button('get_emp_data','report-table','Show Changes');">
-    <option value="date">Date</option>
-    <option value="emp_id">Employee ID</option>
-    <option value="emp_last_name">Employee Name</option>
+    <option value="employee_data.date">Date</option>
+    <option value="employee_data.emp_id">Employee ID</option>
+    <option value="employee_data.emp_last_name">Employee Name</option>
 </select>
 &nbsp;&nbsp;
 <label class="label-large">Internal Sorting Direction:</label>
@@ -87,7 +87,7 @@ check_login('report');
 </select>
 </fieldset>
 <br>
-<button id="show_data_cols" type="button" onclick="show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',true,true);">Show Data Selection Columns</button> 
+<button id="show_data_cols" type="button" onclick="show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',true,true);">Show Data Selection Columns</button>
 <button id="show_employee_table" type="button" onclick="report_emp_table('1','emp_last_name','ASC',true);">Show Employee Table</button>
 <button id="get_emp_data" type="button" name="get_emp_data" onclick="create_production_report('report_emp_data','report_data_div','','')">Get All Employee Data</button>
 <button id="get_emp_data_all" type="button" class="hidden-elm" name="get_emp_data_all" onclick="create_production_report('report_emp_data','report_data_div','',''); add_class('hidden-elm','get_emp_data_all');">Get All Employee Data</button>
@@ -124,7 +124,8 @@ var input_args = {
 };
 create_time_range_inputs(input_args);
 var dropbox_args = {
-    sql_where : [['report_type','REGEXP','(^|%)production(%|$)']]
+    sql_where : [['report_type','REGEXP','(^|%)production(%|$)']],
+    add_callback : show_data_columns.bind(null,document.getElementById('department').value,'data_sel_cols','show_data_cols',false,true)
 };
 populate_dropbox_options('preset-report','report_presets','preset_index','preset_name','',dropbox_args);
 </script>

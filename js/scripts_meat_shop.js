@@ -10,7 +10,7 @@ function item_maintenance() {
     reset_meat_page();
     //
     document.getElementById('tab-clicked').value = 'item-maintenance';
-    // 
+    //
     var head_elements = Array(
         {'elm' : 'H4','textNode' : 'Click on an item in the table to modfy it or click the button below the table to create a new item.'},
         {'elm' : 'LABEL', 'className' : 'label', 'textNode' : 'Show Inactive Items'},
@@ -30,7 +30,7 @@ function stock_changes() {
     //
     reset_meat_page();
     //
-    remove_class('hidden-elm','update-stock'); 
+    remove_class('hidden-elm','update-stock');
     remove_class('hidden-elm','mod-record');
 }
 //
@@ -41,8 +41,8 @@ function stock_reports() {
     //
     document.getElementById('tab-clicked').value = 'stock-reports';
     //
-    remove_class('hidden-elm','inventory-report'); 
-    remove_class('hidden-elm','stock-change-report');    
+    remove_class('hidden-elm','inventory-report');
+    remove_class('hidden-elm','stock-change-report');
 }
 //
 // this resets the page after main buttons are pressed
@@ -77,8 +77,8 @@ function update_stock() {
     }
     //
     document.getElementById('tab-clicked').value = 'stock-changes';
-    // 
-    // 
+    //
+    //
     var head_elements = Array(
         {'elm' : 'H4','textNode' : "Click on an item in the table to update it's quantity."},
         {'elm' : 'LABEL', 'className' : 'label-12em', 'textNode' : 'Narrow by Item Number:'},
@@ -94,10 +94,10 @@ function update_stock() {
 function mod_change_records() {
     //
     document.getElementById('content-div').removeAll();
-    document.getElementById('modify-header').removeAll();   
+    document.getElementById('modify-header').removeAll();
     document.getElementById('input-div').removeAll();
     //
-    // 
+    //
     var head_elements = Array(
         {'elm' : 'H4','textNode' : 'Click on a record in the table to modify it.'},
         {'elm' : 'LABEL', 'className' : 'label', 'textNode' : 'Show Deleted Records'},
@@ -112,7 +112,7 @@ function mod_change_records() {
     gen_stock_table(1,'creation_timestamp','DESC');
 }
 //
-// generates the table for the item maintanence tab 
+// generates the table for the item maintanence tab
 function gen_item_table(page,sort_col,sort_dir) {
     //
     var item_table_args = {};
@@ -164,17 +164,19 @@ function gen_item_table(page,sort_col,sort_dir) {
     item_table_args.table_class = 'default-table';
     item_table_args.row_id_prefix = 'item-row';
     item_table_args.table_data_cell_class = 'default-table-td';
-    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = table_callback;
     item_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['meat_shop_stock'],
         'head_row_class_str' : 'default-table-header',
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "gen_item_table(%%,'%column_name%','%sort_dir%')"
     }
     item_table_args.page_nav_args = {
+        'tables_referenced' : ['meat_shop_stock'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -186,7 +188,7 @@ function gen_item_table(page,sort_col,sort_dir) {
         'class_str' : 'page_nav_link',
         'onclick_str' : "gen_item_table(%%,'"+sort_col+"','"+sort_dir+"');",
         'onmouse_str' : ''
-    }; 
+    };
     //
     create_standard_table(item_table_args);
 }
@@ -196,7 +198,7 @@ function mod_item(item_number) {
     //
     create_form('meat_shop_item','content-div');
     //
-    // creating header 
+    // creating header
     document.getElementById('modify-header').textContent = 'Modfiying Item: '+item_number;
     //
     var curr_page = document.getElementById('item-table-page-nav').dataset.currPage;
@@ -212,7 +214,7 @@ function mod_item(item_number) {
     delete_button.type = "button";
     delete_button.appendChild(document.createTextNode('Delete Item'));
     delete_button.addEventListener("click", function () {
-        init_item_form_validation('delete');   
+        init_item_form_validation('delete');
     });
     // creating modify button
     mod_button.id = "modify-item";
@@ -220,7 +222,7 @@ function mod_item(item_number) {
     mod_button.appendChild(document.createTextNode("Submit Changes"))
     mod_button.addEventListener("click", function () {
         init_item_form_validation('update');
-    });   
+    });
     // creating reinstate button for inactive employees
     restore_button.id = "restore-item"
     restore_button.type = "button";
@@ -238,7 +240,7 @@ function mod_item(item_number) {
     //
     // temporary function to determine what buttons to show or hide based on emp status
     var button_fun = function() {
-        // 
+        //
         if (document.getElementById('item-status').value != 'active') {
             add_class('hidden-elm',delete_button.id);
         }
@@ -261,7 +263,7 @@ function mod_item(item_number) {
     document.getElementById('item-number').disabled = true; //this should never be edited
 }
 //
-// generates the table for modifying a stock change record 
+// generates the table for modifying a stock change record
 function gen_stock_table(page,sort_col,sort_dir) {
     //
     var records_table_args = {};
@@ -288,17 +290,19 @@ function gen_stock_table(page,sort_col,sort_dir) {
     records_table_args.table_class = 'default-table';
     records_table_args.row_id_prefix = 'record-row';
     records_table_args.table_data_cell_class = 'default-table-td';
-    records_table_args.row_onclick = "mod_stock_change_record('%entry_id%')"; 
-    records_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    records_table_args.row_onclick = "mod_stock_change_record('%entry_id%')";
+    records_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     records_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
-    records_table_args.add_callback = ''; 
+    records_table_args.add_callback = '';
     records_table_args.head_row_args = {
         'sortable' : true,
+        'tables_referenced' : ['meat_shop_stock_changes'],
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
         'sort_onclick_str' : "gen_stock_table(%%,'%column_name%','%sort_dir%')"
     }
     records_table_args.page_nav_args = {
+        'tables_referenced' : ['meat_shop_stock_changes'],
         'curr_page' : page,
         'sort_col' : sort_col,
         'sort_dir' : sort_dir,
@@ -310,7 +314,7 @@ function gen_stock_table(page,sort_col,sort_dir) {
         'class_str' : 'page_nav_link',
         'onclick_str' : "gen_stock_table(%%,'"+sort_col+"','"+sort_dir+"');",
         'onmouse_str' : ''
-    }; 
+    };
     //
     create_standard_table(records_table_args);
 }
@@ -332,7 +336,7 @@ function update_item_stock(row_id) {
     if (mon < 10) {mon = '0'+mon.toString();}
     document.getElementById('date').value = d.getFullYear()+'-'+mon+'-'+day;
     //
-    // adding event handlers 
+    // adding event handlers
     document.getElementById('amount').addEventListener('keyup',function() {elementArithmetic('amount','curr-quantity','new-quantity','+');})
     document.getElementById('amount').addEventListener('blur',elementArithmetic('amount','curr-quantity','new-quantity','+'));
 
@@ -346,7 +350,7 @@ function mod_stock_change_record(entry_id) {
     //
     create_form('stock_change_form','content-div');
     //
-    // unhiding form elements 
+    // unhiding form elements
     remove_class('hidden-elm','orig-amount-label');
     remove_class('hidden-elm','orig-amount');
     document.getElementById('amount-label').textContent = 'New Add/Remove Pounds:';
@@ -366,21 +370,21 @@ function mod_stock_change_record(entry_id) {
     delete_button.type = "button";
     delete_button.appendChild(document.createTextNode('Delete Entry'));
     delete_button.addEventListener("click", function () {
-        validate_stock_form('delete');     
+        validate_stock_form('delete');
     });
     // creating modify button
     mod_button.id = "mod-entry";
     mod_button.type = "button";
     mod_button.appendChild(document.createTextNode("Submit Changes"));
     mod_button.addEventListener('click', function () {
-        validate_stock_form('update');  
+        validate_stock_form('update');
     });
     // creating restore button for deleted records
     restore_button.id = "restore-entry"
     restore_button.type = "button";
     restore_button.appendChild(document.createTextNode('Restore Entry'));
     restore_button.addEventListener("click", function () {
-        validate_stock_form('restore'); 
+        validate_stock_form('restore');
     });
     //
     // putting all three buttons onto the form
@@ -392,7 +396,7 @@ function mod_stock_change_record(entry_id) {
     //
     // temporary function to determine what buttons to show or hide based on emp status
     var button_fun = function() {
-        // 
+        //
         if (document.getElementById('entry-status').value != 'submitted') {
             add_class('hidden-elm',delete_button.id);
         }
@@ -474,18 +478,19 @@ function meat_shop_inventory_report() {
     item_table_args.table_class = 'default-table';
     item_table_args.row_id_prefix = 'report-row';
     item_table_args.table_data_cell_class = 'default-table-td';
-    item_table_args.row_onclick = ''; 
-    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    item_table_args.row_onclick = '';
+    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.add_callback = mod_inventory_report_table;
     item_table_args.no_page_nav = true;
     item_table_args.head_row_args = {
-        sortable : false
+        sortable : false,
+        'tables_referenced' : ['meat_shop_stock']
     }
     item_table_args.page_nav_args = {};
     //
     create_standard_table(item_table_args);
-    
+
 }
 //
 // this function modifies the table output by create_meat_shop_report
@@ -538,8 +543,8 @@ function mod_inventory_report_table() {
         //
         // outputting tds
         remove_all_children(price_td,'');
-        remove_all_children(qty_td,'');     
-        price_span = dollar_value.cloneNode();   
+        remove_all_children(qty_td,'');
+        price_span = dollar_value.cloneNode();
         value_span = dollar_value.cloneNode();
         process_data_type(price,type_str,price_span,null);
         process_data_type(qty,type_str,qty_td,null);
@@ -584,7 +589,7 @@ function stock_change_report() {
         if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
     //
-    // 
+    //
     var head_elements = Array(
         {'elm' : 'LEGEND','textNode' : 'Stock Report Parameters'},
         {'elm' : 'LABEL', 'className' : 'label-12em', 'textNode' : 'Show Deleted Records'},
@@ -617,7 +622,7 @@ function stock_change_report() {
     create_time_range_inputs(input_args);
 }
 //
-// generates the table for modifying a stock change record 
+// generates the table for modifying a stock change record
 function create_change_report() {
     //
     var item_table_args = {};
@@ -631,7 +636,7 @@ function create_change_report() {
     new_btn.appendChild(document.createTextNode("Create Report"));
     new_btn.id = "create-report"
     new_btn.className = "hidden-elm"
-    new_btn.addEventListener("click",function(){ 
+    new_btn.addEventListener("click",function(){
             create_change_report();
     });
     old_btn.parentNode.replaceChild(new_btn,old_btn);
@@ -657,16 +662,17 @@ function create_change_report() {
     item_table_args.row_id_prefix = 'record-row';
     item_table_args.table_data_cell_class = 'default-table-td';
     item_table_args.no_page_nav = true;
-    item_table_args.row_onclick = ''; 
-    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    item_table_args.row_onclick = '';
+    item_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     item_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     item_table_args.head_row_args = {
-        sortable : false
+        sortable : false,
+        'tables_referenced' : ['meat_shop_stock_changes']
     }
     item_table_args.page_nav_args = {};
     item_table_args.add_callback = function() {
             add_class('hidden-elm','report-page-nav');
-    }; 
+    };
     //
     create_standard_table(item_table_args);
 }

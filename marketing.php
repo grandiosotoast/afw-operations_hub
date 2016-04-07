@@ -43,7 +43,7 @@ check_login('marketing');
 
 <div id="input-div"></div>
 
-<div id="table-div" class="hidden-elm"></div>
+<div id="table-div" class=""></div>
 
 <br>
 

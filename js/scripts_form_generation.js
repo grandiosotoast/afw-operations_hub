@@ -1037,8 +1037,11 @@ function populate_form(populate_form_args) {
     var callback_fun = function(response) {
         populate_form_args.data_arr = response.data[0];
         process_form_data(populate_form_args)
-        if (!!(populate_form_args.add_callback_funs)) {
-        populate_form_args.add_callback_funs();
+        if (populate_form_args.add_callback_funs) {
+            populate_form_args.add_callback_funs();
+        }
+        if (populate_form_args.add_callback) {
+            populate_form_args.add_callback();
         }
     }
     ajax_fetch([sql],['data'],callback_fun);
