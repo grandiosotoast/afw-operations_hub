@@ -28,7 +28,7 @@ check_login('marketing');
 <div id="nav-container" class="nav-container">
 <h3>Select the desired action:</h3>
 <span class="nav-span"><button id="vendor-broker-setup" type="button" class="big-button" onclick="vendor_broker_setup();">Vendor/ Broker Setup</button></span>
-<span class="nav-span"><button id="vendor-broker-contact-info" type="button" class="big-button" onclick="update_contact_info();">Contact Information</button></span>
+<span class="nav-span"><button id="vendor-broker-contact-info" type="button" class="big-button" onclick="vendor_broker_contact_info();">Contact Information</button></span>
 <span class="nav-span"><button id="update-marketing-commitment" type="button" class="big-button" onclick="update_marketing_commitment();">Update Marketing Commitment</button></span>
 <br>
 <span class="nav-span"><button id="food-show-information" type="button" class="big-button" onclick="update_food_show_info();">Food Show Information</button></span>
@@ -53,5 +53,5 @@ check_login('marketing');
 
 </div> <!-- End main-container div -->
 </body>
-<script>vendor_broker_setup(); console.log('calling setup form line 56')</script>
+<script>vendor_broker_contact_info(); console.log('calling contact info line 56')</script>
 </html>

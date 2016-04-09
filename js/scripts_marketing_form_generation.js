@@ -83,10 +83,68 @@ var setup_vendor_broker = ''+
     '<button id="submit-vendor-broker-form" type="button" onclick="submit_vendor_broker_form(\'create\');">Add Vendor/ Broker</button>'+
     '</form>';
 //
+// vendor / broker contact form
+var marketing_contact_info_form = ''+
+    '<form id="marketing-contact-info-form">'+
+
+    '<fieldset class="fieldset-default">'+
+    '<legend>Vendor/Broker Information</legend>'+
+    '<label class="label">Broker:</label>'+
+    '<input id="broker" name="broker" class="text-input" type="text" disabled>'+
+    '<br>'+
+    '<label class="label">Vendor:</label>'+
+    '<input id="vendor" name="vendor" class="text-input" type="text" disabled>'+
+    '</fieldset>'+
+
+    '<fieldset class="fieldset-default">'+
+    '<legend>Personal Information</legend>'+
+    '<label class="label">Name</label>'+
+    '<input id="contact-name" name="contact_name" class="text-input" type="text" onblur="validate_marketing_contact_info_form();">'+
+    '<br>'+
+    '<label class="label">Phone Number</label>'+
+    '<input id="contact-phone-number" name="contact_phone_number" class="text-input" type="text" onkeyup="remove_class(\'invalid-field\',this.id); check_phone_str(this.id,null,false);" onblur="validate_marketing_contact_info_form();">'+
+    '&nbsp;&nbsp;&nbsp;&nbsp;<label>Skip:</label>'+
+    '<input id="skip-contact-phone-number" type="checkbox" onclick="toggle_disabled(\'contact-phone-number\')">'+
+    '&nbsp;&nbsp;&nbsp;&nbsp;<label>Force Value:</label>'+
+    '<input id="force-contact-phone-number" type="checkbox" onclick="force_value(this);">'+
+    '<br>'+
+    '<label class="label">Email</label>'+
+    '<input id="contact-email" name="contact_email" class="text-input" type="text" onkeyup="remove_class(\'invalid-field\',this.id);" onblur="validate_marketing_contact_info_form();">'+
+    '&nbsp;&nbsp;&nbsp;&nbsp;<label>Skip:</label>'+
+    '<input id="skip-contact-email" type="checkbox" onclick="toggle_disabled(\'contact-email\')">'+
+    '&nbsp;&nbsp;&nbsp;&nbsp;<label>Force Value:</label>'+
+    '<input id="force-contact-email" type="checkbox" onclick="force_value(this);">'+
+    '<br>'+
+    '</fieldset>'+
+
+    '<fieldset class="fieldset-default">'+
+    '<legend>Additional Information</legend>'+
+    '<label class="label">On Mail CHIMP</label>'+
+    '<input id="on-mail-chimp" name="on_mail_chimp" class="text-input" type="text" value="NO" onkeyup="remove_class(\'invalid-field\',this.id);" onblur="validate_marketing_contact_info_form();">'+
+    '<br>'+
+    '<label class="label">Communicated Food Show</label>'+
+    '<input id="communicated-food-show" name="communicated_food_show" class="text-input" type="text" value="NO" onkeyup="remove_class(\'invalid-field\',this.id);" onblur="validate_marketing_contact_info_form();">'+
+    '<br>'+
+    '<label class="label">Received Show Forms</label>'+
+    '<input id="received-show-forms" name="received_show_forms" class="text-input" type="text" value="NO" onkeyup="remove_class(\'invalid-field\',this.id);" onblur="validate_marketing_contact_info_form();">'+
+    '<br>'+
+    '<label class="label">Samples</label>'+
+    '<input id="samples" name="samples" class="text-input" type="text" value="NO" onkeyup="remove_class(\'invalid-field\',this.id);" onblur="validate_marketing_contact_info_form();">'+
+    '<br>'+
+    '</fieldset>'+
+
+    '<input id="contact-status" name="contact_status" type="hidden" value="active">'+
+    '<input id="contact-internal-id" name="contact_internal_id" type="hidden" value="">'+
+    '<input id="vendor-internal-id" name="vendor_internal_id" type="hidden" value="">'+
+    '<label id="form-errors" class="error-msg hidden-elm">Form errors are highlighted in red</label><br>'+
+    '<button id="submit-contact-info-form" type="button" onclick="submit_contact_info_form(\'create\');">Add New Contact</button>'+
+    '</form>';
+//
 // this function will return one of the above forms to a page
 function create_marketing_form(form_name,out_id) {
     var forms = {};
     forms.setup_vendor_broker = setup_vendor_broker;
+    forms.marketing_contact_info_form = marketing_contact_info_form;
     //
     if (!!(forms[form_name])) {
         document.getElementById(out_id).innerHTML = forms[form_name];
@@ -96,6 +154,8 @@ function create_marketing_form(form_name,out_id) {
     }
     return;
 }
+//
+///////////////////////////// Vendor Broker Setup Form /////////////////////////
 //
 //
 function validate_setup_vendor_broker(truncate) {
@@ -165,15 +225,10 @@ function submit_vendor_broker_form(action) {
     // using callback to assign tables to columns
     callback = function(response) {
         //
-        var meta_data = {};
-        for (var i = 0; i < response.meta_data.length; i++) {
-            meta_data[response.meta_data[i]['column_name']] = response.meta_data[i];
-        }
-        //
         var args = {};
         var sql_arr = null;
         args.action = action;
-        args.meta_data = meta_data;
+        args.meta_array = response.meta_data;
         args.form_values = form_values;
         sql_arr = create_vendor_broker_form_sql(args);
         //
@@ -193,86 +248,33 @@ function submit_vendor_broker_form(action) {
 // creates the SQL statements to submit the vendor broker form
 function create_vendor_broker_form_sql(args) {
     //
-    var include_tables = ['marketing_vendor_broker_table','marketing_accounting',
+    // action specific values
+    args.init_sql_args = {};
+    if (args.action == 'create') {
+        args.init_sql_args.cmd = 'INSERT';
+        args.form_values['vendor_internal_id'] = 'LAST_INSERT_ID()';
+        args.include_tables = ['marketing_vendor_broker_table','marketing_accounting',
                           'marketing_food_show','marketing_growth',
                           'marketing_services_performed','marketing_alacarte_commitment'];
-    var sql_arr = [];
-    var cmd = 'UPDATE';
-    var where = null;
-    var username = document.getElementById('user-username').value
-    //
-    if (args.action == 'create') {
-        cmd = 'INSERT';
-        args.form_values['vendor_internal_id'] = 'LAST_INSERT_ID()';
     }
     else {
-        where = [['vendor_internal_id','LIKE',args.form_values['vendor_internal_id']]];
+        args.init_sql_args.cmd = 'UPDATE';
+        args.init_sql_args.where = [['vendor_internal_id','LIKE',
+                                      args.form_values['vendor_internal_id']]];
         delete args.form_values['vendor_internal_id'];
+        args.include_tables = ['marketing_vendor_broker_table',
+                          'marketing_food_show','marketing_growth'];
     }
+    args.modified_by_value = document.getElementById('user-username').value;
+    args.table_pattern = new RegExp(/(?:^|%)(marketing.+?)(?=%|$)/,'gi')
     //
-    // determining which table(s) each form value belongs to.
-    var meta_data = args.meta_data
-    var pat = new RegExp('(?:^|%)(marketing.*?)(?:%|$)','gi')
-    var tables = null;
-    var table_data = {};
-    for (var col in meta_data) {
-        col = meta_data[col];
-        tables = col['in_tables'].match(/(?:^|%)(marketing.*?)(?=%|$)/g);
-        for (var i in tables) {
-            tables[i] = tables[i].replace(/%/g,'');
-            if (!(table_data.hasOwnProperty(tables[i]))) {
-                table_data[tables[i]] = {};
-                table_data[tables[i]]['cols'] = {};
-            }
-            // adding the last modified by columns to table data
-            if (col['column_name'].match(/last_modified_by/)) {
-                table_data[tables[i]]['cols'][col['column_name']] = username;
-            }
+    args.action_specific_changes = function(args,table_data) {
+        if (args.action == 'create') {
+            delete table_data[0]['cols']['vendor_internal_id']
         }
-        col['in_tables'] = tables
+        return table_data;
     }
-    //
-    // grouping form values by table
-    var col = null;
-    for (var name in args.form_values) {
-        col = meta_data[name];
-        for (var i in col['in_tables']) {
-            table_data[col['in_tables'][i]]['cols'][name] = args.form_values[name];
-        }
-    }
-    //
-    // removing tables not in include list and enforcing order defined in include_tables
-    var temp_arr = []
-    for (var i in include_tables) {
-        table_data[include_tables[i]]['table'] = include_tables[i];
-        temp_arr.push(table_data[include_tables[i]]);
-    }
-    table_data = temp_arr;
-    console.log(table_data)
-    //
-    // setting action specific params
-    if (args.action == 'create') {
-        delete table_data[0]['cols']['vendor_internal_id']
-    }
-    //
-    // generating sql statements
-    var sql_args = {};
-    var table = null
-    for (var i in table_data) {
-        table = table_data[i];
-        //
-        sql_args = {};
-        sql_args['cmd'] = cmd;
-        sql_args['table'] = table['table'];
-        if (where) { sql_args['where'] = where;}
-        sql_args['cols'] = [];
-        sql_args['vals'] = [];
-        for (var col in table['cols']) {
-            sql_args['cols'].push(col);
-            sql_args['vals'].push(table['cols'][col]);
-        }
-        sql_arr.push(gen_sql(sql_args));
-    }
+    var sql_arr = build_form_sql(args);
     //
     return(sql_arr)
 }
@@ -295,5 +297,125 @@ function reset_vendor_broker_form(act) {
     }
     else {
         document.getElementById('content-div').removeAll();
+        document.getElementById('header').textContent = '';
+    }
+}
+//
+/////////////////////////// Vendor Broker Contact Form /////////////////////////
+//
+//
+function validate_marketing_contact_info_form() {
+    //
+    var basic_val_error = false;
+    var form_id = 'marketing-contact-info-form';
+    var skip_ids = 'broker,vendor,contact-status,contact-internal-id';
+    //
+    basic_val_error = basic_validate(form_id,skip_ids);
+    //
+    if (document.getElementById('vendor-internal-id').value == '') {
+        alert('Error - No Vendor/Broker linked to contact form reselect Vendor/Broker from table');
+    }
+}
+//
+//
+function submit_marketing_contact_info_form(action) {
+    //
+    var form_id = 'marketing-contact-info-form';
+    var errors = false;
+    var form_values = null;
+    var cont = false;
+    var act = 'modification'
+    var sql_args = null;
+    var sql = '';
+    var callback = null;
+    //
+    remove_class_all('invalid-field');
+    validate_marketing_contact_info_form();
+    errors = check_for_invalid_fields(form_id);
+    //
+    // returning early if there are errors
+    if (errors) { remove_class('hidden-elm','form-errors'); return;}
+    else { add_class('hidden-elm','form-errors');}
+    //
+    form_values = get_all_form_values(form_id,'');
+    //
+    if (action == 'create') { act = 'creation'; form_values['contact_status'] = 'active';}
+    if (action == 'delete') { act = 'deletion'; form_values['contact_status'] = 'deleted';}
+    if (action == 'restore') { act = 'restoration'; form_values['contact_status'] = 'active';}
+    cont = confirm('Confirm '+act+' of '+form_values['contact_name']);
+    if (!(cont)) { return;}
+    //
+    // using callback to assign tables to columns
+    callback = function(response) {
+        //
+        var args = {};
+        var sql_arr = null;
+        args.action = action;
+        args.meta_array = response.meta_data;
+        args.form_values = form_values;
+        sql_arr = create_marketing_contact_info_form_sql(args);
+        //
+        exec_transaction(sql_arr,reset_marketing_contact_info_form.bind(null,act));
+    }
+    //
+    sql_args = {
+        'cmd' : 'SELECT',
+        'table' : 'table_meta_data',
+        'cols' : ['column_name','in_tables'],
+    }
+    //
+    sql = gen_sql(sql_args);
+    ajax_fetch([sql],['meta_data'],callback);
+}
+//
+// creates the SQL statements to submit the contact info form
+function create_marketing_contact_info_form_sql(args) {
+    //
+    // action specific values
+    args.init_sql_args = {};
+    if (args.action == 'create') {
+        args.init_sql_args.cmd = 'INSERT';
+        args.form_values['contact_internal_id'] = 'LAST_INSERT_ID()';
+    }
+    else {
+        args.init_sql_args.cmd = 'UPDATE';
+        args.init_sql_args.where = [['contact_internal_id','LIKE',
+                                      args.form_values['contact_internal_id']]];
+        delete args.form_values['contact_internal_id'];
+    }
+    args.include_tables = ['marketing_contact_information','marketing_contact_aux_info'];
+    args.modified_by_value = document.getElementById('user-username').value;
+    args.table_pattern = new RegExp(/(?:^|%)(marketing_contact.+?)(?=%|$)/,'gi')
+    //
+    args.action_specific_changes = function(args,table_data) {
+        if (args.action == 'create') {
+            delete table_data[0]['cols']['contact_internal_id']
+        }
+        return table_data;
+    }
+    var sql_arr = build_form_sql(args);
+    //
+    return(sql_arr);
+}
+//
+// resets the contact info from
+function reset_marketing_contact_info_form(act) {
+    //
+    alert('Successful '+act+' of contact.');
+    //
+    var curr_page = document.getElementById('vbc-info-table-page-nav').dataset.currPage;
+    var sort_col = document.getElementById('vbc-info-table-page-nav').dataset.sortCol;
+    var sort_dir = document.getElementById('vbc-info-table-page-nav').dataset.sortDir;
+    var broker = window.sessionStorage.getItem('contact_table_broker');
+    var vendor_id = window.sessionStorage.getItem('contact_table_vendor_internal_id');
+    create_contact_info_table(broker,vendor_id,curr_page,sort_col,sort_dir);
+    //
+    // recreating form
+    if (act == 'creation') {
+        create_contact_info_table('marketing_contact_info_form','content-div');
+    }
+    else {
+        document.getElementById('content-div').removeAll();
+        document.getElementById('header').textContent = '';
     }
 }

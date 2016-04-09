@@ -698,15 +698,7 @@ function addChildren(parentNode,elementsArray) {
             element[prop] = elm_obj[prop];
         }
         //
-        if (element.id == '') {
-            parentNode.appendChild(element);
-        }
-        else if (document.getElementById(element.id)) {
-            parentNode.replaceChild(element,document.getElementById(element.id));
-        }
-        else {
-            parentNode.appendChild(element);
-        }
+        parentNode.safeAppendChild(element);
     }
 }
 //
@@ -879,6 +871,36 @@ function find_pay_period(date) {
     return ts_arr;
 }
 //
+//
+function to_and_from_timestamps() {
+    var from_ts = '';
+    var to_ts = '';
+    var today = new Date()
+    var ret_obj = {}
+    //
+    // getting time range data
+    if (document.getElementById('time-range').disabled == false) {
+        from_ts = document.getElementById('time-range').value.split('|')[0]+' 00:00:00';
+        to_ts   = document.getElementById('time-range').value.split('|')[1]+' 23:59:59';
+    }
+    // using calander inputs instead
+    else {
+        var st_year = document.getElementById('st-year').value;
+        var st_mon = document.getElementById('st-month').value;
+        var st_day = document.getElementById('st-day').value;
+        var from_ts = st_year+'-'+st_mon+'-'+st_day+' 00:00:00';
+        //
+        var en_year = document.getElementById('en-year').value;
+        var en_mon = document.getElementById('en-month').value;
+        var en_day = document.getElementById('en-day').value;
+        var to_ts = en_year+'-'+en_mon+'-'+en_day+' 23:59:59';
+    }
+    //
+    ret_obj.from_ts = from_ts
+    ret_obj.to_ts = to_ts
+    return(ret_obj);
+}
+//
 // this creates the haul information area on the backhaul form
 function create_haul_fields(out_id,entry_num) {
     //
@@ -1021,22 +1043,26 @@ function set_date(day,mon,year,day_id,mon_id,year_id,cal_id) {
 function populate_form(populate_form_args) {
     //
     // processing arg object
-    var table = populate_form_args.table
-    var unique_col = populate_form_args.unique_col
-    var unique_data = populate_form_args.unique_data
+    var sql = '';
+    var sql_args = {};
     var form_id = populate_form_args.form_id
     //
     // creating sql statment
-    var sql = ""
-    var sql_args = {};
-    sql_args.cmd = "SELECT";
-    sql_args.table = table;
-    sql_args.where = [[unique_col,'LIKE',unique_data]];
+    if (populate_form_args.hasOwnProperty('sql_args')) {
+        sql_args = populate_form_args.sql_args;
+    }
+    else {
+        sql_args.cmd = 'SELECT';
+        sql_args.table = populate_form_args.table;
+        sql_args.where = [[populate_form_args.unique_col,'LIKE',
+                           populate_form_args.unique_data]];
+    }
     sql = gen_sql(sql_args);
     //
     var callback_fun = function(response) {
         populate_form_args.data_arr = response.data[0];
         process_form_data(populate_form_args)
+        //
         if (populate_form_args.add_callback_funs) {
             populate_form_args.add_callback_funs();
         }

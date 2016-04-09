@@ -181,13 +181,40 @@ function check_date_str(input_id,err_str_id,ret_val) {
     if (ret_val == true) { return error;}
 }
 //
+// checks if a phone number appears to have valid formatting (304)677-4975
+function check_phone_str(input_id,err_str_id,ret_val) {
+    //
+    // getting the input string from the element
+    var input_str = trim(document.getElementById(input_id).value);
+    var error;
+    input_str = input_str.replace(/[()]/g,'-');
+    input_str = input_str.replace(/\s*/g,'');
+    input_str = input_str.replace(/^-/,'');
+    var phone_pat = new RegExp(/^(?:\d-)?\d{3}-\d{3}-\d{4}$/);
+    var match = phone_pat.test(input_str);
+    //
+    if (match) {
+        remove_class('invalid-field',input_id)
+        document.getElementById(input_id).value = input_str
+        if (err_str_id) { add_class('hidden-elm',err_str_id);}
+        error = false;
+    }
+    else {
+        add_class('invalid-field',input_id)
+        if (err_str_id) { remove_class('hidden-elm',err_str_id);}
+        error = true;
+    }
+	//
+    if (ret_val == true) {return error;}
+}
+//
 // checks if an email appears to have valid formatting text@text.text
 function check_email_str(input_id,err_str_id,ret_val) {
     //
     // getting the input string from the element
     var input_str = trim(document.getElementById(input_id).value);
     var error
-    var email_pat = new RegExp(".*?@.*?\\..+$");
+    var email_pat = new RegExp(/.*?@.*?\\..+$/);
     var match = email_pat.test(input_str);
     //
     if (match) {
@@ -205,71 +232,56 @@ function check_email_str(input_id,err_str_id,ret_val) {
 }
 //
 // validates and formats a time entry to hh:mm
-function format_time(elm_id,ret_val) {
-    var error = false;
-    var time_str = document.getElementById(elm_id).value;
-    time_str = trim(time_str);
-    if (time_str.match(/^\d\d\d\d$/)) {
-        time_str = time_str.slice(0,2)+':'+time_str.slice(2,4);
-        remove_class('invalid-field',elm_id);
-    }
-    else if (time_str.match(/^\d\d\:\d\d$/)) {
-        remove_class('invalid-field',elm_id);
-    }
-    else if (time_str.match(/^\d\d\:\d\d\:\d\d$/)) {
-        remove_class('invalid-field',elm_id);
-    }
-    else if (time_str.match(/^\d\:\d\d$/)) {
-        time_str = '0'+time_str;
-        remove_class('invalid-field',elm_id);
-    }
-    else {
-        add_class('invalid-field',elm_id);
-        error = true;
-        if (ret_val) {return error;}
-        return;
+function check_time_str(input_id,err_str_id,ret_val) {
+    var error = true;
+    var time_str = trim(document.getElementById(input_id).value);
+    var time_pat = new RegExp(/^(?:(\d\d\d\d)|(\d\d\:\d\d)|(\d\:\d\d))$/);
+    var match = time_pat.test(time_str);
+    //
+    if (match) {
+        error = false
+        //
+        // checking if hours are less than 23 and minutes less than 60
+        var time_arr = time_str.split(':');
+        var hh = parseInt(time_arr[0]);
+        var mm = parseInt(time_arr[1]);
+        if (hh > 23) {error = true;}
+        if (mm > 59) {error = true;}
+        time_str = hh+':'+mm
     }
     //
-    // checking if hours are less than 23 and minutes less than 60
-    var time_arr = time_str.split(':');
-    var hh = parseInt(time_arr[0]);
-    var mm = parseInt(time_arr[1]);
-    if (hh > 23) {hh = 23;}
-    if (mm > 59) {mm = 59;}
-    if (hh < 10) {hh = '0'+hh;}
-    if (mm < 10) {mm = '0'+mm;}
-    time_str = hh+":"+mm;
-    document.getElementById(elm_id).value = time_str;
+    if (error) {
+        add_class('invalid-field',elm_id);
+        if (err_str_id) { remove_class('hidden-elm',err_str_id);}
+    }
+    else {
+        remove_class('invalid-field',elm_id);
+        if (err_str_id) { add_class('hidden-elm',err_str_id);}
+        document.getElementById(elm_id).value = time_str;
+    }
+    //
+    if (ret_val) { return error;}
+    return;
 }
 //
-//
-function to_and_from_timestamps() {
-    var from_ts = '';
-    var to_ts = '';
-    var today = new Date()
-    var ret_obj = {}
+// handles the logic to hard define a form value ignoring normal validation
+function force_value(checkbox) {
     //
-    // getting time range data
-    if (document.getElementById('time-range').disabled == false) {
-        from_ts = document.getElementById('time-range').value.split('|')[0]+' 00:00:00';
-        to_ts   = document.getElementById('time-range').value.split('|')[1]+' 23:59:59';
+    var input_id = checkbox.id.match(/force-(.+)/i)[1];
+    var input = document.getElementById(input_id);
+    //
+    if (checkbox.checked) {
+        input.disabled = true;
+        checkbox.name = input.name;
+        checkbox.value = input.value;
+        remove_class('invalid-field',input.id);
     }
-    // using calander inputs instead
     else {
-        var st_year = document.getElementById('st-year').value;
-        var st_mon = document.getElementById('st-month').value;
-        var st_day = document.getElementById('st-day').value;
-        var from_ts = st_year+'-'+st_mon+'-'+st_day+' 00:00:00';
-        //
-        var en_year = document.getElementById('en-year').value;
-        var en_mon = document.getElementById('en-month').value;
-        var en_day = document.getElementById('en-day').value;
-        var to_ts = en_year+'-'+en_mon+'-'+en_day+' 23:59:59';
+        input.disabled = false;
+        checkbox.name = '';
+        checkbox.value = '';
+        add_class('invalid-field',input.id);
     }
-    //
-    ret_obj.from_ts = from_ts
-    ret_obj.to_ts = to_ts
-    return(ret_obj);
 }
 //
 // this steps through non disabled form elements of each input type skipping buttons
@@ -290,10 +302,10 @@ function get_all_form_values(parent_id,skip_elm_ids) {
         //
         if ((all_children[i].type.toUpperCase() == 'RADIO') && (!(all_children[i].checked))) {continue;}
         if ((all_children[i].type.toUpperCase() == 'CHECKBOX') && (!(all_children[i].checked))) {continue;}
-
         //
         name_val_obj[all_children[i].name] = trim(all_children[i].value);
-        // removing line breaks because they can break things
+        //
+        // removing newline characters because they break things
         name_val_obj[all_children[i].name] = name_val_obj[all_children[i].name].replace(/\r?\n|\r/g,'; ');
     }
     return name_val_obj;
@@ -313,10 +325,11 @@ function basic_validate(parent_id,empty_elms_id) {
         if (all_children[i].nodeType != 1) {continue;}
         if ((all_children[i].nodeName.toUpperCase() != 'INPUT') && (all_children[i].nodeName.toUpperCase() != 'SELECT') && (all_children[i].nodeName.toUpperCase() != 'TEXTAREA')) {continue;}
         if (empty_id_arr.indexOf(all_children[i].id) >= 0) {continue;}
+        if (all_children[i].name == '') {continue;}
         if (all_children[i].disabled == true) {continue;}
-        if (trim(all_children[i].value) == "") {
+        if (trim(all_children[i].value) == '') {
             add_class('invalid-field',all_children[i].id);
-            console.log("Error on element: ",all_children[i].id);
+            console.log('Error on element: ',all_children[i].id);
             error = true;
         }
     }
@@ -324,7 +337,7 @@ function basic_validate(parent_id,empty_elms_id) {
     return error;
 }
 //
-// checks the parent element for any fields with an invalid-field class
+// checks the form element for any children with an invalid-field class
 function check_for_invalid_fields(form_id) {
     //
     var error = false;
@@ -341,6 +354,104 @@ function check_for_invalid_fields(form_id) {
     }
     //
     return(error);
+}
+//
+// builds a multi-table sql command from form data
+function build_form_sql(input_args) {
+    //
+    var sql_arr = [];
+    var args = {
+        'action' : 'modify',
+        'action_specific_changes' : function(args,table_data) { return(table_data);},
+        'form_values' : {},
+        'include_tables' : [],
+        'init_sql_args' : {},
+        'meta_array' : [],
+        'modified_by_value' : document.getElementById('user-username').value,
+        'table_pattern' : new RegExp(/(?:^|%)(.+?)(?=%|$)/,'gi')
+    }
+    //
+    for (var prop in input_args) { args[prop] = input_args[prop];}
+    //
+    // converting array indicies to property names
+    var meta_array = JSON.parse(JSON.stringify(args.meta_array));
+    var meta_data = {};
+    for (var i = 0; i < meta_array.length; i++) {
+        meta_data[meta_array[i]['column_name']] = meta_array[i];
+    }
+    //
+    // determining which table(s) each form value belongs to.
+    var tables = null;
+    var table_data = {};
+    for (var col in meta_data) {
+        col = meta_data[col];
+        tables = col['in_tables'].match(args.table_pattern);
+        for (var i in tables) {
+            tables[i] = tables[i].replace(/%/g,'');
+            if (!(table_data.hasOwnProperty(tables[i]))) {
+                table_data[tables[i]] = {};
+                table_data[tables[i]]['cols'] = {};
+            }
+            // adding the last modified by columns to table data
+            if (col['column_name'].match(/last_modified_by/)) {
+                table_data[tables[i]]['cols'][col['column_name']] = args.modified_by_value;
+            }
+        }
+        col['in_tables'] = tables
+    }
+    //
+    // grouping form values by table
+    var col = null;
+    for (var name in args.form_values) {
+        col = meta_data[name];
+        for (var i in col['in_tables']) {
+            table_data[col['in_tables'][i]]['cols'][name] = args.form_values[name];
+        }
+        args.form_values[name] = false;
+    }
+    //
+    // removing tables not in include list and enforcing order defined in include_tables
+    var temp_arr = []
+    var data = null
+    for (var i in args.include_tables) {
+        data = table_data[args.include_tables[i]]
+        data['table'] = args.include_tables[i];
+        temp_arr.push(data);
+        for (var col in data['cols']) { args.form_values[col] = true;}
+    }
+    table_data = temp_arr;
+    //
+    // checking if all form values were submitted
+    var errors = [];
+    for (name in args.form_values) {
+        if (!(args.form_values[name])) { errors.push(name);}
+    }
+    if (errors.length > 0) {
+        alert('ERROR - '+errors.join(', ')+' form inputs could not be submitted!');
+        return null;
+    }
+    //
+    // setting action specific params
+    table_data = args.action_specific_changes(args,table_data);
+    //
+    // generating sql statements
+    var sql_args = {};
+    var table = null
+    for (var i in table_data) {
+        table = table_data[i];
+        //
+        sql_args = JSON.parse(JSON.stringify(args.init_sql_args));
+        sql_args['table'] = table['table'];
+        if (!(sql_args['cols'])) { sql_args['cols'] = [];}
+        if (!(sql_args['vals'])) { sql_args['vals'] = [];}
+        for (var col in table['cols']) {
+            sql_args['cols'].push(col);
+            sql_args['vals'].push(table['cols'][col]);
+        }
+        sql_arr.push(gen_sql(sql_args));
+    }
+    //
+    return(sql_arr)
 }
 //
 //

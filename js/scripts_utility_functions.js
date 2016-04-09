@@ -17,6 +17,8 @@ document.createElementWithAttr = function(nodeName,attributes) {
 // this adds a node if the ID doesn't exist on the parent node and replaces it if it does
 Node.prototype.safeAppendChild = function(element) {
     //
+    if (!(element.id)) { this.appendChild(element); return;}
+    //
     var old_element = document.getElementById(element.id);
     var parent = null;
     if (old_element) { parent = old_element.parentNode;}
@@ -68,6 +70,15 @@ Number.parse = function(num_str) {
     num_str = num_str.replace(/[%$,]/g,'');
     //
     return(Number(num_str));
+}
+//
+// stores data on the window session object
+function store_session_data(key_value_dict) {
+    //
+    for (var key in key_value_dict) {
+        var value = key_value_dict[key]
+        window.sessionStorage.setItem(key,value);
+    }
 }
 //
 // this takes a function string and executes it
@@ -285,7 +296,7 @@ function toggle_readonly(elm_id_str) {
     }
 }
 //
-// this sets a checkboc value based on if it is checked or not
+// this sets a checkbox value based on if it is checked or not
 function toggle_checkbox_value(checkbox_id,checked_value,unchecked_value) {
     var checkbox = document.getElementById(checkbox_id);
     //
@@ -308,6 +319,15 @@ function toggle_innerHTML(id,str_1,str_2) {
     else {
         document.getElementById(id).textContent = str_2;
     }
+}
+//
+//
+function disable_if_checked(checkbox,id) {
+    //
+    var elm = document.getElementById(id);
+    //
+    if (checkbox.checked) { elm.disabled = true;}
+    else { elm.disabled = false;}
 }
 //
 // shows or hides an element by applying a CSS class
@@ -603,7 +623,7 @@ function gen_sql(input_args) {
     }
     //
     // adding in group by clause
-    if (args.group_by) { sql += 'GROUP BY '+args.group_by;}
+    if (args.group_by) { sql += ' GROUP BY '+args.group_by;}
     //
     // adding in limit clause
     if (args.limit) { sql += ' LIMIT '+args.limit.splice(0,2).join();}
@@ -767,31 +787,6 @@ function ajax_call(post_str) {
     else {
     // code for IE6, IE5
         var xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    //
-    // sending post str to async function to store the data
-    xmlhttp.open("POST", "async_php_functions.php", true);
-    xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    xmlhttp.send(post_str);
-}
-//
-// this executes a returning ajax call
-function ajax_return_call(post_str,callback) {
-
-    if (window.XMLHttpRequest) {
-    // code for IE7+, Firefox, Chrome, Opera, Safari
-        var xmlhttp = new XMLHttpRequest();
-    }
-    else {
-    // code for IE6, IE5
-        var xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    }
-    //
-    // executing async function
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            callback(xmlhttp.responseText);
-        }
     }
     //
     // sending post str to async function to store the data
