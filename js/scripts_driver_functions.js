@@ -54,7 +54,7 @@ function enter_data_emp_table(page,sort_col,sort_dir,department) {
         'page_nav_div_id' : 'emp-table-page-nav',
         'id_prefix' : 'emp',
         'page_nav_class' : 'page_nav',
-        'class_str' : 'page_nav_link',
+        'class_str' : 'page-nav-link',
         'onclick_str' : "enter_data_emp_table(%%,'"+sort_col+"','"+sort_dir+"','"+department+"');",
         'onmouse_str' : ''
     };
@@ -222,7 +222,7 @@ function view_emp_table(page,sort_col,sort_dir) {
         'page_nav_div_id' : 'emp-table-page-nav',
         'id_prefix' : 'emp',
         'page_nav_class' : 'page_nav',
-        'class_str' : 'page_nav_link',
+        'class_str' : 'page-nav-link',
         'onclick_str' : "view_emp_table(%%,'"+sort_col+"','"+sort_dir+"','"+department+"');",
         'onmouse_str' : ''
     };
@@ -293,7 +293,7 @@ function view_emp_data_table(page,sort_col,sort_dir,emp_id,department) {
         'page_nav_div_id' : 'employee-data-table-page-nav',
         'id_prefix' : 'emp-data',
         'page_nav_class' : 'page_nav',
-        'class_str' : 'page_nav_link',
+        'class_str' : 'page-nav-link',
         'onclick_str' : "view_emp_data_table(%%,'"+sort_col+"','"+sort_dir+"','"+emp_id+"','"+department+"');",
         'onmouse_str' : ''
     };
@@ -610,7 +610,7 @@ function edit_data_emp_table(page,sort_col,sort_dir) {
         'page_nav_div_id' : 'employee-table-page-nav',
         'id_prefix' : 'emp',
         'page_nav_class' : 'page_nav',
-        'class_str' : 'page_nav_link',
+        'class_str' : 'page-nav-link',
         'onclick_str' : "edit_data_emp_table(%%,'"+sort_col+"','"+sort_dir+"');",
         'onmouse_str' : ''
     };
@@ -694,7 +694,7 @@ function mod_emp_data_table(page,sort_col,sort_dir,emp_id) {
         'page_nav_div_id' : 'employee-data-table-page-nav',
         'id_prefix' : 'emp-data',
         'page_nav_class' : 'page_nav',
-        'class_str' : 'page_nav_link',
+        'class_str' : 'page-nav-link',
         'onclick_str' : "mod_emp_data_table(%%,'"+sort_col+"','"+sort_dir+"','"+emp_id+"');",
         'onmouse_str' : ''
     };
@@ -1068,7 +1068,7 @@ function mod_dbuser_table(page,sort_col,sort_dir) {
         'page_nav_div_id' : 'dbuser-table-page-nav',
         'id_prefix' : 'dbuser',
         'page_nav_class' : 'page_nav',
-        'class_str' : 'page_nav_link',
+        'class_str' : 'page-nav-link',
         'onclick_str' : "mod_dbuser_table(%%,'"+sort_col+"','"+sort_dir+"');",
         'onmouse_str' : ''
     };
@@ -1240,7 +1240,7 @@ function mod_emp_table(page,sort_col,sort_dir) {
         'page_nav_div_id' : 'emp-table-page-nav',
         'id_prefix' : 'emp',
         'page_nav_class' : 'page_nav',
-        'class_str' : 'page_nav_link',
+        'class_str' : 'page-nav-link',
         'onclick_str' : "mod_emp_table(%%,'"+sort_col+"','"+sort_dir+"');",
         'onmouse_str' : ''
     };
@@ -1475,7 +1475,7 @@ function create_table(page,sort_col,sort_dir) {
         'page_nav_div_id' : 'table-page-nav',
         'id_prefix' : 'tm',
         'page_nav_class' : 'page_nav',
-        'class_str' : 'page_nav_link',
+        'class_str' : 'page-nav-link',
         'onclick_str' : "create_table(%%,'"+sort_col+"','"+sort_dir+"');",
         'onmouse_str' : ''
     };

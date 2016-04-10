@@ -53,5 +53,5 @@ check_login('marketing');
 
 </div> <!-- End main-container div -->
 </body>
-<script>vendor_broker_contact_info(); console.log('calling contact info line 56')</script>
+<script>update_payments_and_growth(); console.log('calling update payments line 56')</script>
 </html>

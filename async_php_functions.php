@@ -1,6 +1,7 @@
 <?php
 session_start();
-require 'operations_tracking.php'; 
+require 'operations_tracking_credentials.php';
+require 'operations_tracking.php';
 //
 // values in the session array that can not be over written
 $protected_vars = ['username','password','permissions','user_email','department','dbuser_last_name','dbuser_first_name','dbuser_internal_id'];
@@ -65,7 +66,7 @@ if (isset($_POST["exec_transaction"])) {
     $json = json_encode(Array('msg' => $msg, 'error' => $err));
     if ($json == '') { print_r('JSON Encoding Error: ',json_last_error(),' - ',json_last_error_msg());}
     else { print_r($json);}
-    
+
 }
 // storing data in session variable
 if (isset($_POST["store_session"])) {
@@ -95,7 +96,7 @@ if (isset($_POST["get_session"])) {
         foreach($_SESSION as $key => $value) {
             if (in_array($key,$protected_vars)) {continue;}
             unset($_SESSION[$key]);
-        }  
+        }
     }
 }
 //

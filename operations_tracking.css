@@ -123,6 +123,10 @@ input[type="text"]:-moz-read-only { /* For Firefox */
 input[type="text"]:read-only {
     color: rgb(200,200,200)
 }
+.input-borderless {
+    background-color: rgb(255,255,255);
+    border: none !important;
+}
 .input-long {
     width: 20em;
     display: inline-block;
@@ -170,25 +174,25 @@ input[type="text"]:read-only {
   vertical-align: top;
 }
 .link-blue {
-    color: rgb(0,0,235);    
+    color: rgb(0,0,235);
 }
 .link-blue:hover {
     text-decoration: underline;
 }
 .link-green {
-    color: rgb(0,135,0);    
+    color: rgb(0,135,0);
 }
 .link-green:hover {
     text-decoration: underline;
 }
 .link-orange {
-    color: rgb(235,135,35);    
+    color: rgb(235,135,35);
 }
 .link-orange:hover {
     text-decoration: underline;
 }
 .link-red {
-    color: rgb(235,35,0);    
+    color: rgb(235,35,0);
 }
 .link-red:hover {
     text-decoration: underline;
@@ -216,21 +220,21 @@ input[type="text"]:read-only {
     vertical-align: middle;
     font-size: 20px;
     }
-.page_nav_link {
-    color: rgb(0,0,235);    
+.page-nav-link {
+    color: rgb(0,0,235);
 }
-.page_nav_link:hover {
+.page-nav-link:hover {
     text-decoration: underline;
     padding-left: 3px;
     padding-right: 3px;
     font-size: 22px;
 }
-.page_nav_link_curr {
+.page-nav-link_curr {
     pointer-events: none;
     color: rgb(0,0,0);
 }
 .readonly-select {
-    pointer-events: none; 
+    pointer-events: none;
     cursor: default;
 }
 .report-column-header {
@@ -248,14 +252,14 @@ input[type="text"]:read-only {
 .report-data-span-avg {
     border-top: solid 1px rgb(0,0,0);
     padding-top: 1px;
-    
+
 }
 .report-data-td {
     border: solid 1px rgb(0,0,0);
     text-align: center;
     padding: 3px
 }
-.report-spacer-td { 
+.report-spacer-td {
     display: inline-block;
     width: 20px;
     white-space: nowrap;

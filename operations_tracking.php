@@ -1,41 +1,38 @@
 <?php
+require 'operations_tracking_credentials.php';
+//
 date_default_timezone_set ("America/New_York");
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
-//
-$server = 'localhost';
-$database = 'afwl3_operations';
-$username = 'afwl3_operator';
-$password = 'a1f9w13';
 //
 $forbidden_str = "<h1>403 - Forbidden Page</h1> <br> You do not have permission to access this page.<br><br> ";
 $forbidden_str .= "If you believe this is in error contact your system administrator.";
 //
 // user perms follow the similar scheme to file perms
 // $user_perm design:
-//      data entry/employee perms: 1 - modify/delete entry, 2 - submit entry for employee, 4 - view employee entries 
-//      meat shop perms: 1 - add/modify items, 2 - add/modify stock change, 4 - run stock reports, etc. 
+//      data entry/employee perms: 1 - modify/delete entry, 2 - submit entry for employee, 4 - view employee entries
+//      meat shop perms: 1 - add/modify items, 2 - add/modify stock change, 4 - run stock reports, etc.
 //      sales perms:  1 - add/modify/view all sales reps, 2 - add/modify/sales data, returns, 4 - view rep specific reports
 //      global perms: 1 - delete/modify user, 2 - create users, 4 - other high level tasks not related to users (i.e. table_maintenance)
 //
 // page perm array
-$page_perms = array( 
-    "add_dbuser" => '0002', 
-    "add_employee" => '2000', 
-    "administration" => '0000', 
-    "edit_emp_data" => '1000', 
+$page_perms = array(
+    "add_dbuser" => '0002',
+    "add_employee" => '2000',
+    "administration" => '0000',
+    "edit_emp_data" => '1000',
     "freight_backhaul" => '2000',
     "general_entry" => '2000',
     "marketing" => '0040',
     "meat_shop" => '0400',
-    "mod_dbuser" => '0001', 
+    "mod_dbuser" => '0001',
     "mod_employee" => '1000',
-    "receiving" => '2000', 
-    "report" => '4000', 
+    "receiving" => '2000',
+    "report" => '4000',
     "sales_maintenance" => '0070',
     "sales_reporting" => '0040',
-    "transportation" => '2000',    
-    "view_employee" => '4000',    
+    "transportation" => '2000',
+    "view_employee" => '4000',
     "warehouse" => '2000',
     "operations" => '7000',
     "table_maintenance" => '0007'
@@ -61,7 +58,7 @@ function page_head() {
     echo "<input type=\"hidden\" name=\"logout\" value=\"BBL\">";
     echo "</form>";
     //
-    // non-sensitive user data 
+    // non-sensitive user data
     echo "<input id=\"user-username\" type=\"hidden\" value=\"{$_SESSION["username"]}\">";
     echo "<input id=\"user-department\" type=\"hidden\" value=\"{$_SESSION["department"]}\">";
     echo "<input id=\"user-perm\" type=\"hidden\" value=\"{$_SESSION["permissions"]}\">";
@@ -105,7 +102,7 @@ function check_login($page_root) {
     }
     else {
         echo "<script> document.getElementById(\"invalid_login\").submit();</script>";
-        session_destroy(); 
+        session_destroy();
     }
     // checking user perms for the page
     $access = check_perms($_SESSION["permissions"],$page_perms[$page_root]);
@@ -119,7 +116,7 @@ function check_perms($user_perm_str,$page_perm_str) {
     //
     // spliting perm strings into digits
     preg_match('/(\d)(\d)(\d)(\d)/',$user_perm_str,$user_perm_arr);
-    preg_match('/(\d)(\d)(\d)(\d)/',$page_perm_str,$page_perm_arr); 
+    preg_match('/(\d)(\d)(\d)(\d)/',$page_perm_str,$page_perm_arr);
     for ($i = 1; $i < count($page_perm_arr); $i++) {
         $user_perm = intval($user_perm_arr[$i]);
         $page_perm = intval($page_perm_arr[$i]);
@@ -134,7 +131,7 @@ function check_perms($user_perm_str,$page_perm_str) {
         else if ($page_perm == 2) {
             if (in_array($user_perm,array(1,4,5))) {
                 return(false);
-            }   
+            }
         }
     }
     return(true);
@@ -156,22 +153,22 @@ function access_dbUsers($user,$pass,$username,$password) {
     try {
         // Connects to the database using the credentials stored in the variables
         $conn = new PDO("mysql:host=$server;dbname=$database", $username, $password);
-        
-        // set the PDO error mode to exception to display and handle any errors 
+
+        // set the PDO error mode to exception to display and handle any errors
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-        // executes a sql SELECT statment.  
+
+        // executes a sql SELECT statment.
         $stmt = $conn->prepare($sql);
         $stmt->execute();
         $results = $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $results =  $stmt->fetchAll();
-        
-        // Terminates connection to database 
+
+        // Terminates connection to database
         $conn = null;
-        
+
         return($results);
         }
-    catch(PDOException $e) { 
+    catch(PDOException $e) {
         // Returns the PDO error encountered and displays it
         echo "<script>alert(\"{$e->getMessage()}\");</script>";
         }
@@ -181,56 +178,56 @@ function access_dbUsers($user,$pass,$username,$password) {
 function fetch_db($server,$database,$username,$password,$sql) {
     try {
         // Connects to the database using the credentials stored in the variables
-        $conn = new PDO("mysql:host=$server;dbname=$database", $username, $password);        
-        // set the PDO error mode to exception to display and handle any errors 
+        $conn = new PDO("mysql:host=$server;dbname=$database", $username, $password);
+        // set the PDO error mode to exception to display and handle any errors
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        // executes a sql SELECT statment.  
+        // executes a sql SELECT statment.
         $stmt = $conn->prepare($sql);
         $stmt->execute();
         $results = $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $results =  $stmt->fetchAll();
-        // Terminates connection to database 
+        // Terminates connection to database
         $conn = null;
         return([$results,false]);
         }
-    catch(PDOException $e) { 
+    catch(PDOException $e) {
         // Returns the PDO error encountered and displays it
         $err_str = "{$e->getMessage()}";
         return([$err_str,true]);        }
-    }  
+    }
 //
-// Connects to the database and executes sql statment  
+// Connects to the database and executes sql statment
 function exec_db($server,$database,$username,$password,$sql) {
     try {
         // Connects to the database using the credentials stored in the variables
         $conn = new PDO("mysql:host=$server;dbname=$database", $username, $password);
-        //       
-        // set the PDO error mode to exception to display and handle any errors 
+        //
+        // set the PDO error mode to exception to display and handle any errors
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         //
-        // executes a sql statment that isn't returning results. 
+        // executes a sql statment that isn't returning results.
         $conn->exec($sql);
-        $conn = null; 
+        $conn = null;
         //
         return(['Success',false]);
         }
-    catch(PDOException $e) { 
+    catch(PDOException $e) {
         // Returns the PDO error encountered and displays it
         $err_str = "{$e->getMessage()}";
         return([$err_str,true]);
         }
     }
 //
-// Connects to the database and executes sql statment  
+// Connects to the database and executes sql statment
 function exec_transaction($server,$database,$username,$password,$sql_arr) {
     try {
         // Connects to the database using the credentials stored in the variables
         $conn = new PDO("mysql:host=$server;dbname=$database", $username, $password);
-        
-        // set the PDO error mode to exception to display and handle any errors 
+
+        // set the PDO error mode to exception to display and handle any errors
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         //
-        // executing a number of SQL statements. 
+        // executing a number of SQL statements.
         $conn->beginTransaction();
         for ($i = 0; $i < count($sql_arr); $i++) {
             $conn->exec($sql_arr[$i]);
@@ -240,7 +237,7 @@ function exec_transaction($server,$database,$username,$password,$sql_arr) {
         //
         return(['Success',false]);
         }
-    catch(Exception $e) { 
+    catch(Exception $e) {
         // Returns the PDO error encountered and displays it
         $conn->rollBack();
         $err_str = "{$e->getMessage()}";

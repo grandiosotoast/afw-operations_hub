@@ -5,7 +5,7 @@
 "use strict";
 //
 // generates the employe table on the report page
-function report_emp_table(page,sort_col,sort_dir,toggle) {   
+function report_emp_table(page,sort_col,sort_dir,toggle) {
     //
     // creating argument objects
     var emp_table_args = {};
@@ -35,15 +35,15 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
     emp_table_args.data_sql_args = data_sql_args;
     emp_table_args.meta_sql_args = meta_sql_args;
     //
-    // creating argument object 
+    // creating argument object
     emp_table_args.department = document.getElementById('department').value;
     emp_table_args.table_output_id = 'employee-table-div';
     emp_table_args.table_id = 'employee_table';
     emp_table_args.table_class = 'default-table';
     emp_table_args.row_id_prefix = 'emp-row-';
-    emp_table_args.table_data_cell_class = 'default-table-td'; 
+    emp_table_args.table_data_cell_class = 'default-table-td';
     emp_table_args.row_onclick = "create_production_report('report_emp_data','report_data_div','%department%','%emp_id%'); ";
-    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')"; 
+    emp_table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
     emp_table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
     emp_table_args.head_row_args = {
         'sortable' : true,
@@ -60,7 +60,7 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
         'page_nav_div_id' : 'emp-table-page-nav',
         'id_prefix' : 'emp',
         'page_nav_class' : 'page_nav',
-        'class_str' : 'page_nav_link',
+        'class_str' : 'page-nav-link',
         'onclick_str' : "report_emp_table(%%,'"+sort_col+"','"+sort_dir+"',false);",
         'onmouse_str' : ''
     };
@@ -85,7 +85,7 @@ function report_emp_table(page,sort_col,sort_dir,toggle) {
 }
 //
 // creates the data columns table for the report page
-function show_data_columns(department,out_id,button_id,toggle,reset) { 
+function show_data_columns(department,out_id,button_id,toggle,reset) {
     var sql_args = {};
     var meta_sql = '';
     var preset_sql = '';
@@ -105,7 +105,7 @@ function show_data_columns(department,out_id,button_id,toggle,reset) {
         sql_args.where.push(['use_on_pages','REGEXP','(^|%)report(%|$)']);
         sql_args.where.push(['use_in_html_tables','REGEXP','(^|%)report_'+department+'(%|$)']);
         sql_args.where.push(['use_in_html_tables','REGEXP','(^|%)column_selection_table(%|$)']);
-        sql_args.order_by = [['order_index','ASC']];  
+        sql_args.order_by = [['order_index','ASC']];
         meta_sql = gen_sql(sql_args);
     }
     else {
@@ -176,7 +176,7 @@ function create_production_report(parent_form_id,report_div_id,department,emp_id
     new_btn.appendChild(document.createTextNode("Get All Employee Data"));
     new_btn.id = "get_emp_data"
     new_btn.className = "hidden-elm"
-    new_btn.addEventListener("click",function(){ 
+    new_btn.addEventListener("click",function(){
         department = document.getElementById(parent_form_id).elements.namedItem("department").value
         create_production_report('report_emp_data','report_data_div',department,emp_id);
     });
@@ -212,7 +212,7 @@ function create_production_report(parent_form_id,report_div_id,department,emp_id
             }
         }
         //
-        // ensuring sorting columns are included in selection 
+        // ensuring sorting columns are included in selection
         if (sel_cols.indexOf(name_val_obj['prime-sort']) < 0) {var obj = {}; obj.column_name = name_val_obj['prime-sort']; obj.total_type = 'none'; col_objs[name_val_obj['prime-sort']] = obj; sel_cols.push(name_val_obj['prime-sort']);}
         if (sel_cols.indexOf(name_val_obj['secd-sort'])  < 0) {var obj = {}; obj.column_name = name_val_obj['secd-sort'];  obj.total_type = 'none'; col_objs[name_val_obj['secd-sort']] = obj;  sel_cols.push(name_val_obj['secd-sort']);}
     }
@@ -240,7 +240,7 @@ function create_production_report(parent_form_id,report_div_id,department,emp_id
     report_args.to_ts = ts_obj.to_ts;
     report_args.data_sql_args = {
         'where' : [['date','BETWEEN',data_range[0]+"' AND '"+data_range[1]],['entry_status','LIKE','submitted']]
-    }    
+    }
     var id_mtype = 'contains';
     if (emp_id) { id_mtype = 'exact';}
     report_args.display_params = {
@@ -300,21 +300,21 @@ function make_data_sql(report_args) {
         col_meta_data[meta_data[i].column_name] = meta_data[i]
     }
     //
-    // indexing dynamic cols by name 
+    // indexing dynamic cols by name
     for (var i = 0; i < dynamic_array.length; i++) {
         dynamic_cols[dynamic_array[i].column_name] = dynamic_array[i];
     }
     delete report_args.data.dynamic_array;
     report_args.dynamic_cols = dynamic_cols;
     //
-    // setting data sql arguments 
+    // setting data sql arguments
     var sql_args = {};
     for (var arg in report_args.data_sql_args) { sql_args[arg] = report_args.data_sql_args[arg];}
     if (!(sql_args.where instanceof Array)) { sql_args.where = [];}
     sql_args.cmd = 'SELECT';
     sql_args.table = 'employee_data';
     sql_args.inner_join = Array(['employee_info','employee_data.emp_id','employee_info.emp_id']);
-    if (report_args.dept_table != 'none') { 
+    if (report_args.dept_table != 'none') {
         sql_args.inner_join.push([report_args.dept_table,'employee_data.entry_id',report_args.dept_table+'.entry_id']);
     }
     sql_args.where.push(['department','LIKE',report_args.department]);
@@ -332,7 +332,7 @@ function make_data_sql(report_args) {
             console.log(error);
             console.log(preset_data.preset_where);
             alert('Error parsing report preset "where" information, check console.');
-        }            
+        }
     }
     sql_args.order_by = Array([report_args.prime_sort,report_args.prime_sort_dir],
                               [report_args.secd_sort,report_args.secd_sort_dir]);
@@ -360,7 +360,7 @@ function make_data_sql(report_args) {
         }
         sql_args.order_by[i][0] = name
     }
-    
+
     data_sql = gen_sql(sql_args);
     //
     // fetching table specific meta_data
@@ -368,7 +368,7 @@ function make_data_sql(report_args) {
     sql_args.cmd = 'SELECT';
     sql_args.table = 'table_meta_data';
     sql_args.where = [['in_tables','REGEXP','(^|%)employee_data(%|$)|(^|%)'+report_args.dept_table+'(%|$)'],['use_on_pages','REGEXP','(^|%)report(%|$)'],['use_in_html_tables','REGEXP','(^|%)report_'+report_args.department+'(%|$)']];
-    sql_args.order_by = [['order_index','ASC']];    
+    sql_args.order_by = [['order_index','ASC']];
     if (!!(report_args.sel_cols)) {
         sql_args.where.push(['column_name','REGEXP',report_args.sel_cols.join('$|')]); sql_args.where[sql_args.where.length-1][2] += '$';
     }
@@ -385,7 +385,7 @@ function make_data_sql(report_args) {
     ajax_fetch(sql_arr,name_arr,callback)
 }
 //
-// this function handles creation of the report header for production reports 
+// this function handles creation of the report header for production reports
 function make_production_report_header(args) {
     //
     var br = document.createElement('BR');
@@ -427,14 +427,14 @@ function make_production_report_sect_header(data_row,args) {
 //
 function make_report(report_args) {
     //
-    // getting required arguments 
+    // getting required arguments
     var output_id = report_args.output_id;
     var col_meta_data = report_args.meta_data;
     var col_objs = report_args.col_objs;
     var data_arr = report_args.data;
     var prime_sort = report_args.prime_sort;
     //
-    // setting defaults for additional arguments 
+    // setting defaults for additional arguments
     var no_totals = false;
     var summary = false;
     var no_sect_headers = false;
@@ -459,13 +459,13 @@ function make_report(report_args) {
     else { report_args.report_head_function = report_head_function;}
     //
     if (report_args.report_section_head_function) { report_section_head_function = report_args.report_section_head_function;}
-    else { report_args.report_section_head_function = report_section_head_function;}  
+    else { report_args.report_section_head_function = report_section_head_function;}
     //
     if (report_args.report_type.match(/(^|%)no_totals(%|$)/)) { no_totals = true;}
-    else { report_args.no_totals = no_totals;}    
+    else { report_args.no_totals = no_totals;}
     //
     if (report_args.report_type.match(/(^|%)summary(%|$)/)) { summary = true;}
-    else { report_args.summary = summary;}   
+    else { report_args.summary = summary;}
     //
     if (report_args.report_type.match(/(^|%)no_sect_heads(%|$)/)) { no_sect_headers = true;}
     else { report_args.no_sect_headers = no_sect_headers;}
@@ -477,7 +477,7 @@ function make_report(report_args) {
     // converting meta_data array to be an object indexed by column_name
     report_args.col_name_meta = {};
     for (var i = 0; i < col_meta_data.length; i++) {
-        if (col_objs.hasOwnProperty(col_meta_data[i].column_name)) { 
+        if (col_objs.hasOwnProperty(col_meta_data[i].column_name)) {
             for (var prop in col_objs[col_meta_data[i].column_name]) { col_meta_data[i][prop] = col_objs[col_meta_data[i].column_name][prop];}
         }
         report_args.col_name_meta[col_meta_data[i].column_name] = col_meta_data[i];
@@ -495,7 +495,7 @@ function make_report(report_args) {
         if (col_meta_data[i].column_type.match(/total/)) {head_row_args.skip_cols.push(col_meta_data[i].column_name)}
     }
     //
-    // setting report body arguments  
+    // setting report body arguments
     var sect_head_args = {}
     var row_args = {};
     sect_head_args.prev_id   = '';
@@ -525,7 +525,7 @@ function make_report(report_args) {
             var col = col_meta_data[i];
             if (sect_cols.indexOf(col.column_name) >= 0) {totals_obj[total][col.column_name] = ''; continue;}
             if (col.total_type.match(/avg|sum/)) { totals_obj[total][col.column_name] = 0; skip = false;}
-            else { 
+            else {
                 totals_obj[total][col.column_name] = '';
                 if (skip) {total_args.skip_cols.push(col.column_name);}
             }
@@ -576,7 +576,7 @@ function make_report(report_args) {
             data_arr.splice(i,1);
             continue;
         }
-        
+
         //
         // testing for new section
         if (data_arr[i][prime_sort].toLowerCase() != sect_head_args.prev_sect) {
@@ -631,7 +631,7 @@ function make_report(report_args) {
         total_args.total_name = 'overall';
         total_args.total_id = 'overall';
         report_args.section_ids.push('overall');
-        rows = make_report_total_tr(total_args,totals_obj,col_meta_data)  
+        rows = make_report_total_tr(total_args,totals_obj,col_meta_data)
         //
         if (rows[0]) { table.appendChild(rows[0]);}
         if (rows[1]) { table.appendChild(rows[1]);}
@@ -654,7 +654,7 @@ function make_report(report_args) {
         var col_funct = REPORT_FUNCTIONS[col.col_function]
         if (!(col_funct)) {console.log('Error: No function for column: '+col.column_name); continue;}
         col_funct(col.column_name,report_args);
-    }  
+    }
     //
     // handling async columns
     for (var col in report_args.dynamic_cols) {
@@ -666,12 +666,12 @@ function make_report(report_args) {
         var col_funct = REPORT_FUNCTIONS[col.col_function]
         if (!(col_funct)) {console.log('Error: No function for column: '+col.column_name); continue;}
         col_funct(col.column_name,report_args);
-    } 
+    }
     console.log(report_args);
 }
 //
 // this checks if a row should be displayed based on the reports display params
-function check_display(data_row,display_params) { 
+function check_display(data_row,display_params) {
     var display = true;
     if (!(display_params)) { return display;}
     //
@@ -682,10 +682,10 @@ function check_display(data_row,display_params) {
         //
         if (dtype == 'string') {
             if (mtype == 'contains') {
-                if (!(data_row[col].match(value))) { display = false;}    
+                if (!(data_row[col].match(value))) { display = false;}
             }
             else if (mtype == 'exact') {
-                if (!(data_row[col].match('^'+value+'$'))) { display = false;}    
+                if (!(data_row[col].match('^'+value+'$'))) { display = false;}
             }
             else {
                 console.log('Unknown match type: '+mtype);
@@ -696,7 +696,7 @@ function check_display(data_row,display_params) {
                 var st_date = new Date(value[0].split('-')[0],Number(value[0].split('-')[1])-1,value[0].split('-')[2]);
                 var en_date = new Date(value[1].split('-')[0],Number(value[1].split('-')[1])-1,value[1].split('-')[2]);
                 var date = new Date(data_row[col].split('-')[0],Number(data_row[col].split('-')[1])-1,data_row[col].split('-')[2]);
-                if (!((date >= st_date) && (date <= en_date))) { display = false;}    
+                if (!((date >= st_date) && (date <= en_date))) { display = false;}
             }
             else {
                 console.log('Unknown match type: '+mtype);
@@ -777,13 +777,13 @@ function make_report_data_tr(row_args,totals_obj) {
         td_attr = {'id':'data-entry-'+data_entry.entry_id+'-'+col,'class':'report-data-td'};
         td = document.createElementWithAttr('TD',td_attr);
         text = data_entry[col];
-        if ((col == 'comments') && (data_entry[col] != '')) { 
+        if ((col == 'comments') && (data_entry[col] != '')) {
             span = document.createElementWithAttr('SPAN',{'class':'link-blue'});
             span.id = 'comments-'+data_entry.entry_id;
             span.addEventListener('click',toggle_innerHTML.bind(null,span.id,'C',data_entry[col]));
             span.textContent = 'C'
             td.appendChild(span);
-        } 
+        }
         else {
             process_data_type(data_entry[col],col_meta_data[i].data_type,td,null)
         }
@@ -816,7 +816,7 @@ function make_report_total_tr(total_args,totals_obj,col_meta_data) {
     for (var i = 0; i < col_meta_data.length; i++) {
         if (total_args.skip_cols.indexOf(col_meta_data[i].column_name) >= 0) {continue;}
         if (sect_cols.indexOf(col_meta_data[i].column_name) >= 0) {continue;}
-        //if (col_meta_data[i]['column_type'].match(/dynamic/)) { 
+        //if (col_meta_data[i]['column_type'].match(/dynamic/)) {
         //    if (dynamic_cols[col_meta_data[i]['column_name']]['column_type'].match(/special/)) { continue;}
         //    else if (dynamic_cols[col_meta_data[i]['column_name']]['column_type'].match(/total/)) { dynamic += 1; continue;}
         //} dynamic-total
@@ -843,7 +843,7 @@ function make_report_total_tr(total_args,totals_obj,col_meta_data) {
         totals_obj[total_name+'_total'][col.column_name] = reset;
         totals_obj[total_name+'_count'][col.column_name] = reset;
         //
-        if (value !== '') { 
+        if (value !== '') {
             span.id = total_args.total_id+'-span-'+col.column_name;
             process_data_type(value,col.data_type,span,null)
             td.appendChild(span);

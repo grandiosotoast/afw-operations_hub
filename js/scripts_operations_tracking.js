@@ -187,6 +187,7 @@ function make_standard_table(input_args) {
     //
     // initializations
     var args = {
+        data_preprocessor : function(args) {},
         no_page_nav : false,
         table_id : 'standard-data-table',
         table_class : 'default-table',
@@ -213,6 +214,8 @@ function make_standard_table(input_args) {
     for (var arg in input_args) {
         args[arg] = input_args[arg];
     }
+    //
+    args.data_preprocessor(args);
     //
     // calculating number of pages and what to display
     var page = page_nav_args.curr_page;
@@ -327,10 +330,9 @@ function create_page_links(input_args) {
         'data-curr-page' : args.curr_page,
         'data-sort-col' : args.sort_col,
         'data-sort-dir' : args.sort_dir,
-
-
     }
     var page_div = document.createElementWithAttr('DIV',div_attr);
+    //
     var page_link = null
     var link_attr = {};
     page_div.appendChild(document.createTextNode('Pages: '));
@@ -351,7 +353,7 @@ function create_page_links(input_args) {
         p_class_str = args.class_str.replace('%%',page_arr[i])
         p_onclick_str = args.onclick_str.replace('%%',page_arr[i])
         p_onmouse_str = args.onmouse_str.replace('%%',page_arr[i])
-        if (page_arr[i] == args.curr_page) { p_class_str += ' page_nav_link_curr';}
+        if (page_arr[i] == args.curr_page) { p_class_str += ' page-nav-link_curr';}
         //
         link_attr.id = args.id_prefix+'-page-nav-'+page_arr[i];
         link_attr.class = p_class_str;
