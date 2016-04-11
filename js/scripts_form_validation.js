@@ -286,7 +286,7 @@ function force_value(checkbox) {
 //
 // this steps through non disabled form elements of each input type skipping buttons
 // storing the value and name of element in an object
-function get_all_form_values(parent_id,skip_elm_ids) {
+function get_all_form_values(parent_id,skip_elm_ids,get_all) {
     var all_children = document.getElementById(parent_id).getElementsByTagName("*");
     var skip_id_arr = skip_elm_ids.split(',');
     var name_val_obj = {};
@@ -296,9 +296,12 @@ function get_all_form_values(parent_id,skip_elm_ids) {
         // checking if child node is an element
         if (all_children[i].nodeType != 1) {continue;}
         if ((all_children[i].nodeName.toUpperCase() != 'INPUT') && (all_children[i].nodeName.toUpperCase() != 'SELECT') && (all_children[i].nodeName.toUpperCase() != 'TEXTAREA')) {continue;}
-        if (skip_id_arr.indexOf(all_children[i].id) >= 0) {continue;}
-        if (all_children[i].disabled == true) {continue;}
         if (all_children[i].name == '') {continue;}
+        //
+        if (!(get_all)) {
+            if (skip_id_arr.indexOf(all_children[i].id) >= 0) {continue;}
+            if (all_children[i].disabled == true) {continue;}
+        }
         //
         if ((all_children[i].type.toUpperCase() == 'RADIO') && (!(all_children[i].checked))) {continue;}
         if ((all_children[i].type.toUpperCase() == 'CHECKBOX') && (!(all_children[i].checked))) {continue;}

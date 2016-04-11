@@ -134,7 +134,29 @@ function vendor_broker_setup_form(vendor_internal_id,row_id) {
             }
             populate_form_args.form_id = 'vendor-broker-setup-form';
             populate_form_args.trigger_events = true;
-            populate_form_args.add_callback = button_fun;
+            populate_form_args.add_callback = function() {
+                button_fun();
+                var broker_input = document.getElementById('broker');
+                var vendor_input = document.getElementById('vendor');
+                var vendor_num_input = document.getElementById('vendor-number');
+                var event = document.createEvent("HTMLEvents");
+                event.initEvent("click",true,false);
+                if (broker_input.value === '') {
+                    remove_class('invalid-field',broker_input.id);
+                    document.getElementById('skip-'+broker_input.id).checked = true;
+                    document.getElementById('skip-'+broker_input.id).dispatchEvent(event);
+                }
+                if (vendor_input.value === '') {
+                    remove_class('invalid-field',vendor_input.id);
+                    document.getElementById('skip-'+vendor_input.id).checked = true;
+                    document.getElementById('skip-'+vendor_input.id).dispatchEvent(event);
+                }
+                if (vendor_num_input.value === '') {
+                    remove_class('invalid-field',vendor_num_input.id);
+                    document.getElementById('skip-'+vendor_num_input.id).checked = true;
+                    document.getElementById('skip-'+vendor_num_input.id).dispatchEvent(event);
+                }
+            }
             populate_form(populate_form_args);
         }
     }
@@ -144,6 +166,7 @@ function vendor_broker_setup_form(vendor_internal_id,row_id) {
     //
     //
     var args = {
+        'place_holder_status' : 'disabled',
         'sql_args' : {'order_by':[['marketing_level','ASC']]},
         'add_callback' : callback
     };
@@ -234,6 +257,7 @@ function create_contact_info_form(contact_internal_id,vendor_internal_id,row_id)
         populate_form_args.add_callback = function() {
             document.getElementById('broker').name = '';
             document.getElementById('vendor').name = '';
+            validate_marketing_contact_info_form()
         }
         populate_form(populate_form_args);
     }
@@ -284,6 +308,10 @@ function create_food_show_form(vendor_internal_id,row_id) {
         if (price == 0.0) {
             document.getElementById('booth-price').value = fee;
         }
+        document.getElementById('broker').name = '';
+        document.getElementById('vendor').name = '';
+        document.getElementById('marketing-level').name = '';
+        validate_marketing_food_show_form(true);
     }
     populate_form(populate_form_args);
 }
@@ -307,7 +335,7 @@ function create_payments_and_growth_form(vendor_internal_id,row_id) {
     if (broker == '') { broker = '(None)';}
     var vendor = document.getElementById(row_id+'-vendor').innerHTML;
     if (vendor == '') { vendor = '(None)';}
-    header.textContent = 'Updating  Broker: '+broker+' - Vendor: '+vendor+' Payments and Growth Information';
+    header.textContent = 'Updating  Broker: '+broker+' - Vendor: '+vendor+', Payments and Growth Information';
     //
     var populate_form_args = {};
     populate_form_args.sql_args = {
@@ -334,7 +362,10 @@ function create_payments_and_growth_form(vendor_internal_id,row_id) {
     populate_form_args.form_id = form_id;
     populate_form_args.trigger_events = true;
     populate_form_args.add_callback = function() {
-        console.log('pass');
+        document.getElementById('broker').name = '';
+        document.getElementById('vendor').name = '';
+        document.getElementById('marketing-level').name = '';
+        validate_payments_and_growth_form(true);
     }
     populate_form(populate_form_args);
 }
@@ -785,7 +816,7 @@ function create_payments_and_growth_table(page,sort_col,sort_dir) {
         'sort_dir' : sort_dir,
         'tot_pages_shown' : 9,
         'num_per_page' : 10,
-        'page_nav_div_id' : 'payments-and-growth-table-page-nav',
+        'page_nav_div_id' : 'pag-table-page-nav',
         'id_prefix' : 'pgt',
         'page_nav_class' : 'page_nav',
         'class_str' : 'page-nav-link',

@@ -38,8 +38,8 @@ var setup_vendor_broker = ''+
     '<label class="label">Purchases %</label>'+
     '<input id="purchase-percent" name="purchase_percent" class="text-input" value="00.00" onkeyup="check_num_str(this.id,false,false);" onblur="validate_setup_vendor_broker(true);"> %'+
     '<br>'+
-    '<label class="label">Amount per Unit<span style="float: right; text-align: right;">$&nbsp;</span></label>'+
-    '<input id="amount-per-unit" name="dollars_per_unit" class="text-input" value="  0.00" onkeyup="check_num_str(this.id,false,false);" onblur="validate_setup_vendor_broker(true);">'+
+    '<label class="label">Dollars per Unit<span style="float: right; text-align: right;">$&nbsp;</span></label>'+
+    '<input id="dollars-per-unit" name="dollars_per_unit" class="text-input" value="  0.00" onkeyup="check_num_str(this.id,false,false);" onblur="validate_setup_vendor_broker(true);">'+
     '<br>'+
     '<br>'+
     '<label class="label">Notes</label>'+
@@ -63,7 +63,7 @@ var setup_vendor_broker = ''+
     '<input id="electric-fee" name="electric_fee" class="text-input" value="0.00" onkeyup="check_num_str(this.id,false,false);" onblur="validate_setup_vendor_broker(true);">'+
     '<br>'+
     '<label class="label">Total Price</label>'+
-    '<input id="total-price" class="text-input" value="0.00" readonly>'+
+    '<input id="total-booth-price" class="text-input" value="0.00" readonly>'+
     '<br>'+
     '<br>'+
     '<label class="label">Paid</label>'+
@@ -167,17 +167,17 @@ var marketing_food_show_form = ''+
     '</select>'+
     '<br>'+
     '<label class="label">Booth Price</label>'+
-    '<input id="booth-price" name="booth_price" class="text-input" value="0.00" onkeyup="check_num_str(this.id,false,false);" onblur="validate_marketing_food_show_form(true);">'+
+    '<input id="booth-price" name="booth_price" class="text-input" value="0.00" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_marketing_food_show_form(true);">'+
     '<br>'+
     '<label class="label">Electric Fee</label>'+
-    '<input id="electric-fee" name="electric_fee" class="text-input" value="0.00" onkeyup="check_num_str(this.id,false,false);" onblur="validate_marketing_food_show_form(true);">'+
+    '<input id="electric-fee" name="electric_fee" class="text-input" value="0.00" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_marketing_food_show_form(true);">'+
     '<br>'+
     '<label class="label">Total Price</label>'+
-    '<input id="total-price" name="total_price" class="text-input" value="0.00" readonly>'+
+    '<input id="total-booth-price" class="text-input" value="0.00" readonly>'+
     '<br>'+
     '<br>'+
     '<label class="label">Food Show Payments</label>'+
-    '<input id="paid" name="paid" class="text-input" value="0.00" onkeyup="check_num_str(this.id,false,false);" onblur="validate_marketing_food_show_form(true);">'+
+    '<input id="paid" name="paid" class="text-input" value="0.00" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_marketing_food_show_form(true);">'+
     '<br>'+
     '<label class="label">Remaining Due</label>'+
     '<input id="total-due" class="text-input" value="0.00" readonly>'+
@@ -216,7 +216,7 @@ var marketing_payments_and_growth_form = ''+
     '<input name="food_show_last_modified" class="input-borderless"  disabled>'+
     '</span>'+
     '<label class="label">Update Information:</label>'+
-    '<input type="checkbox" onclick="toggle_food_show_fields();">'+
+    '<input id="update-food-show-info" type="checkbox" onclick="toggle_food_show_fields();">'+
     '<br>'+
     '<label class="label">Booth Size</label>'+
     '<select id="booth-size" name="booth_size" class="dropbox-input" disabled>'+
@@ -227,19 +227,18 @@ var marketing_payments_and_growth_form = ''+
     '</select>'+
     '<br>'+
     '<label class="label">Booth Price</label>'+
-    '<input id="booth-price" name="booth_price" class="text-input" value="0.00" disabled>'+
+    '<input id="booth-price" name="booth_price" class="text-input" value="0.00" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);" disabled>'+
     '<br>'+
     '<label class="label">Electric Fee</label>'+
-    '<input id="electric-fee" name="electric_fee" class="text-input" value="0.00" disabled>'+
+    '<input id="electric-fee" name="electric_fee" class="text-input" value="0.00" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);" disabled>'+
     '<br>'+
     '<br>'+
     '<label class="label">Food Show Payments</label>'+
-    '<input id="paid" name="paid" class="text-input" value="0.00" onkeyup="check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);" disabled>'+
-    '<br>'+
+    '<input id="paid" name="paid" class="text-input" value="0.00" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);" disabled>'+
     '<br>'+
     '<br>'+
     '<label class="label">Food Show Notes</label>'+
-    '<textarea id="food-show-notes" name="food_show_notes" rows=4 cols=60 value="" disabled></textarea>'+
+    '<textarea id="food-show-notes" name="food_show_notes" rows=2 cols=60 value="" onkeyup="remove_class(\'invalid-field\',this.id);" onblur="validate_payments_and_growth_form(true);" disabled></textarea>'+
     '</fieldset>'+
 
     '<fieldset class="fieldset-default">'+
@@ -249,27 +248,27 @@ var marketing_payments_and_growth_form = ''+
     '<input name="growth_last_modified" class="input-borderless"  disabled>'+
     '</span>'+
     '<label class="label">Volume %</label>'+
-    '<input id="volume-percent" name="volume_percent" class="text-input" value="00.00" onkeyup="check_num_str(this.id,false,false);" onblur=""> %'+
+    '<input id="volume-percent" name="volume_percent" class="text-input" value="00.00" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);"> %'+
     '<br>'+
     '<label class="label">Purchases %</label>'+
-    '<input id="purchase-percent" name="purchase_percent" class="text-input" value="00.00" onkeyup="check_num_str(this.id,false,false);" onblur=""> %'+
+    '<input id="purchase-percent" name="purchase_percent" class="text-input" value="00.00" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);"> %'+
     '<br>'+
-    '<label class="label">Amount per Unit<span style="float: right; text-align: right;">$&nbsp;</span></label>'+
-    '<input id="amount-per-unit" name="dollars_per_unit" class="text-input" value="  0.00" onkeyup="check_num_str(this.id,false,false);" onblur="">'+
+    '<label class="label">Dollars per Unit<span style="float: right; text-align: right;">$&nbsp;</span></label>'+
+    '<input id="dollars-per-unit" name="dollars_per_unit" class="text-input" value="  0.00" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
     '<br>'+
     '<label class="label">YTD Volume</label>'+
-    '<input id="ytd-volume" name ="ytd_volume" class="text-input" onkeyup="" onblur="">'+
+    '<input id="ytd-volume" name ="ytd_volume" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
     '<label class="label">YTD Purchases</label>'+
-    '<input id="ytd-purchases" name ="ytd_purchases" class="text-input" onkeyup="" onblur="">'+
+    '<input id="ytd-purchases" name ="ytd_purchases" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
     '<label class="label">YTD Units</label>'+
-    '<input id="ytd-units" name ="ytd_units" class="text-input" onkeyup="" onblur="">'+
+    '<input id="ytd-units" name ="ytd_units" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_int_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
     '<br>'+
     '<label class="label">Growth Notes</label>'+
-    '<textarea id="growth-notes" name="growth_notes" rows=4 cols=60 value=""></textarea>'+
+    '<textarea id="growth-notes" name="growth_notes" rows=2 cols=60 value="" onkeyup="remove_class(\'invalid-field\',this.id);" onblur="validate_payments_and_growth_form(true);"></textarea>'+
     '</fieldset>'+
 
     '<fieldset class="fieldset-default">'+
@@ -279,52 +278,52 @@ var marketing_payments_and_growth_form = ''+
     '<input name="accounting_last_modified" class="input-borderless"  disabled>'+
     '</span>'+
     '<label class="label-12em">Marketing Commitment</label>'+
-    '<input id="commitment" name="commitment" class="text-input" onkeyup="" onblur="" disabled>'+
+    '<input id="commitment" name="commitment" class="text-input" disabled>'+
     '<br>'+
     '<label class="label-12em">A La Carte Commitment</label>'+
-    '<input id="amount-committed" name="amount_committed" class="text-input" onkeyup="" onblur="" disabled>'+
+    '<input id="amount-committed" name="amount_committed" class="text-input" disabled>'+
     '<br>'+
     '<label class="label-12em">Food Show Booth Price</label>'+
-    '<input id="total-price" class="text-input" value="0.00" readonly>'+
+    '<input id="total-booth-price" class="text-input" value="0.00" readonly>'+
     '<br>'+
     '<label class="label-12em">Additional Fees</label>'+
-    '<input id="additional-fees" name="additional_fees" class="text-input" onkeyup="" onblur="">'+
+    '<input id="additional-fees" name="additional_fees" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
     '<label class="label-12em">Misc. Charges</label>'+
-    '<input id="misc-charges" name="misc_charges" class="text-input" onkeyup="" onblur="">'+
+    '<input id="misc-charges" name="misc_charges" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
     '<label class="label-12em">Credits</label>'+
-    '<input id="credits" name="credits" class="text-input" onkeyup="" onblur="">'+
+    '<input id="credits" name="credits" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
-    '<label class="label-12em">Description</label>'+
-    '<textarea id="misc-description" name="misc_description" rows=2 cols=60 value=""></textarea>'+
+    '<label class="label-12em">Accounting Notes</label>'+
+    '<textarea id="misc-description" name="misc_description" rows=2 cols=60 value="" onkeyup="remove_class(\'invalid-field\',this.id);"></textarea>'+
     '<br>'+
     '<br>'+
     '<label class="label-12em">1<sup>st</sup> Quarter Payments</label>'+
-    '<input id="Q1-payments" name="Q1_payments" class="text-input" onkeyup="" onblur="">'+
+    '<input id="Q1-payments" name="Q1_payments" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
     '<label class="label-12em">2<sup>nd</sup> Quarter Payments</label>'+
-    '<input id="Q2-payments" name="Q2_payments" class="text-input" onkeyup="" onblur="">'+
+    '<input id="Q2-payments" name="Q2_payments" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
     '<label class="label-12em">3<sup>rd</sup> Quarter Payments</label>'+
-    '<input id="Q3-payments" name="Q3_payments" class="text-input" onkeyup="" onblur="">'+
+    '<input id="Q3-payments" name="Q3_payments" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
     '<label class="label-12em">4<sup>th</sup> Quarter Payments</label>'+
-    '<input id="Q4-payments" name="Q4_payments" class="text-input" onkeyup="" onblur="">'+
+    '<input id="Q4-payments" name="Q4_payments" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_payments_and_growth_form(true);">'+
     '<br>'+
     '<br>'+
     '<label class="label-12em">Food Show Amount Due</label>'+
-    '<input id="total-due" class="text-input" value="0.00" readonly>'+
+    '<input id="food-show-due" class="text-input" value="0.00" onblur="validate_payments_and_growth_form(true);" readonly>'+
     '<br>'+
     '<label class="label-12em">Marketing Amount Due</label>'+
-    '<input id="total-due" class="text-input" value="0.00" readonly>'+
+    '<input id="marketing-due" class="text-input" value="0.00" onblur="validate_payments_and_growth_form(true);" readonly>'+
     '<br>'+
     '<label class="label-12em">Growth Amount Due</label>'+
-    '<input id="total-due" class="text-input" value="0.00" readonly>'+
+    '<input id="growth-due" class="text-input" value="0.00" onblur="validate_payments_and_growth_form(true);" readonly>'+
     '<br>'+
     '<br>'+
     '<label class="label-12em">Total Amount Due</label>'+
-    '<input id="total-due" class="text-input" value="0.00" readonly>'+
+    '<input id="total-due" class="text-input" value="0.00" onblur="validate_payments_and_growth_form(true);" readonly>'+
     '</fieldset>'+
 
     '<input id="vendor-internal-id" name="vendor_internal_id" type="hidden" value="">'+
@@ -358,8 +357,8 @@ function validate_setup_vendor_broker(truncate) {
     var skip_ids = 'growth-notes,food-show-notes,vendor-status,vendor-internal-id';
     var basic_val_error = false;
     var value_error = false;
-    var float_input_ids = ['volume-percent','purchase-percent','amount-per-unit',
-                           'booth-price','electric-fee','total-price','paid','total-due'];
+    var float_input_ids = ['volume-percent','purchase-percent','dollars-per-unit',
+                           'booth-price','electric-fee','total-booth-price','paid','total-due'];
     var precision = 8;
     if (truncate) {
         precision = CONSTANTS.STD_PRECISION;
@@ -374,7 +373,7 @@ function validate_setup_vendor_broker(truncate) {
     var amount_paid = Number.parse(form_values['paid']);
     var total_price = booth_price + electric_fee;
     var remaining = total_price - amount_paid;
-    document.getElementById('total-price').value = total_price;
+    document.getElementById('total-booth-price').value = total_price;
     document.getElementById('total-due').value = remaining;
     //
     var value = 0.0;
@@ -624,7 +623,7 @@ function validate_marketing_food_show_form(truncate) {
     var skip_ids = 'food-show-notes';
     var basic_val_error = false;
     var value_error = false;
-    var float_input_ids = ['booth-price','electric-fee','total-price','paid','total-due'];
+    var float_input_ids = ['booth-price','electric-fee','total-booth-price','paid','total-due'];
     var precision = 8;
     if (truncate) {
         precision = CONSTANTS.STD_PRECISION;
@@ -638,7 +637,7 @@ function validate_marketing_food_show_form(truncate) {
     var amount_paid = Number.parse(form_values['paid']);
     var total_price = booth_price + electric_fee;
     var remaining = total_price - amount_paid;
-    document.getElementById('total-price').value = total_price;
+    document.getElementById('total-booth-price').value = total_price;
     document.getElementById('total-due').value = remaining;
     //
     var value = 0.0;
@@ -739,4 +738,150 @@ function toggle_food_show_fields() {
     for (var i=0; i < ids.length; i++) {
         toggle_disabled(ids[i]);
     }
+}
+//
+//
+function validate_payments_and_growth_form(truncate) {
+    //
+    var form_id = 'marketing-payments-and-growth-form';
+    var skip_ids = 'growth-notes,food-show-notes,misc-description';
+    var basic_val_error = false;
+    var value_error = false;
+    var float_input_ids = ['volume-percent','purchase-percent','dollars-per-unit',
+                           'ytd-volume','ytd-purchases','booth-price',
+                           'electric-fee','paid','total-booth-price','commitment',
+                           'amount-committed','additional-fees','misc-charges',
+                           'credits','Q1-payments','Q2-payments','Q3-payments',
+                           'Q4-payments','food-show-due','marketing-due','growth-due',
+                           'total-due'];
+    var precision = 8;
+    if (truncate) {
+        precision = CONSTANTS.STD_PRECISION;
+    }
+    //
+    basic_val_error = basic_validate(form_id,skip_ids);
+    //
+    // getting form values and converting numbers
+    var form_values = get_all_form_values(form_id,'',true);
+    for (var name in form_values) {
+        if (form_values[name].match(/^-?\d+$|^-?\d+\.\d+$/)) {
+            form_values[name] = Number.parse(form_values[name]);
+        }
+    }
+    form_values['volume_percent'] = form_values['volume_percent']/100.0;
+    form_values['purchase_percent'] = form_values['purchase_percent']/100.0;
+    //
+    // calculating values
+    var total_booth_price = form_values['booth_price'] + form_values['electric_fee'];
+    var food_show_due = total_booth_price - form_values['paid'];
+    var marketing_due = form_values['commitment'] + form_values['amount_committed'];
+    marketing_due += form_values['additional_fees'] + form_values['misc_charges'] - form_values['credits'];
+    var growth_due = form_values['volume_percent']*form_values['ytd_volume'];
+    growth_due += form_values['purchase_percent']*form_values['ytd_purchases'];
+    growth_due += form_values['dollars_per_unit']*form_values['ytd_units'];
+    var total_due = food_show_due + marketing_due + growth_due;
+    total_due += -form_values['Q1_payments'] - form_values['Q2_payments'];
+    total_due += -form_values['Q3_payments'] - form_values['Q4_payments'];
+    //
+    document.getElementById('total-booth-price').value = total_booth_price;
+    document.getElementById('food-show-due').value = food_show_due;
+    document.getElementById('marketing-due').value = marketing_due;
+    document.getElementById('growth-due').value = growth_due;
+    document.getElementById('total-due').value = total_due;
+    //
+    // rounding values to precision
+    var value = 0.0;
+    var input = null;
+    for (var i = 0; i < float_input_ids.length; i++) {
+        input = document.getElementById(float_input_ids[i]);
+        value_error = check_data_type(float_input_ids[i],'float',true);
+        if (input.value === '') { continue;}
+        value = Number.parse(input.value);
+        input.value = round(value,precision).toFixed(precision);
+    }
+}
+//
+//
+function submit_payments_and_growth_form() {
+    //
+    var form_id = 'marketing-payments-and-growth-form';
+    var errors = false;
+    var form_values = null;
+    var cont = false;
+    var sql_args = null;
+    var sql = '';
+    var callback = null;
+    //
+    remove_class_all('invalid-field');
+    validate_payments_and_growth_form(false);
+    errors = check_for_invalid_fields(form_id);
+    //
+    // returning early if there are errors
+    if (errors) { remove_class('hidden-elm','form-errors'); return;}
+    else { add_class('hidden-elm','form-errors');}
+    //
+    form_values = get_all_form_values(form_id,'');
+    //
+    cont = confirm('Confirm update of payments and growth information.');
+    if (!(cont)) { validate_payments_and_growth_form(true); return;}
+    //
+    // using callback to assign tables to columns
+    callback = function(response) {
+        //
+        var args = {};
+        var sql_arr = null;
+        args.action = 'modify';
+        args.meta_array = response.meta_data;
+        args.form_values = form_values;
+        sql_arr = create_payments_and_growth_form_sql(args);
+        //
+        exec_transaction(sql_arr,reset_payments_and_growth_form);
+    }
+    //
+    sql_args = {
+        'cmd' : 'SELECT',
+        'table' : 'table_meta_data',
+        'cols' : ['column_name','in_tables'],
+    }
+    //
+    sql = gen_sql(sql_args);
+    ajax_fetch([sql],['meta_data'],callback);
+}
+//
+//
+function create_payments_and_growth_form_sql(args) {
+    //
+    // action specific values
+    args.init_sql_args = {};
+    args.init_sql_args.cmd = 'UPDATE';
+    args.init_sql_args.where = [['vendor_internal_id','LIKE',
+                                  args.form_values['vendor_internal_id']]];
+    delete args.form_values['vendor_internal_id'];
+    //
+    if (document.getElementById('update-food-show-info').checked) {
+        args.include_tables = ['marketing_accounting','marketing_food_show','marketing_growth'];
+    }
+    else {
+        args.include_tables = ['marketing_accounting','marketing_growth'];
+    }
+    args.modified_by_value = document.getElementById('user-username').value;
+    args.table_pattern = new RegExp(/(?:^|%)(marketing.+?)(?=%|$)/,'gi')
+    //
+    var sql_arr = build_form_sql(args);
+    //
+    return(sql_arr);
+}
+//
+//
+function reset_payments_and_growth_form() {
+    //
+    alert('Successful update of Vendor/ Broker payment and growth information.');
+    //
+    var curr_page = document.getElementById('pag-table-page-nav').dataset.currPage;
+    var sort_col = document.getElementById('pag-table-page-nav').dataset.sortCol;
+    var sort_dir = document.getElementById('pag-table-page-nav').dataset.sortDir;
+    create_payments_and_growth_table(curr_page,sort_col,sort_dir);
+    //
+    document.getElementById('content-div').removeAll();
+    document.getElementById('header').textContent = '';
 }
