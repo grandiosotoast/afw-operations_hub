@@ -53,5 +53,4 @@ check_login('marketing');
 
 </div> <!-- End main-container div -->
 </body>
-<script>update_payments_and_growth(); console.log('calling update payments line 56')</script>
 </html>

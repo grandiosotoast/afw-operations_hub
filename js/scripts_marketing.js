@@ -54,6 +54,21 @@ function update_food_show_info() {
     create_food_show_table(1,'broker','ASC');
 }
 //
+// sets the page for updatin marketing informat
+function update_marketing_commitment() {
+    //
+    //
+    document.getElementById('tab-clicked').value = 'update_food_show_info';
+    //
+    // clearing elements inside main-container div
+    var childNodes = document.getElementById('main-container').childNodes;
+    for (var i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
+    }
+    //
+    alert('Not Implemented');
+}
+//
 // sets the page for updating a vendors payment info
 function update_payments_and_growth() {
     //
@@ -68,6 +83,21 @@ function update_payments_and_growth() {
     create_payments_and_growth_table_filter('input-div');
     //
     create_payments_and_growth_table(1,'broker','ASC');
+}
+//
+// sets the page for updatin marketing informat
+function create_dashboard() {
+    //
+    //
+    document.getElementById('tab-clicked').value = 'update_food_show_info';
+    //
+    // clearing elements inside main-container div
+    var childNodes = document.getElementById('main-container').childNodes;
+    for (var i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
+    }
+    //
+    alert('Not Implemented');
 }
 //
 ////////////////////// Marketing Secondary Functions ///////////////////////////
