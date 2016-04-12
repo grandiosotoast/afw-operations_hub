@@ -1,7 +1,7 @@
 <?php
 // Start the session
 session_start();
-require 'operations_tracking.php'; 
+require 'operations_tracking.php';
 ?>
 <!DOCTYPE html>
 <html>
@@ -18,7 +18,7 @@ link_external_files();
 
 <body>
 <div id="head" class="head">
-<?php 
+<?php
 page_head();
 check_login('add_employee');
 ?>
@@ -32,7 +32,7 @@ check_login('add_employee');
 <script>
 // forces this to execute after page has loaded
 create_form('add_employee','add-new-employee-form');
-pop_add_emp_dropdowns(false);
+pop_add_emp_dropdowns(null);
 </script>
 </html>
 

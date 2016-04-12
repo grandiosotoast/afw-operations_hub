@@ -331,6 +331,69 @@ var marketing_payments_and_growth_form = ''+
     '<button id="submit-payments-and-growth-form" type="button" onclick="submit_payments_and_growth_form();">Submit Changes</button>'+
     '</form>';
 //
+// marketing commitment form
+var marketing_commitment_form = ''+
+    '<form id="marketing-commitment-form">'+
+
+    '<fieldset class="fieldset-default">'+
+    '<legend>Vendor/Broker Information</legend>'+
+    '<label class="label-12em">Broker:</label>'+
+    '<input id="broker" name="broker" class="text-input" type="text" disabled>'+
+    '<br>'+
+    '<label class="label-12em">Vendor:</label>'+
+    '<input id="vendor" name="vendor" class="text-input" type="text" disabled>'+
+    '<br>'+
+    '<label class="label-12em">Marketing Level</label>'+
+    '<select id="marketing-level" name="marketing_level" class="dropbox-input" onchange="remove_class(\'invalid-field\',this.id); validate_marketing_commitment_form(true);"></select>'+
+    '&nbsp;&nbsp;&nbsp;&nbsp;'+
+    '<input id="commitment" name="commitment" class="input-borderless" value="$ 0.00" disabled>'+
+    '<br>'+
+    '<label class="label-12em">A La Carte Commitment</label>'+
+    '<input id="amount-committed" name="amount_committed" class="text-input" value="0.00">'+
+    '</fieldset>'+
+
+    '<fieldset class="fieldset-default">'+
+    '<legend>A La Carte Services</legend>'+
+    '<span style="float: right;">'+
+    '<label style="color:rgb(127,127,127); font-size:14px;">Last Updated:&nbsp;&nbsp;</label>'+
+    '<input name="alacarte_commitment_last_modified" class="input-borderless"  disabled>'+
+    '</span>'+
+    '<div id="alacarte-fields">'+
+    // this is auto-populated,
+    // <label> <# input field> <cost per disabled> <total cost of services>
+    '<div>'+
+    '<br>'+
+    '<br>'+
+    '<label class="label-12em">A La Carte Notes</label>'+
+    '<textarea id="alacarte-commitment-notes" name="alacarte-commitment-notes" rows=2 cols=60 value="" onkeyup="remove_class(\'invalid-field\',this.id);"></textarea>'+
+    '</fieldset>'+
+
+    '<fieldset class="fieldset-default">'+
+    '<legend>Accounting Information</legend>'+
+    '<span style="float: right;">'+
+    '<label style="color:rgb(127,127,127); font-size:14px;">Last Updated:&nbsp;&nbsp;</label>'+
+    '<input name="accounting_last_modified" class="input-borderless"  disabled>'+
+    '</span>'+
+    '<br>'+
+    '<label class="label-12em">Additional Fees</label>'+
+    '<input id="additional-fees" name="additional_fees" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_marketing_commitment_form(true);">'+
+    '<br>'+
+    '<label class="label-12em">Misc. Charges</label>'+
+    '<input id="misc-charges" name="misc_charges" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_marketing_commitment_form(true);">'+
+    '<br>'+
+    '<label class="label-12em">Credits</label>'+
+    '<input id="credits" name="credits" class="text-input" onkeyup="remove_class(\'invalid-field\',this.id); check_num_str(this.id,false,false);" onblur="validate_marketing_commitment_form(true);">'+
+    '<br>'+
+    '<label class="label-12em">Accounting Notes</label>'+
+    '<textarea id="misc-description" name="misc_description" rows=2 cols=60 value="" onkeyup="remove_class(\'invalid-field\',this.id);"></textarea>'+
+    '</fieldset>'+
+
+    '<input id="vendor-internal-id" name="vendor_internal_id" type="hidden" value="">'+
+    '<label id="form-errors" class="error-msg hidden-elm">Form errors are highlighted in red</label><br>'+
+    '<button id="submit-marketing-commitment-form" type="button" onclick="submit_marketing_commitment_form();">Submit Changes</button>'+
+    '</form>';
+
+//
 // this function will return one of the above forms to a page
 function create_marketing_form(form_name,out_id) {
     var forms = {};
@@ -338,6 +401,7 @@ function create_marketing_form(form_name,out_id) {
     forms.marketing_contact_info_form = marketing_contact_info_form;
     forms.marketing_food_show_form = marketing_food_show_form;
     forms.marketing_payments_and_growth_form = marketing_payments_and_growth_form;
+    forms.marketing_commitment_form = marketing_commitment_form;
     //
     if (!!(forms[form_name])) {
         document.getElementById(out_id).innerHTML = forms[form_name];
@@ -484,9 +548,21 @@ function reset_vendor_broker_form(act) {
     //
     // recreating form
     if (act == 'creation') {
-        var args = {'sql_args' : {'order_by':[['marketing_level','ASC']]}};
+        var dropbox_args = {
+            'dropbox_id' : 'marketing-level',
+            'text_format' : '%marketing_level%',
+            'value_format' : '%marketing_level%',
+            'place_holder' : 'Select Level',
+            'place_holder_status' : 'disabled',
+            'sql_args' : {
+                'table' : 'marketing_tiers',
+                'cols' : ['marketing_level'],
+                'order_by':[['marketing_level','ASC']]
+            },
+            'add_callback' : callback
+        };
         create_marketing_form('setup_vendor_broker','content-div');
-        populate_dropbox_options('marketing-level','marketing_tiers','marketing_level','marketing_level','Select Level',args);
+        populate_dropbox_options(dropbox_args);
     }
     else {
         document.getElementById('content-div').removeAll();
@@ -881,6 +957,123 @@ function reset_payments_and_growth_form() {
     var sort_col = document.getElementById('pag-table-page-nav').dataset.sortCol;
     var sort_dir = document.getElementById('pag-table-page-nav').dataset.sortDir;
     create_payments_and_growth_table(curr_page,sort_col,sort_dir);
+    //
+    document.getElementById('content-div').removeAll();
+    document.getElementById('header').textContent = '';
+}
+//
+///////////////////// Marketing commitment validation //////////////////////////
+//
+//
+function create_alacarte_fields(args) {
+    //
+    console.log(args);
+    //
+    // creating the entry fields
+    for (var i = 0; i < args.meta_data_arr.length; i++) {
+
+    }
+    //
+    process_dropbox_data(args.dropbox_args);
+    process_form_data(args.populate_form_args);
+}
+//
+//
+function validate_marketing_commitment_form(truncate) {
+    //
+    var form_id = 'marketing-commitment-form';
+    var skip_ids = 'misc-description,alacarte-commitment-notes';
+    var basic_val_error = false;
+    var value_error = false;
+    var float_input_ids = [];
+    var precision = 8;
+    if (truncate) {
+        precision = CONSTANTS.STD_PRECISION;
+    }
+    //
+    basic_val_error = basic_validate(form_id,skip_ids);
+    //
+    if (document.getElementById('vendor-internal-id').value == '') {
+        alert('Error - No Vendor/Broker linked to commitment form reselect Vendor/Broker from table');
+    }
+}
+//
+//
+function submit_marketing_commitment_form() {
+    //
+    var form_id = 'marketing-commitment-form';
+    var errors = false;
+    var form_values = null;
+    var cont = false;
+    var sql_args = null;
+    var sql = '';
+    var callback = null;
+    //
+    remove_class_all('invalid-field');
+    validate_marketing_commitment_form(false);
+    errors = check_for_invalid_fields(form_id);
+    //
+    // returning early if there are errors
+    if (errors) { remove_class('hidden-elm','form-errors'); return;}
+    else { add_class('hidden-elm','form-errors');}
+    //
+    form_values = get_all_form_values(form_id,'');
+    //
+    cont = confirm('Confirm update of marketing information.');
+    if (!(cont)) { validate_marketing_commitment_form(true); return;}
+    //
+    // using callback to assign tables to columns
+    callback = function(response) {
+        //
+        var args = {};
+        var sql_arr = null;
+        args.action = 'modify';
+        args.meta_array = response.meta_data;
+        args.form_values = form_values;
+        sql_arr = create_marketing_commitment_form_form_sql(args);
+        //
+        //exec_transaction(sql_arr,reset_payments_and_growth_form);
+        reset_marketing_commitment_form();
+    }
+    //
+    sql_args = {
+        'cmd' : 'SELECT',
+        'table' : 'table_meta_data',
+        'cols' : ['column_name','in_tables'],
+    }
+    //
+    sql = gen_sql(sql_args);
+    ajax_fetch([sql],['meta_data'],callback);
+}
+//
+//
+function create_marketing_commitment_form_form_sql(args) {
+    //
+    // action specific values
+    args.init_sql_args = {};
+    args.init_sql_args.cmd = 'UPDATE';
+    args.init_sql_args.where = [['vendor_internal_id','LIKE',
+                                  args.form_values['vendor_internal_id']]];
+    delete args.form_values['vendor_internal_id'];
+    //
+    args.include_tables = ['marketing_vendor_broker_table','marketing_accounting','marketing_alacarte_commitment'];
+    args.modified_by_value = document.getElementById('user-username').value;
+    args.table_pattern = new RegExp(/(?:^|%)(marketing.+?)(?=%|$)/,'gi')
+    //
+    var sql_arr = build_form_sql(args);
+    //
+    return(sql_arr);
+}
+//
+//
+function reset_marketing_commitment_form() {
+    //
+    alert('Successful update of Vendor/ Broker marketing commitment information.');
+    //
+    var curr_page = document.getElementById('mc-table-page-nav').dataset.currPage;
+    var sort_col = document.getElementById('mc-table-page-nav').dataset.sortCol;
+    var sort_dir = document.getElementById('mc-table-page-nav').dataset.sortDir;
+    create_marketing_commitment_table(curr_page,sort_col,sort_dir);
     //
     document.getElementById('content-div').removeAll();
     document.getElementById('header').textContent = '';

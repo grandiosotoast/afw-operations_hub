@@ -66,7 +66,23 @@ function update_marketing_commitment() {
         if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
     }
     //
-    alert('Not Implemented');
+    create_marketing_commitment_table_filter('input-div');
+    //
+    create_marketing_commitment_table(1,'broker','ASC');
+}
+//
+// sets the page for updating services performed
+function update_marketing_services_performed() {
+    //
+    document.getElementById('tab-clicked').value = 'update_marketing_services_performed';
+    //
+    // clearing elements inside main-container div
+    var childNodes = document.getElementById('main-container').childNodes;
+    for (var i = 0; i < childNodes.length; i++) {
+        if (childNodes[i].nodeType == 1) {childNodes[i].removeAll();}
+    }
+    //
+    alert('Not Implemented Yet');
 }
 //
 // sets the page for updating a vendors payment info
@@ -195,15 +211,21 @@ function vendor_broker_setup_form(vendor_internal_id,row_id) {
     }
     //
     //
-    var args = {
+    var dropbox_args = {
+        'dropbox_id' : 'marketing-level',
+        'text_format' : '%marketing_level%',
+        'value_format' : '%marketing_level%',
+        'place_holder' : 'Select Level',
         'place_holder_status' : 'disabled',
-        'sql_args' : {'order_by':[['marketing_level','ASC']]},
+        'sql_args' : {
+            'table' : 'marketing_tiers',
+            'cols' : ['marketing_level'],
+            'order_by':[['marketing_level','ASC']]
+        },
         'add_callback' : callback
     };
     create_marketing_form('setup_vendor_broker','content-div');
-    populate_dropbox_options('marketing-level','marketing_tiers',
-                             'marketing_level','marketing_level','Select Level',
-                              args);
+    populate_dropbox_options(dropbox_args);
 }
 //
 // handles initial generation of the contact info form
@@ -400,6 +422,107 @@ function create_payments_and_growth_form(vendor_internal_id,row_id) {
     populate_form(populate_form_args);
 }
 //
+//
+function create_marketing_commitment_form(vendor_internal_id,row_id) {
+    //
+    var form_id = 'marketing-commitment-form';
+    var header = document.getElementById('header');
+    var callback = null;
+    var sql_args = null;
+    //
+    if (!(vendor_internal_id && row_id)) {
+        alert('There was an error, reselect the Vendor/Broker');
+        return;
+    }
+    //
+    var broker = document.getElementById(row_id+'-broker').innerHTML;
+    if (broker == '') { broker = '(None)';}
+    var vendor = document.getElementById(row_id+'-vendor').innerHTML;
+    if (vendor == '') { vendor = '(None)';}
+    header.textContent = 'Updating  Broker: '+broker+' - Vendor: '+vendor+', Marketing Commitment Information';
+    //
+    // creating sql statments
+    var price_data_sql = '';
+    var populate_form_sql = '';
+    var populate_dropbox_sql = '';
+    var meta_data_sql = '';
+    sql_args = {
+        'cmd' : 'SELECT',
+        'table' : 'marketing_alacarte_prices',
+        'cols' : ['service','cost']
+    }
+    price_data_sql = gen_sql(sql_args);
+    //
+    sql_args = {
+        'cmd' : 'SELECT',
+        'table' : 'marketing_vendor_broker_table',
+        'inner_join' : [['marketing_accounting',
+                         'marketing_vendor_broker_table.vendor_internal_id',
+                         'marketing_accounting.vendor_internal_id'],
+                        ['marketing_alacarte_commitment',
+                         'marketing_vendor_broker_table.vendor_internal_id',
+                         'marketing_alacarte_commitment.vendor_internal_id']],
+        'where' : [['marketing_vendor_broker_table.vendor_internal_id',
+                    'LIKE',vendor_internal_id]]
+    }
+    populate_form_sql = gen_sql(sql_args);
+    //
+    sql_args = {
+        'cmd' : 'SELECT',
+        'table' : 'marketing_tiers',
+        'cols' : ['marketing_level'],
+        'order_by':[['marketing_level','ASC']]
+    }
+    populate_dropbox_sql = gen_sql(sql_args);
+    //
+    sql_args = {
+        'cmd' : 'SELECT',
+        'table' : 'table_meta_data',
+        'where' : [['in_tables','REGEXP','(^|%)marketing_tiers(%|$)'],
+                    ['data_type','NOT REGEXP','internal']],
+        'order_by':[['order_index','ASC']]
+    }
+    meta_data_sql = gen_sql(sql_args);
+    //
+    // setting callback to emulate args passed to populate_dropbox_options and populate_form
+    callback = function(response) {
+        var args = {
+            'meta_data_arr' : response.meta_data_arr,
+            'populate_form_args' : {
+                'form_id' : form_id,
+                'trigger_events' : false,
+                'skip_fields_str' : '',
+                'data_arr' : response.form_data[0]
+             },
+            'dropbox_args' : {
+                'dropbox_id' : 'marketing-level',
+                'text_format' : '%marketing_level%',
+                'value_format' : '%marketing_level%',
+                'place_holder' : 'Select Level',
+                'place_holder_status' : 'disabled',
+                'add_opts_val' : [],
+                'add_opts_text' : [],
+                'add_callback' : function(args) {},
+                'dropbox_data' : response.dropbox_data
+             }
+        }
+        //
+        args.meta_data_obj = {};
+        for (var i = 0; i < args.meta_data_arr.length; i++) {
+            args.meta_data_obj[args.meta_data_arr[i]['column_name']] = args.meta_data_arr[i];
+        }
+        for (var i = 0; i < response.price_data.length; i++) {
+            args.meta_data_obj[response.price_data[i]['service']]['cost'] = response.price_data[i]['cost'];
+        }
+        //
+        create_alacarte_fields(args)
+    };
+    //
+    create_marketing_form('marketing_commitment_form','content-div');
+    ajax_fetch([price_data_sql,populate_form_sql,populate_dropbox_sql,meta_data_sql],
+               ['price_data','form_data','dropbox_data','meta_data_arr'],callback);
+}
+//
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////// Marketing Table Generation ////////////////////////////
 //
@@ -465,7 +588,7 @@ function create_food_show_table_filter(output_id) {
             //
             {'elm' : 'label', 'className' : 'label-large',
              'textNode' : 'Filter by Booth Size:'},
-            {'elm' : 'select', 'id' : 'booth-size', 'name':'booth_size',
+            {'elm' : 'select', 'id' : 'filter-booth-size', 'name':'booth_size',
               'events' : [{'event' : 'change','function' : update_function}]},
             {'elm' : 'br'}
         );
@@ -481,7 +604,7 @@ function create_food_show_table_filter(output_id) {
     fieldset.className = 'fieldset-default';
     addChildren(fieldset,form_elements);
     document.getElementById(output_id).appendChild(fieldset);
-    addChildren(document.getElementById('booth-size'),select_elements);
+    addChildren(document.getElementById('filter-booth-size'),select_elements);
     document.getElementById(output_id).appendChild(document.createElement('BR'));
 }
 //
@@ -497,15 +620,15 @@ function create_payments_and_growth_table_filter(output_id) {
             //
             {'elm' : 'label', 'className' : 'label-large',
              'textNode' : 'Filter by Marketing Level:'},
-            {'elm' : 'select', 'id' : 'marketing-level', 'name':'marketing_level',
-              'className' : 'dropbox-input-10em',
+            {'elm' : 'select', 'id' : 'filter-marketing-level', 'name':'marketing_level',
+              'className' : 'dropbox-input',
               'events' : [{'event' : 'change','function' : update_function}]},
             {'elm' : 'br'},
             //
             {'elm' : 'label', 'className' : 'label-large',
              'textNode' : 'Filter by Booth Size:'},
-            {'elm' : 'select', 'id' : 'booth-size', 'name':'booth_size',
-              'className' : 'dropbox-input-10em',
+            {'elm' : 'select', 'id' : 'filter-booth-size', 'name':'booth_size',
+              'className' : 'dropbox-input',
               'events' : [{'event' : 'change','function' : update_function}]},
             {'elm' : 'br'}
             //
@@ -530,8 +653,43 @@ function create_payments_and_growth_table_filter(output_id) {
     fieldset.className = 'fieldset-default';
     addChildren(fieldset,form_elements);
     document.getElementById(output_id).appendChild(fieldset);
-    addChildren(document.getElementById('marketing-level'),level_elements);
-    addChildren(document.getElementById('booth-size'),booth_elements);
+    addChildren(document.getElementById('filter-marketing-level'),level_elements);
+    addChildren(document.getElementById('filter-booth-size'),booth_elements);
+    document.getElementById(output_id).appendChild(document.createElement('BR'));
+}
+//
+//
+function create_marketing_commitment_table_filter(output_id) {
+    //
+    // adding a filter fieldset
+    var fieldset = document.createElement('FIELDSET');
+    var update_function = create_marketing_commitment_table.bind(null,1,'broker','ASC');
+    var form_elements = standard_vb_filter_elemets(update_function);
+    //
+    //
+    form_elements.push(
+        //
+        {'elm' : 'label', 'className' : 'label-large',
+         'textNode' : 'Filter by Marketing Level:'},
+        {'elm' : 'select', 'id' : 'filter-marketing-level', 'name':'marketing_level',
+         'className' : 'dropbox-input','events' :
+             [{'event' : 'change','function' : update_function}]},
+        {'elm' : 'br'}
+    );
+    var level_elements = Array(
+        //
+        {'elm':'option','value' : '.', 'textNode' : 'All'},
+        {'elm':'option','value' : 'a la carte', 'textNode' : 'A La Carte'},
+        {'elm':'option','value' : 'bronze', 'textNode' : 'Bronze'},
+        {'elm':'option','value' : 'silver', 'textNode' : 'Silver'},
+        {'elm':'option','value' : 'gold', 'textNode' : 'Gold'}
+    );
+    //
+    fieldset.id = 'selection-parameters';
+    fieldset.className = 'fieldset-default';
+    addChildren(fieldset,form_elements);
+    document.getElementById(output_id).appendChild(fieldset);
+    addChildren(document.getElementById('filter-marketing-level'),level_elements);
     document.getElementById(output_id).appendChild(document.createElement('BR'));
 }
 //
@@ -918,6 +1076,76 @@ function create_payments_and_growth_table(page,sort_col,sort_dir) {
             else if (size == '0') { data_arr[i]['booth_size'] = 'None';}
         }
     }
+    table_args.add_callback = vendor_broker_table_callbacks;
+    //
+    create_standard_table(table_args);
+}
+//
+//
+function create_marketing_commitment_table(page,sort_col,sort_dir) {
+    //
+    // initializating argument objects
+    var table_args = {};
+    var data_sql_args = {};
+    var meta_sql_args = {};
+    //
+    // creating sql statements
+    get_table_inputs(data_sql_args,{'parent_id':'selection-parameters'});
+    //
+    data_sql_args.cmd = 'SELECT';
+    data_sql_args.table = 'marketing_vendor_broker_table';
+    data_sql_args.inner_join = [['marketing_accounting',
+                                 'marketing_vendor_broker_table.vendor_internal_id',
+                                 'marketing_accounting.vendor_internal_id'],
+                                ['marketing_alacarte_commitment',
+                                 'marketing_vendor_broker_table.vendor_internal_id',
+                                 'marketing_alacarte_commitment.vendor_internal_id']
+        ];
+    data_sql_args.order_by = [[sort_col,sort_dir]];
+    //
+    meta_sql_args.cmd = 'SELECT';
+    meta_sql_args.table = 'table_meta_data';
+    var in_tables = '(^|%)marketing_vendor_broker_table(%|$)|(^|%)marketing_accounting(%|$)|'+
+                    '(^|%)marketing_alacarte_commitment(%|$)';
+    meta_sql_args.where = [['in_tables','REGEXP',in_tables],
+                           ['use_on_pages','REGEXP','marketing'],
+                           ['use_in_html_tables','REGEXP','marketing_commitment_table']];
+    meta_sql_args.order_by = [['order_index','ASC']]
+    //
+    table_args.data_sql = gen_sql(data_sql_args);
+    table_args.meta_sql = gen_sql(meta_sql_args);
+    //
+    // creating table argument object
+    table_args.table_output_id = 'table-div';
+    table_args.table_id = 'marketing-commitment-table';
+    table_args.table_class = 'default-table';
+    table_args.row_id_prefix = 'mc-row-';
+    table_args.table_data_cell_class = 'default-table-td';
+    table_args.row_onclick = "create_marketing_commitment_form('%vendor_internal_id%','%row_id%');";
+    table_args.row_onmouseenter = "add_class('default-table-row-highlight','%row_id%')";
+    table_args.row_onmouseleave = "remove_class('default-table-row-highlight','%row_id%')";
+    table_args.head_row_args = {
+        'sortable' : true,
+        'column_tables' : ['marketing_vendor_broker_table','marketing_accounting',
+                           'marketing_alacarte_commitment'],
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'sort_onclick_str' : "create_marketing_commitment_table(%%,'%column_name%','%sort_dir%')"
+    };
+    table_args.page_nav_args = {
+        'curr_page' : page,
+        'sort_col' : sort_col,
+        'sort_dir' : sort_dir,
+        'tot_pages_shown' : 9,
+        'num_per_page' : 10,
+        'page_nav_div_id' : 'mc-table-page-nav',
+        'id_prefix' : 'mc',
+        'page_nav_class' : 'page_nav',
+        'class_str' : 'page-nav-link',
+        'onclick_str' : "create_marketing_commitment_table(%%,'"+sort_col+"','"+sort_dir+"');",
+        'onmouse_str' : ''
+    };
+    //table_args.data_preprocessor = function(args) {}
     table_args.add_callback = vendor_broker_table_callbacks;
     //
     create_standard_table(table_args);

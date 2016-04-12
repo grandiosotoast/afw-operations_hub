@@ -1151,75 +1151,75 @@ function toggle_children(parent_id,skip_ids,disable) {
 }
 //
 // this function will get database data and fill the dropbox with it
-function populate_dropbox_options(dropbox_id,table,value_col,text_col,place_holder,add_args) {
+function populate_dropbox_options(input_args) {
     //
     // creating SQL statment
-    var sql = '';
-    var sql_args = {};
-    var place_holder_value = '';
-    var place_holder_status = 'disabled selected';
-    var text_format = '%'+text_col+'%';
-    var value_format = '%'+value_col+'%';
-    var callback = false;
-    sql_args.cmd = "SELECT";
-    sql_args.table = table;
-    sql_args.cols = [value_col,text_col];
-    // processing additional arguments
-    if (!(add_args)) { add_args = {};}
-    if (!!(add_args.value_format)) { value_format = add_args.value_format;}
-    if (!!(add_args.format_str)) { text_format = add_args.format_str;}
-    if (!!(add_args.add_cols)) { sql_args.cols = sql_args.cols.concat(add_args.add_cols);}
-    if (!!(add_args.sql_where)) { sql_args.where = add_args.sql_where;}
-    if (!!(add_args.place_holder_value)) {place_holder_value = add_args.place_holder_value;}
-    if (!!(add_args.place_holder_status)) {place_holder_status = add_args.place_holder_status;}
-    if (!!(add_args.add_callback)) {callback = add_args.add_callback;}
-    if (!!(add_args.sql_args)) {
-        for (var arg in add_args.sql_args) { sql_args[arg] = add_args.sql_args[arg];}
+    var args = {
+        'sql_args' : {},
+        'dropbox_id' : null,
+        'text_format' : '',
+        'value_format' : '',
+        'place_holder' : '',
+        'place_holder_value' : '',
+        'place_holder_status' : 'disabled selected',
+        'add_opts_val' : [],
+        'add_opts_text' : [],
+        'add_callback' : function(args) {}
     }
-    sql = gen_sql(sql_args);
     //
-    // temporary function to populate a drop box
-    var pop_dropbox = function(response) {
-        var dropbox = document.getElementById(dropbox_id)
-        var data_arr = response.data;
-        var opt = null;
-        var opt_attr = {};
-        //
-        // creating options for dropbox
-        dropbox.removeAll();
-        if (place_holder != ''){
-            opt_attr = {'value' : place_holder_value}
-            opt = document.createElementWithAttr('OPTION',opt_attr);
-            if (place_holder_status) { opt[place_holder_status] = true;}
-            opt.addTextNode(place_holder);
-            dropbox.appendChild(opt);
-        }
-        //
-        for (var i = 0; i < data_arr.length; i++) {
-            var text = text_format;
-            var value = value_format;
-            for (var prop in data_arr[i]) { text = text.replace('%'+prop+'%',data_arr[i][prop]); value = value.replace('%'+prop+'%',data_arr[i][prop]);}
-            opt_attr = {'value' : value}
-            opt = document.createElementWithAttr('OPTION',opt_attr);
-            opt.addTextNode(text);
-            dropbox.appendChild(opt);
-        }
-        //
-        // placing additional options in list
-        if (!!(add_args.add_opts_val)) {
-            for (var i = 0;  i < add_args.add_opts_val.length; i++) {
-                opt_attr = {'value' : add_args.add_opts_val[i]}
-                opt = document.createElementWithAttr('OPTION',opt_attr);
-                opt.addTextNode(add_args.add_opts_text[i]);
-                dropbox.appendChild(opt);
-            }
-        }
-        //
-        if (callback) {callback();}
-    }
+    // processing additional arguments
+    for (var prop in input_args) { args[prop] = input_args[prop];}
+    //
+    args.sql_args.cmd = 'SELECT';
+    var sql = gen_sql(args.sql_args);
     //
     // fetching data and populating the dropbox
-    ajax_fetch([sql],['data'],pop_dropbox)
+    var callback = function(response) {
+        args.dropbox_data = response.dropbox_data;
+        process_dropbox_data(args)
+    }
+    ajax_fetch([sql],['dropbox_data'],callback);
+}
+//
+// processes data and actually populates the dropbox
+function process_dropbox_data(args) {
+    var dropbox = document.getElementById(args.dropbox_id)
+    var data_arr = args.dropbox_data;
+    var opt = null;
+    var opt_attr = {};
+    //
+    // creating options for dropbox
+    dropbox.removeAll();
+    if (args.place_holder) {
+        opt_attr = {'value' : args.place_holder_value}
+        opt = document.createElementWithAttr('OPTION',opt_attr);
+        if (args.place_holder_status) { opt[args.place_holder_status] = true;}
+        opt.addTextNode(args.place_holder);
+        dropbox.appendChild(opt);
+    }
+    //
+    for (var i = 0; i < data_arr.length; i++) {
+        var text = args.text_format;
+        var value = args.value_format;
+        for (var prop in data_arr[i]) {
+            text = text.replace('%'+prop+'%',data_arr[i][prop]);
+            value = value.replace('%'+prop+'%',data_arr[i][prop]);
+        }
+        opt_attr = {'value' : value}
+        opt = document.createElementWithAttr('OPTION',opt_attr);
+        opt.addTextNode(text);
+        dropbox.appendChild(opt);
+    }
+    //
+    // placing additional options in list
+    for (var i = 0;  i < args.add_opts_val.length; i++) {
+        opt_attr = {'value' : args.add_opts_val[i]}
+        opt = document.createElementWithAttr('OPTION',opt_attr);
+        opt.addTextNode(args.add_opts_text[i]);
+        dropbox.appendChild(opt);
+    }
+    //
+    args.add_callback(args);
 }
 //
 // this function specifically populates the year dropboxes

@@ -101,17 +101,34 @@ function get_data_entry_form(emp_id,department,form_div_id,update) {
         populate_form_args.add_callback_funs = function() { document.getElementById('department').value = department;};
         populate_form(populate_form_args)
     }
-    // defining add_args for error code dropbox
-    var add_args = {
-        place_holder_value : '0',
-        place_holder_status : 'selected',
-        add_opts_val : ['99'],
-        add_opts_text : ['OTHER'],
-        add_callback : callback
-    };
     // populating dropboxes
-    populate_dropbox_options('attendance-select','attendance','absence_value','absence_kind','','');
-    populate_dropbox_options('error-code','error_codes','reason','description','NO ERRORS',add_args);
+    var dropbox_args = {
+        'dropbox_id' : 'attendance-select',
+        'value_format' : '%absence_value%',
+        'text_format' : '%absence_kind%',
+        'sql_args' : {
+            'table' : 'attendance',
+            'cols' : ['absence_value','absence_kind'],
+        },
+        'place_holder' : ''
+    }
+    populate_dropbox_options(dropbox_args);
+    var dropbox_args = {
+        'dropbox_id' : 'error-code',
+        'value_format' : '%reason%',
+        'text_format' : '%description%',
+        'sql_args' : {
+            'table' : 'error_codes',
+            'cols' : ['reason','description'],
+         },
+        'place_holder' : 'NO ERRORS',
+        'place_holder_value' : '0',
+        'place_holder_status' : 'selected',
+        'add_opts_val' : ['99'],
+        'add_opts_text' : ['OTHER'],
+        'add_callback' : callback
+    }
+    populate_dropbox_options(dropbox_args);
 }
 //
 // this creates the driver frieght backhaul form
@@ -422,18 +439,34 @@ function view_employee_data_entry(entry_id,department,row_id) {
             populate_form_args.trigger_events = false;
             populate_form(populate_form_args)
         }
-        //
-        // setting up add_args for error code dropbox
-        var add_args = {
-            place_holder_value : '0',
-            place_holder_status : 'selected',
-            add_opts_val : ['99'],
-            add_opts_text : ['OTHER'],
-            add_callback : callback
-        };
-        // populating dropbox
-        populate_dropbox_options('attendance-select','attendance','absence_value','absence_kind','','');
-        populate_dropbox_options('error-code','error_codes','reason','description','NO ERRORS',add_args)
+        // populating dropboxes
+        var dropbox_args = {
+            'dropbox_id' : 'attendance-select',
+            'value_format' : '%absence_value%',
+            'text_format' : '%absence_kind%',
+            'sql_args' : {
+                'table' : 'attendance',
+                'cols' : ['absence_value','absence_kind'],
+            },
+            'place_holder' : ''
+        }
+        populate_dropbox_options(dropbox_args);
+        var dropbox_args = {
+            'dropbox_id' : 'error-code',
+            'value_format' : '%reason%',
+            'text_format' : '%description%',
+            'sql_args' : {
+                'table' : 'error_codes',
+                'cols' : ['reason','description'],
+             },
+            'place_holder' : 'NO ERRORS',
+            'place_holder_value' : '0',
+            'place_holder_status' : 'selected',
+            'add_opts_val' : ['99'],
+            'add_opts_text' : ['OTHER'],
+            'add_callback' : callback
+        }
+        populate_dropbox_options(dropbox_args);
     }
     else {
         //
@@ -455,17 +488,34 @@ function view_employee_data_entry(entry_id,department,row_id) {
             populate_form(populate_form_args)
         }
         //
-        // setting up add_args for error code dropbox
-        var add_args = {
-            place_holder_value : '0',
-            place_holder_status : 'selected',
-            add_opts_val : ['99'],
-            add_opts_text : ['OTHER'],
-            add_callback : callback
-        };
-        // populating dropbox
-        populate_dropbox_options('attendance-select','attendance','absence_value','absence_kind','','');
-        populate_dropbox_options('error-code','error_codes','reason','description','NO ERRORS',add_args)
+        // populating dropboxes
+        var dropbox_args = {
+            'dropbox_id' : 'attendance-select',
+            'value_format' : '%absence_value%',
+            'text_format' : '%absence_kind%',
+            'sql_args' : {
+                'table' : 'attendance',
+                'cols' : ['absence_value','absence_kind'],
+            },
+            'place_holder' : ''
+        }
+        populate_dropbox_options(dropbox_args);
+        var dropbox_args = {
+            'dropbox_id' : 'error-code',
+            'value_format' : '%reason%',
+            'text_format' : '%description%',
+            'sql_args' : {
+                'table' : 'error_codes',
+                'cols' : ['reason','description'],
+             },
+            'place_holder' : 'NO ERRORS',
+            'place_holder_value' : '0',
+            'place_holder_status' : 'selected',
+            'add_opts_val' : ['99'],
+            'add_opts_text' : ['OTHER'],
+            'add_callback' : callback
+        }
+        populate_dropbox_options(dropbox_args);
     }
     //
     document.getElementById('emp-first-name').focus();
@@ -1003,17 +1053,34 @@ function mod_regular_data_form(args) {
         populate_form(populate_form_args)
     }
     //
-    // setting up add_args for error code dropbox
-    var add_args = {
-        place_holder_value : '0',
-        place_holder_status : 'selected',
-        add_opts_val : ['99'],
-        add_opts_text : ['OTHER'],
-        add_callback : callback
-    };
-    // populating dropbox
-    populate_dropbox_options('attendance-select','attendance','absence_value','absence_kind','','');
-    populate_dropbox_options('error-code','error_codes','reason','description','NO ERRORS',add_args)
+    // populating dropboxes
+    var dropbox_args = {
+        'dropbox_id' : 'attendance-select',
+        'value_format' : '%absence_value%',
+        'text_format' : '%absence_kind%',
+        'sql_args' : {
+            'table' : 'attendance',
+            'cols' : ['absence_value','absence_kind'],
+        },
+        'place_holder' : ''
+    }
+    populate_dropbox_options(dropbox_args);
+    var dropbox_args = {
+        'dropbox_id' : 'error-code',
+        'value_format' : '%reason%',
+        'text_format' : '%description%',
+        'sql_args' : {
+            'table' : 'error_codes',
+            'cols' : ['reason','description'],
+         },
+        'place_holder' : 'NO ERRORS',
+        'place_holder_value' : '0',
+        'place_holder_status' : 'selected',
+        'add_opts_val' : ['99'],
+        'add_opts_text' : ['OTHER'],
+        'add_callback' : callback
+    }
+    populate_dropbox_options(dropbox_args);
     //
     document.getElementById('emp-first-name').focus();
 }
@@ -1337,40 +1404,65 @@ function mod_employee_info(emp_id) {
 //
 function pop_add_emp_dropdowns(args) {
     //
-    var add_args = {
-      sql_where : [['department_type','REGEXP','(^|%)employees(%|$)']],
+    // department dropbox
+    var dropbox_args = {
+        'dropbox_id' : 'department-select',
+        'text_format' : '%department_name%',
+        'value_format' : '%deparment%',
+        'place_holder' : 'Select Department',
+        'sql_args' : {
+            'table' : 'departments',
+            'cols' : ['department','department_name'],
+            'where' : [['department_type','REGEXP','(^|%)employees(%|$)']]
+         }
     }
-    populate_dropbox_options('department-select','departments','department','department_name','Select Department',add_args);
+    populate_dropbox_options(dropbox_args);
     //
-    var add_args = {
-      sql_where : [['level_name','LIKE','base_rate_level']],
-      place_holder_value : '0',
-      add_opts_val : ['other','0'],
-      add_opts_text : ['Other','N/A']
-    };
-    //
-    populate_dropbox_options('base-rate-select','driver_levels','value','level','Select Level',add_args);
-    add_args.sql_where = [['level_name','LIKE','case_rate_level']];
-    populate_dropbox_options('case-rate-select','driver_levels','value','level','Select Level',add_args);
-    //
-    if (args) {
-         add_args.add_callback = args.callback_fun;
+    // driver levels dropboxes
+    var dropbox_args = {
+        'dropbox_id' : 'base-rate-select',
+        'text_format' : '%level%',
+        'value_format' : '%value%',
+        'place_holder' : 'Select Level',
+        'place_holder_value' : '0',
+        'add_opts_val' : ['other','0'],
+        'add_opts_text' : ['Other','N/A'],
+        'sql_args' : {
+            'table' : 'driver_levels',
+            'cols' : ['value','level'],
+            'where' : [['level_name','LIKE','base_rate_level']]
+         }
     }
-    add_args.sql_where = [['level_name','LIKE','stop_rate_level']];
-    populate_dropbox_options('stop-rate-select','driver_levels','value','level','Select Level',add_args);
+    populate_dropbox_options(dropbox_args);
+    //
+    dropbox_args.dropbox_id = 'case-rate-select';
+    dropbox_args.sql_args.where = [['level_name','LIKE','case_rate_level']];
+    populate_dropbox_options(dropbox_args);
+    //
+    dropbox_args.dropbox_id = 'stop-rate-select';
+    dropbox_args.sql_args.where = [['level_name','LIKE','stop_rate_level']];
+    if (args) { dropbox_args.add_callback = args.callback_fun;}
+    populate_dropbox_options(dropbox_args);
 }
 //
 //
 function pop_add_dbuser_dropdowns(args) {
-
-    var add_args = {
-      add_opts_val : ['other'],
-      add_opts_text : ['Other']
-    };
-    if (args) {
-        add_args.add_callback = args.callback_fun;
+    //
+    var dropbox_args = {
+        'dropbox_id' : 'department-select',
+        'text_format' : '%department_name%',
+        'value_format' : '%deparment%',
+        'place_holder' : 'Select Department',
+        'add_opts_val' : ['other'],
+        'add_opts_text' : ['Other'],
+        'sql_args' : {
+            'table' : 'departments',
+            'cols' : ['department','department_name'],
+            'where' : [['department_type','REGEXP','(^|%)employees(%|$)']]
+         }
     }
-    populate_dropbox_options('department-select','departments','department','department_name','Select Department',add_args);
+    if (args) { dropbox_args.add_callback = args.callback_fun;}
+    populate_dropbox_options(dropbox_args);
 }
 //
 // this creates the table select box on te table_maintenance page

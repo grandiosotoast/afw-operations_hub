@@ -732,7 +732,7 @@ function submit_employee_form(arg_object) {
         // add employee callback
         var callback = function() {
             create_form('add_employee','add-new-employee-form');
-            pop_add_emp_dropdowns(false);
+            pop_add_emp_dropdowns(null);
             alert(message);
         }
     }

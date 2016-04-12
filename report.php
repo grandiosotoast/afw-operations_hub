@@ -18,7 +18,7 @@ link_external_files();
 </head>
 <body>
 <div id="head" class="head">
-<?php 
+<?php
 page_head();
 check_login('report');
 ?>
@@ -87,7 +87,7 @@ check_login('report');
 </select>
 </fieldset>
 <br>
-<button id="show_data_cols" type="button" onclick="show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',true,true);">Show Data Selection Columns</button> 
+<button id="show_data_cols" type="button" onclick="show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',true,true);">Show Data Selection Columns</button>
 <button id="show_employee_table" type="button" onclick="report_emp_table('1','emp_last_name','ASC',true);">Show Employee Table</button>
 <button id="get_emp_data" type="button" name="get_emp_data" onclick="create_production_report('report_emp_data','report_data_div','','')">Get All Employee Data</button>
 <button id="get_emp_data_all" type="button" class="hidden-elm" name="get_emp_data_all" onclick="create_production_report('report_emp_data','report_data_div','',''); add_class('hidden-elm','get_emp_data_all');">Get All Employee Data</button>
@@ -124,9 +124,17 @@ var input_args = {
 };
 create_time_range_inputs(input_args);
 var dropbox_args = {
-    sql_where : [['report_type','REGEXP','(^|%)production(%|$)']]
+    'dropbox_id' : 'preset-report',
+    'text_format' : '%preset_name%',
+    'value_format' : '%preset_index%',
+    'place_holder' : 'None',
+    'sql_args' : {
+        'table' : 'report_presets',
+        'cols' : ['preset_index','preset_name'],
+        'where' : [['report_type','REGEXP','(^|%)production(%|$)']]
+    }
 };
-populate_dropbox_options('preset-report','report_presets','preset_index','preset_name','',dropbox_args);
+populate_dropbox_options(dropbox_args);
 </script>
 </body>
 </html>

@@ -92,10 +92,17 @@ function new_customer() {
     create_form('sales_customer_form','content-div');
     //
     // populating rep dropbox
-    var add_args = {
-        'format_str' : '%rep_id% - %rep_name%'
+    var dropbox_args = {
+        'dropbox_id' : 'rep-id',
+        'place_holder' : 'Rep ID - Rep Name',
+        'text_format' : '%rep_id% - %rep_name%',
+        'value_format' : '%rep_id%',
+        'sql_args' : {
+            'table' : 'sales_rep_table',
+            'cols' : ['rep_id','rep_name']
+        }
     };
-    populate_dropbox_options('rep-id','sales_rep_table','rep_id','rep_name','Rep ID - Rep Name',add_args)
+    populate_dropbox_options(dropbox_args);
 }
 //
 // this sets up the page to modify a customer
@@ -256,17 +263,33 @@ function rep_report() {
     //
     // populating dropboxes
     var dropbox_args = {
-        sql_where : [['report_type','REGEXP','(^|%)sales(%|$)']]
+        'dropbox_id' : 'preset-report',
+        'text_format' : '%preset_name%',
+        'value_format' : '%preset_index%',
+        'placeholder' : 'None',
+        'sql_args' : {
+            'table' : 'report_presets',
+            'cols' : ['preset_index','preset_name'],
+            'where' : [['report_type','REGEXP','(^|%)sales(%|$)']]
+        }
     };
-    populate_dropbox_options('preset-report','report_presets','preset_index','preset_name','',dropbox_args);
+    populate_dropbox_options(dropbox_args);
+    //
     dropbox_args = {
-        sql_args : {
-            where : [['column_type','REGEXP','(^|%)static(%|$)'],['in_tables','REGEXP','(^|%)sales_rep_data(%|$)'],['use_on_pages','REGEXP','(^|%)sales_reporting(%|$)'],['use_in_html_tables','REGEXP','(^|%)sales_rep_report(%|$)']],
-            order_by : [['order_index','ASC']]
-        },
-        value_format : 'sales_rep_data.%column_name%'
+        'dropbox_id' : 'sort-column',
+        'text_format' : '%column_nickname%',
+        'value_format' : 'sales_rep_data.%column_name%',
+        'sql_args' : {
+            'table' : 'table_meta_data',
+            'cols' : ['column_name','column_nickname'],
+            'where' : [['column_type','REGEXP','(^|%)static(%|$)'],
+                       ['in_tables','REGEXP','(^|%)sales_rep_data(%|$)'],
+                       ['use_on_pages','REGEXP','(^|%)sales_reporting(%|$)'],
+                       ['use_in_html_tables','REGEXP','(^|%)sales_rep_report(%|$)']],
+            'order_by' : [['order_index','ASC']]
+        }
     };
-    populate_dropbox_options('sort-column','table_meta_data','column_name','column_nickname','',dropbox_args);
+    populate_dropbox_options(dropbox_args);
 }
 //
 // this function sets up the page for a customer report
@@ -516,12 +539,18 @@ function modify_customer_form(customer_internal_id,row_id) {
     }
     //
     // populating rep dropbox
-    var add_args = {
-        'format_str'   : '%rep_id% - %rep_name%',
+    var dropbox_args = {
+        'dropbox_id' : 'rep-id',
+        'place_holder' : 'Rep ID - Rep Name',
+        'text_format' : '%rep_id% - %rep_name%',
+        'value_format' : '%rep_id%',
+        'sql_args' : {
+            'table' : 'sales_rep_table',
+            'cols' : ['rep_id','rep_name']
+        },
         'add_callback' : callback
-
     };
-    populate_dropbox_options('rep-id','sales_rep_table','rep_id','rep_name','Rep ID - Rep Name',add_args)
+    populate_dropbox_options(dropbox_args);
 }
 //
 // this starts off the sales rep form validation
