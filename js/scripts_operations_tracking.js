@@ -148,6 +148,27 @@ function total_fields(id_arr_str,out_id) {
     document.getElementById(out_id).value = total
 }
 //
+// this function takes inputs from a fieldset or form and adds them to the
+// where parameter of the sql args using a REGEXP
+function get_table_inputs(sql_args,input_args) {
+    //
+    var args = {
+        'parent_id' : null,
+        'skip_elm_ids' : '',
+        'get_all' : true
+    }
+    //
+    for (var prop in input_args) { args[prop] = input_args[prop];}
+    //
+    var name_val_obj = get_all_form_values(args.parent_id,args.skip_elm_ids,args.get_all);
+    //
+    if (!(sql_args.where)) { sql_args.where = [];}
+    for (var col in name_val_obj) {
+        if (trim(name_val_obj[col]) === '') { continue;}
+        sql_args.where.push([col,'REGEXP',name_val_obj[col]]);
+    }
+}
+//
 // function to generate a standard table
 function create_standard_table(table_args) {
     //

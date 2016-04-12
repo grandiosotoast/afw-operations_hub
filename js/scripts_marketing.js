@@ -403,30 +403,209 @@ function create_payments_and_growth_form(vendor_internal_id,row_id) {
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////// Marketing Table Generation ////////////////////////////
 //
+//
+//////////////////////////////// Table Filters /////////////////////////////////
+//
+// container for common vendor/broker table filtering elements
+function standard_vb_filter_elemets(update_function) {
+    //
+    var status_onlick = toggle_checkbox_value.bind(null,'vendor-status','.','active');
+    var form_elements = Array(
+            {'elm' : 'legend','textNode' : 'Selection Parameters'},
+            //
+            {'elm' : 'label', 'className' : 'label-large',
+             'textNode' : 'Show Inactive Brokers/Vendors:'},
+            {'elm' : 'input', 'id' : 'vendor-status', 'name':'vendor_status',
+             'type' : 'checkbox', 'value' : 'active', 'events' : [
+                 {'event' : 'click','function' : status_onlick},
+                 {'event' : 'click','function' : update_function}]},
+            {'elm' : 'br'},
+            //
+            {'elm' : 'label', 'className' : 'label-large',
+             'textNode' : 'Filter by Broker:'},
+            {'elm' : 'input', 'id' : 'broker', 'name':'broker',
+             'type' : 'text', 'value' : '', 'events' : [
+                 {'event' : 'keyup','function' : update_function}]},
+            {'elm' : 'br'},
+            //
+            {'elm' : 'label', 'className' : 'label-large',
+             'textNode' : 'Filter by Vendor:'},
+            {'elm' : 'input', 'id' : 'vendor', 'name':'vendor',
+             'type' : 'text', 'value' : '', 'events' : [
+                 {'event' : 'keyup','function' : update_function}]},
+            {'elm' : 'br'}
+        );
+    return(form_elements);
+}
+//
 // creates filtering options for the vendor_broker tabke
 function create_vendor_broker_table_filter(output_id) {
     //
     // adding a filter fieldset
     var fieldset = document.createElement('FIELDSET');
-    var formElements = Array(
-            {'elm' : 'legend','textNode' : 'Selection Parameters'},
+    var onclick = create_vendor_broker_table.bind(null,1,'broker','ASC');
+    var form_elements = standard_vb_filter_elemets(onclick);
+    //
+    fieldset.id = 'selection-parameters';
+    fieldset.className = 'fieldset-default';
+    addChildren(fieldset,form_elements);
+    document.getElementById(output_id).appendChild(fieldset);
+    document.getElementById(output_id).appendChild(document.createElement('BR'));
+}
+//
+//
+function create_food_show_table_filter(output_id) {
+    //
+    // adding a filter fieldset
+    var fieldset = document.createElement('FIELDSET');
+    var update_function = create_food_show_table.bind(null,1,'broker','ASC');
+    var form_elements = standard_vb_filter_elemets(update_function);
+    //
+    form_elements.push(
             //
             {'elm' : 'label', 'className' : 'label-large',
-             'textNode' : 'Show Inactive Brokers/Vendors:'},
-            {'elm' : 'input', 'id' : 'show-inactive', 'type' : 'checkbox',
+             'textNode' : 'Filter by Booth Size:'},
+            {'elm' : 'select', 'id' : 'booth-size', 'name':'booth_size',
+              'events' : [{'event' : 'change','function' : update_function}]},
+            {'elm' : 'br'}
+        );
+    var select_elements = Array(
+        //
+        {'elm':'option','value' : '.', 'textNode' : 'All'},
+        {'elm':'option','value' : '0', 'textNode' : 'None'},
+        {'elm':'option','value' : '0.5', 'textNode' : 'Half'},
+        {'elm':'option','value' : '1.0', 'textNode' : 'Full'}
+        );
+    //
+    fieldset.id = 'selection-parameters';
+    fieldset.className = 'fieldset-default';
+    addChildren(fieldset,form_elements);
+    document.getElementById(output_id).appendChild(fieldset);
+    addChildren(document.getElementById('booth-size'),select_elements);
+    document.getElementById(output_id).appendChild(document.createElement('BR'));
+}
+//
+//
+function create_payments_and_growth_table_filter(output_id) {
+    //
+    // adding a filter fieldset
+    var fieldset = document.createElement('FIELDSET');
+    var update_function = create_payments_and_growth_table.bind(null,1,'broker','ASC');
+    var form_elements = standard_vb_filter_elemets(update_function);
+    //
+    form_elements.push(
+            //
+            {'elm' : 'label', 'className' : 'label-large',
+             'textNode' : 'Filter by Marketing Level:'},
+            {'elm' : 'select', 'id' : 'marketing-level', 'name':'marketing_level',
+              'className' : 'dropbox-input-10em',
+              'events' : [{'event' : 'change','function' : update_function}]},
+            {'elm' : 'br'},
+            //
+            {'elm' : 'label', 'className' : 'label-large',
+             'textNode' : 'Filter by Booth Size:'},
+            {'elm' : 'select', 'id' : 'booth-size', 'name':'booth_size',
+              'className' : 'dropbox-input-10em',
+              'events' : [{'event' : 'change','function' : update_function}]},
+            {'elm' : 'br'}
+            //
+        );
+    var booth_elements = Array(
+        //
+        {'elm':'option','value' : '.', 'textNode' : 'All'},
+        {'elm':'option','value' : '0', 'textNode' : 'None'},
+        {'elm':'option','value' : '0.5', 'textNode' : 'Half'},
+        {'elm':'option','value' : '1.0', 'textNode' : 'Full'}
+        );
+    var level_elements = Array(
+        //
+        {'elm':'option','value' : '.', 'textNode' : 'All'},
+        {'elm':'option','value' : 'a la carte', 'textNode' : 'A La Carte'},
+        {'elm':'option','value' : 'bronze', 'textNode' : 'Bronze'},
+        {'elm':'option','value' : 'silver', 'textNode' : 'Silver'},
+        {'elm':'option','value' : 'gold', 'textNode' : 'Gold'}
+        );
+    //
+    fieldset.id = 'selection-parameters';
+    fieldset.className = 'fieldset-default';
+    addChildren(fieldset,form_elements);
+    document.getElementById(output_id).appendChild(fieldset);
+    addChildren(document.getElementById('marketing-level'),level_elements);
+    addChildren(document.getElementById('booth-size'),booth_elements);
+    document.getElementById(output_id).appendChild(document.createElement('BR'));
+}
+//
+// creates the filtering fieldset for the contact_info table
+function create_contact_info_table_filter(broker,vendor_internal_id,output_id) {
+    //
+    // adding a filter fieldset
+    var fieldset = document.createElement('FIELDSET');
+    var form_elements = Array(
+            {'elm' : 'legend','textNode' : 'Contact Selection Parameters'},
+            //
+            {'elm' : 'label', 'className' : 'label-large',
+             'textNode' : 'Show Deleted Contacts:'},
+            {'elm' : 'input', 'id' : 'contact-show-deleted', 'type' : 'checkbox',
              'events' : [{'event' : 'click',
-                          'function' : create_vendor_broker_table.bind(null,1,'broker','ASC')}]},
+                          'function' : create_contact_info_table.bind(null,broker,vendor_internal_id,1,'broker','ASC')}]},
             {'elm' : 'br'}
             //
             // filtering stuff like in sales customer table
             //
         );
-    fieldset.id = 'selection-parameters';
+    fieldset.id = 'contact-selection-parameters';
     fieldset.className = 'fieldset-default';
-    addChildren(fieldset,formElements);
-    document.getElementById(output_id).appendChild(fieldset);
-    document.getElementById(output_id).appendChild(document.createElement('BR'));
+    addChildren(fieldset,form_elements);
+    document.getElementById(output_id).safeAppendChild(fieldset);
 }
+//
+///////////////////// Table callback and event functions ///////////////////////
+//
+//
+// defines tab specific vendor/ broker table callbacks
+function vendor_broker_table_callbacks() {
+    //
+    var tab = document.getElementById('tab-clicked').value;
+    //
+    if (tab == 'vendor_broker_setup') {
+        var br = document.createElementWithAttr('BR',{'id':'create-new-vendor-br'});
+        var button = document.createElementWithAttr('BUTTON',{'id':'create-new-vendor'});
+        button.addTextNode('Create New Vendor/Broker');
+        button.style['margin'] = 'auto';
+        button.style['display'] = 'block';
+        button.addEventListener('click',vendor_broker_setup_form.bind(null,null,null));
+        document.getElementById('table-div').safeAppendChild(br);
+        document.getElementById('table-div').safeAppendChild(button);
+    }
+    else if (tab == 'vendor_broker_contact_info') {
+        var br = document.createElementWithAttr('BR',{'id':'contact-table-spacer-br'});
+        document.getElementById('table-div').safeAppendChild(br);
+    }
+    else if (tab == 'update_payments_and_growth') {
+        console.log('pass update_payments_and_growth');
+    }
+}
+//
+// defines tab specific vendor/ broker row onclick functions
+function vendor_broker_table_onclicks() {
+    //
+    var tab = document.getElementById('tab-clicked').value;
+    var onclick = '';
+    //
+    if (tab == 'vendor_broker_setup') {
+        onclick = "vendor_broker_setup_form('%vendor_internal_id%','%row_id%')";
+    }
+    else if (tab == 'vendor_broker_contact_info') {
+        onclick = "create_contact_info_table_filter('%broker%',"+
+                  "'%vendor_internal_id%','table-div');"+
+                  "create_contact_info_table('%broker%','%vendor_internal_id%',1,"+
+                  "'marketing_contact_information.contact_name','ASC'); ";
+    }
+    //
+    return(onclick);
+}
+//
+/////////////////////////// Table Creation Function ////////////////////////////
 //
 // creates broker vendor table
 function create_vendor_broker_table(page,sort_col,sort_dir) {
@@ -437,11 +616,8 @@ function create_vendor_broker_table(page,sort_col,sort_dir) {
     var meta_sql_args = {};
     //
     // creating sql statements
-    table_args.show_inactive = document.getElementById('show-inactive').checked;
-    data_sql_args.where = [];
-    if (!(table_args.show_inactive)) {
-        data_sql_args.where.push(['vendor_status','LIKE','active']);
-    }
+    get_table_inputs(data_sql_args,{'parent_id':'selection-parameters'});
+    //
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'marketing_vendor_broker_table';
     data_sql_args.order_by = [[sort_col,sort_dir]];
@@ -488,70 +664,6 @@ function create_vendor_broker_table(page,sort_col,sort_dir) {
     table_args.add_callback = vendor_broker_table_callbacks;
     //
     create_standard_table(table_args);
-}
-//
-// defines tab specific vendor/ broker row onclick functions
-function vendor_broker_table_onclicks() {
-    //
-    var tab = document.getElementById('tab-clicked').value;
-    var onclick = '';
-    //
-    if (tab == 'vendor_broker_setup') {
-        onclick = "vendor_broker_setup_form('%vendor_internal_id%','%row_id%')";
-    }
-    else if (tab == 'vendor_broker_contact_info') {
-        onclick = "create_contact_info_table_filter('%broker%',"+
-                  "'%vendor_internal_id%','table-div');"+
-                  "create_contact_info_table('%broker%','%vendor_internal_id%',1,"+
-                  "'marketing_contact_information.contact_name','ASC'); ";
-    }
-    //
-    return(onclick);
-}
-//
-// defines tab specific vendor/ broker table callbacks
-function vendor_broker_table_callbacks() {
-    //
-    var tab = document.getElementById('tab-clicked').value;
-    //
-    if (tab == 'vendor_broker_setup') {
-        var br = document.createElementWithAttr('BR',{'id':'create-new-vendor-br'});
-        var button = document.createElementWithAttr('BUTTON',{'id':'create-new-vendor'});
-        button.addTextNode('Create New Vendor/Broker');
-        button.style['margin'] = 'auto';
-        button.style['display'] = 'block';
-        button.addEventListener('click',vendor_broker_setup_form.bind(null,null,null));
-        document.getElementById('table-div').safeAppendChild(br);
-        document.getElementById('table-div').safeAppendChild(button);
-    }
-    else if (tab == 'vendor_broker_contact_info') {
-        var br = document.createElementWithAttr('BR',{'id':'contact-table-spacer-br'});
-        document.getElementById('table-div').safeAppendChild(br);
-    }
-}
-//
-// creates the filtering fieldset for the contact_info table
-function create_contact_info_table_filter(broker,vendor_internal_id,output_id) {
-    //
-    // adding a filter fieldset
-    var fieldset = document.createElement('FIELDSET');
-    var formElements = Array(
-            {'elm' : 'legend','textNode' : 'Contact Selection Parameters'},
-            //
-            {'elm' : 'label', 'className' : 'label-large',
-             'textNode' : 'Show Deleted Contacts:'},
-            {'elm' : 'input', 'id' : 'contact-show-deleted', 'type' : 'checkbox',
-             'events' : [{'event' : 'click',
-                          'function' : create_contact_info_table.bind(null,broker,vendor_internal_id,1,'broker','ASC')}]},
-            {'elm' : 'br'}
-            //
-            // filtering stuff like in sales customer table
-            //
-        );
-    fieldset.id = 'contact-selection-parameters';
-    fieldset.className = 'fieldset-default';
-    addChildren(fieldset,formElements);
-    document.getElementById(output_id).safeAppendChild(fieldset);
 }
 //
 // creates the vendor/ broker contact info table
@@ -656,31 +768,6 @@ function create_contact_info_table(broker,vendor_internal_id,page,sort_col,sort_
 }
 //
 //
-function create_food_show_table_filter(output_id) {
-    //
-    // adding a filter fieldset
-    var fieldset = document.createElement('FIELDSET');
-    var formElements = Array(
-            {'elm' : 'legend','textNode' : 'Selection Parameters'},
-            //
-            {'elm' : 'label', 'className' : 'label-large',
-             'textNode' : 'Show Inactive Brokers/Vendors:'},
-            {'elm' : 'input', 'id' : 'show-inactive', 'type' : 'checkbox',
-             'events' : [{'event' : 'click',
-                          'function' : create_vendor_broker_table.bind(null,1,'broker','ASC')}]},
-            {'elm' : 'br'}
-            //
-            // filtering stuff like in sales customer table
-            //
-        );
-    fieldset.id = 'selection-parameters';
-    fieldset.className = 'fieldset-default';
-    addChildren(fieldset,formElements);
-    document.getElementById(output_id).appendChild(fieldset);
-    document.getElementById(output_id).appendChild(document.createElement('BR'));
-}
-//
-//
 function create_food_show_table(page,sort_col,sort_dir) {
     //
     // initializating argument objects
@@ -689,11 +776,8 @@ function create_food_show_table(page,sort_col,sort_dir) {
     var meta_sql_args = {};
     //
     // creating sql statements
-    table_args.show_inactive = document.getElementById('show-inactive').checked;
-    data_sql_args.where = [];
-    if (!(table_args.show_inactive)) {
-        data_sql_args.where.push(['vendor_status','LIKE','active']);
-    }
+    get_table_inputs(data_sql_args,{'parent_id':'selection-parameters'});
+    //
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'marketing_vendor_broker_table';
     data_sql_args.inner_join = [['marketing_food_show',
@@ -755,31 +839,6 @@ function create_food_show_table(page,sort_col,sort_dir) {
 }
 //
 //
-function create_payments_and_growth_table_filter(output_id) {
-    //
-    // adding a filter fieldset
-    var fieldset = document.createElement('FIELDSET');
-    var formElements = Array(
-            {'elm' : 'legend','textNode' : 'Selection Parameters'},
-            //
-            {'elm' : 'label', 'className' : 'label-large',
-             'textNode' : 'Show Inactive Brokers/Vendors:'},
-            {'elm' : 'input', 'id' : 'show-inactive', 'type' : 'checkbox',
-             'events' : [{'event' : 'click',
-                          'function' : create_vendor_broker_table.bind(null,1,'broker','ASC')}]},
-            {'elm' : 'br'}
-            //
-            // filtering stuff like in sales customer table
-            //
-        );
-    fieldset.id = 'selection-parameters';
-    fieldset.className = 'fieldset-default';
-    addChildren(fieldset,formElements);
-    document.getElementById(output_id).appendChild(fieldset);
-    document.getElementById(output_id).appendChild(document.createElement('BR'));
-}
-//
-//
 function create_payments_and_growth_table(page,sort_col,sort_dir) {
     //
     // initializating argument objects
@@ -788,11 +847,8 @@ function create_payments_and_growth_table(page,sort_col,sort_dir) {
     var meta_sql_args = {};
     //
     // creating sql statements
-    table_args.show_inactive = document.getElementById('show-inactive').checked;
-    data_sql_args.where = [];
-    if (!(table_args.show_inactive)) {
-        data_sql_args.where.push(['vendor_status','LIKE','active']);
-    }
+    get_table_inputs(data_sql_args,{'parent_id':'selection-parameters'});
+    //
     data_sql_args.cmd = 'SELECT';
     data_sql_args.table = 'marketing_vendor_broker_table';
     data_sql_args.inner_join = [['marketing_accounting',

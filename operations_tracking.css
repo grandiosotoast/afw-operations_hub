@@ -47,6 +47,9 @@
 .checkbox-input {
     width: 2em;
 }
+.dropbox-input-10em {
+    width: 10em;
+}
 .dropbox-option-grey {
     padding: 2px;
     background-color: rgb(240,240,240);

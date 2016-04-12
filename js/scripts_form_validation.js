@@ -301,10 +301,9 @@ function get_all_form_values(parent_id,skip_elm_ids,get_all) {
         if (!(get_all)) {
             if (skip_id_arr.indexOf(all_children[i].id) >= 0) {continue;}
             if (all_children[i].disabled == true) {continue;}
+            if ((all_children[i].type.toUpperCase() == 'RADIO') && (!(all_children[i].checked))) {continue;}
+            if ((all_children[i].type.toUpperCase() == 'CHECKBOX') && (!(all_children[i].checked))) {continue;}
         }
-        //
-        if ((all_children[i].type.toUpperCase() == 'RADIO') && (!(all_children[i].checked))) {continue;}
-        if ((all_children[i].type.toUpperCase() == 'CHECKBOX') && (!(all_children[i].checked))) {continue;}
         //
         name_val_obj[all_children[i].name] = trim(all_children[i].value);
         //
