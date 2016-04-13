@@ -267,6 +267,7 @@ function rep_report() {
         'text_format' : '%preset_name%',
         'value_format' : '%preset_index%',
         'placeholder' : 'None',
+        'place_holder_value' : '0',
         'sql_args' : {
             'table' : 'report_presets',
             'cols' : ['preset_index','preset_name'],

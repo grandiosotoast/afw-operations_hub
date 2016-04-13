@@ -54,5 +54,6 @@ check_login('marketing');
 
 </div> <!-- End main-container div -->
 </body>
-<script>console.log('Look at line 56'); update_marketing_commitment();</script>
+<script>//console.log('Look at line 56'); update_marketing_commitment();
+</script>
 </html>

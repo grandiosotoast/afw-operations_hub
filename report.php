@@ -127,7 +127,6 @@ var dropbox_args = {
     'dropbox_id' : 'preset-report',
     'text_format' : '%preset_name%',
     'value_format' : '%preset_index%',
-    'place_holder' : 'None',
     'sql_args' : {
         'table' : 'report_presets',
         'cols' : ['preset_index','preset_name'],

@@ -4,7 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 "use strict";
 //
-// this holds references to pre-made functions 
+// this holds references to pre-made functions
 var REPORT_FUNCTIONS = {
     //
     'calc_freight_backhaul_ytd_savings' : calc_freight_backhaul_ytd_savings,
@@ -25,7 +25,7 @@ var REPORT_FUNCTIONS = {
 }
 //
 //
-// bulk functions that call sub functions 
+// bulk functions that call sub functions
 function precalculate_general(col_name,report_args) {
     //
     calc_true_hours('true_hours',report_args);
@@ -160,7 +160,10 @@ function calc_shipping_totals(col_name,report_args) {
         recalc_totals(args)
     }
     //
-    calc_percent_ot('percent_overtime',report_args)
+    // checking if special cols have been selected
+    if (report_args.col_name_meta.hasOwnProperty('percent_overtime')) {
+        calc_percent_ot('percent_overtime',report_args);
+    }
 }
 //
 function precalculate_transportation(col_name,report_args) {
@@ -228,7 +231,7 @@ function check_calls(fun_name,data_row) {
     return true;
 }
 //
-// this function will handle calculation of dependencies for columns 
+// this function will handle calculation of dependencies for columns
 // that require the entire data set
 function check_dependency_bulk(col_name,report_args,dynamic_cols) {
     var dependents = dynamic_cols[col_name].dependencies.split(',');
@@ -264,7 +267,7 @@ function recalc_totals(args) {
         var value = round((numerator/divisor),precision).toFixed(precision);
         if (!(isFinite(value))) { value = 0.0;}
         if (!(document.getElementById(prefix+'-span-'+output_col))) { continue;}
-        document.getElementById(prefix+'-span-'+output_col).textContent = value;     
+        document.getElementById(prefix+'-span-'+output_col).textContent = value;
     }
 
 }
@@ -310,7 +313,7 @@ function calc_true_hours(col_name,report_args) {
         //
         if (data[i]['attendance_error'] == 'holiday') { true_hours = 0.0;}
         data[i][col_name] = true_hours;
-    } 
+    }
 }
 //
 // this calculates the amount of overtime a person has
@@ -354,7 +357,7 @@ function calc_overtime(col_name,report_args) {
             dailyOT = (wk_hours[emp_id]+hours) - 40;
         }
         wk_hours[emp_id] += hours;
-        data_arr[i].dailyOT = dailyOT; 
+        data_arr[i].dailyOT = dailyOT;
     }
 }
 //
@@ -433,7 +436,7 @@ function calc_driver_expenses(col_name,data_row,dynamic_cols) {
     data_row[col_name] += Number.parse(data_row['fuel_def']) * Number.parse(data_row['def_cost_per_gallon']);
     if (!(isFinite(data_row[col_name]))) {data_row[col_name] = 0.0;}
 }
-// 
+//
 // this calculates the cost per case for drivers and pickers
 function calc_cost_per_case(col_name,data_row,dynamic_cols) {
     //
@@ -500,7 +503,7 @@ function calc_freight_backhaul_ytd_savings(col_name,report_args) {
         // setting up child arrays
         var row = document.createElementWithAttr('TR',{'id' : 'freight-logistics-ytd-savings'});
         var space_td  = document.createElementWithAttr('TD',{'id':'report-spacer-td-ytds','class':'report-spacer-td'});
-        var lbl_td = document.createElementWithAttr('TD',{'id':'savings-label-td','colSpan':report_args.skip_cols.length,'class':'report-data-td'}) 
+        var lbl_td = document.createElementWithAttr('TD',{'id':'savings-label-td','colSpan':report_args.skip_cols.length,'class':'report-data-td'})
         var num_td = document.createElementWithAttr('TD',{'id':'ytd-savings','class':'report-data-td','colSpan':colspan});
         var span = document.createElement('SPAN')
         //
@@ -547,7 +550,7 @@ function calc_receiving_incentive(col_name,report_args) {
         if (emps[id]['pay_type'].match('both|incentive')) { crewSize += 1;}
     }
     console.log(emps);
-    console.log(crewSize);   
+    console.log(crewSize);
     //
     // creating the incentive pay object
     var incentive_pay = {
@@ -704,7 +707,7 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
             exit_date = entry_date;
         }
         //
-        if (data_arr[i]['emp_id'] == supervisor_id) { 
+        if (data_arr[i]['emp_id'] == supervisor_id) {
             supervisor_entries.push(i);
             if (data_arr[i]['attendance_error'] != 'none') { error_dates.push(data_arr[i]['date']);}
         }
@@ -729,8 +732,8 @@ function calc_shipping_supervisor_incentive(col_name,report_args) {
             data_arr[supervisor_entries[i]]['incentive_pay'] = bonus_per_entry;
             data_arr[supervisor_entries[i]]['total'] = Number.parse(data_arr[supervisor_entries[i]]['total']) +  bonus_per_entry
         }
-    } 
-} 
+    }
+}
 ////////////////////////////////////////////////////////////////////////////////
 //////////////              Sales Rep Report Functions               ///////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -744,7 +747,7 @@ function calc_dso(col_name,report_args) {
         dso = data[i]['total_ar']/data[i]['total_ar_sales'];
         if (!(isFinite(dso))) { dso = 0.0;}
         data[i]['dso'] = dso;
-    }  
+    }
 }
 //
 //
@@ -790,7 +793,7 @@ function calc_growth(col_name,report_args) {
     var data = report_args.rep_data;
     for (var i = 0; i < data.length; i++) {
         var growth = 0.0
-        growth = data[i]['ytd_total']/data[i]['lytd_total'] - 1.0; 
+        growth = data[i]['ytd_total']/data[i]['lytd_total'] - 1.0;
         if (!(isFinite(growth))) { growth = 0.0;}
         data[i]['growth'] = growth;
     }
@@ -801,7 +804,7 @@ function calc_total_commission(col_name,report_args) {
     //
     var data = report_args.rep_data;
     for (var i = 0; i < data.length; i++) {
-        var total_comm = data[i]['base_commission']; 
+        var total_comm = data[i]['base_commission'];
         var profit = Number.parse(data[i]['profit']);
         //
         // growth bonuses
