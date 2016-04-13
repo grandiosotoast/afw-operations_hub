@@ -634,6 +634,9 @@ function process_data_type(value,data_type,element,args) {
     if (node) {
         element.appendChild(node);
     }
+    else if (element.nodeName == 'INPUT') {
+        element.value = value;
+    }
     else {
         element.appendChild(document.createTextNode(value));
     }

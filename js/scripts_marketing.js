@@ -173,7 +173,7 @@ function vendor_broker_setup_form(vendor_internal_id,row_id) {
                              'marketing_vendor_broker_table.vendor_internal_id',
                              'marketing_food_show.vendor_internal_id'],
                             ['marketing_growth',
-                             'marketing_growth.vendor_internal_id',
+                             'marketing_vendor_broker_table.vendor_internal_id',
                              'marketing_growth.vendor_internal_id']],
                 'where' : [['marketing_vendor_broker_table.vendor_internal_id',
                             'LIKE',vendor_internal_id]]
@@ -478,7 +478,7 @@ function create_marketing_commitment_form(vendor_internal_id,row_id) {
     sql_args = {
         'cmd' : 'SELECT',
         'table' : 'table_meta_data',
-        'where' : [['in_tables','REGEXP','(^|%)marketing_tiers(%|$)'],
+        'where' : [['in_tables','REGEXP','(^|%)marketing_alacarte_commitment(%|$)'],
                     ['data_type','NOT REGEXP','internal']],
         'order_by':[['order_index','ASC']]
     }
@@ -532,13 +532,13 @@ function create_marketing_commitment_form(vendor_internal_id,row_id) {
 // container for common vendor/broker table filtering elements
 function standard_vb_filter_elemets(update_function) {
     //
-    var status_onlick = toggle_checkbox_value.bind(null,'vendor-status','.','active');
+    var status_onlick = toggle_checkbox_value.bind(null,'filter-vendor-status','.','active');
     var form_elements = Array(
             {'elm' : 'legend','textNode' : 'Selection Parameters'},
             //
             {'elm' : 'label', 'className' : 'label-large',
-             'textNode' : 'Show Inactive Brokers/Vendors:'},
-            {'elm' : 'input', 'id' : 'vendor-status', 'name':'vendor_status',
+             'textNode' : 'Show Deleted Brokers/Vendors:'},
+            {'elm' : 'input', 'id' : 'filter-vendor-status', 'name':'vendor_status',
              'type' : 'checkbox', 'value' : 'active', 'events' : [
                  {'event' : 'click','function' : status_onlick},
                  {'event' : 'click','function' : update_function}]},
@@ -546,14 +546,14 @@ function standard_vb_filter_elemets(update_function) {
             //
             {'elm' : 'label', 'className' : 'label-large',
              'textNode' : 'Filter by Broker:'},
-            {'elm' : 'input', 'id' : 'broker', 'name':'broker',
+            {'elm' : 'input', 'id' : 'filter-broker', 'name':'broker',
              'type' : 'text', 'value' : '', 'events' : [
                  {'event' : 'keyup','function' : update_function}]},
             {'elm' : 'br'},
             //
             {'elm' : 'label', 'className' : 'label-large',
              'textNode' : 'Filter by Vendor:'},
-            {'elm' : 'input', 'id' : 'vendor', 'name':'vendor',
+            {'elm' : 'input', 'id' : 'filter-vendor', 'name':'vendor',
              'type' : 'text', 'value' : '', 'events' : [
                  {'event' : 'keyup','function' : update_function}]},
             {'elm' : 'br'}

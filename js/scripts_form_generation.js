@@ -1060,6 +1060,7 @@ function populate_form(populate_form_args) {
     sql = gen_sql(sql_args);
     //
     var callback_fun = function(response) {
+        if (response.data.length > 1) { alert('DATA INTEGRITY ERROR - Form populated using non-unique data value!')}
         populate_form_args.data_arr = response.data[0];
         process_form_data(populate_form_args)
         //
