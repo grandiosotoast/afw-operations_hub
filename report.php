@@ -30,7 +30,7 @@ check_login('report');
 <fieldset class="fieldset-default">
 <legend>Report Data Parameters</legend>
 <label class="label">Employee Department</label>
-<select id="department" class="dropbox-input" name="department" onchange="report_emp_table('1','emp_last_name','ASC',false); show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',false,true); show_update_button('get_emp_data','report-table','Show Changes');">
+<select id="department" class="" name="department" onchange="report_emp_table('1','emp_last_name','ASC',false); show_data_columns(document.getElementById('department').value,'data_sel_cols','show_data_cols',false,true); show_update_button('get_emp_data','report-table','Show Changes');">
     <option value="freight_backhaul">Freight Logistics</option>
     <option value="general">Occupancy</option>
     <option value="transportation">Transportation</option>
@@ -61,7 +61,7 @@ check_login('report');
 <br>
 <br>
 <label class="label">Report Section Headers:</label>
-<select id="prime-sort" class="dropbox-input" name="prime-sort" onchange="show_update_button('get_emp_data','report-table','Show Changes');">
+<select id="prime-sort" class="" name="prime-sort" onchange="show_update_button('get_emp_data','report-table','Show Changes');">
     <option value="emp_id">Employee ID</option>
     <option value="date">Date</option>
     <option value="emp_last_name">Employee Name</option>
@@ -74,7 +74,7 @@ check_login('report');
 </select>
 <br>
 <label class="label">Internal Sorting:</label>
-<select id="secd-sort" class="dropbox-input" name="secd-sort" onchange="update_sort_by_col('sort-by-col-tr','secd-sort'); show_update_button('get_emp_data','report-table','Show Changes');">
+<select id="secd-sort" class="" name="secd-sort" onchange="update_sort_by_col('sort-by-col-tr','secd-sort'); show_update_button('get_emp_data','report-table','Show Changes');">
     <option value="date">Date</option>
     <option value="emp_id">Employee ID</option>
     <option value="emp_last_name">Employee Name</option>

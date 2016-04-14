@@ -576,7 +576,10 @@ function make_head_rows(output_element,col_data,input_args) {
         }
     }
     //
-    output_element.addNodes(head_tr);
+    var thead = document.createElement('THEAD');
+    thead.addNodes(head_tr)
+    console.log(thead)
+    output_element.appendChild(thead);
 }
 //
 // this function handles the data types of various cells in the database for reports
