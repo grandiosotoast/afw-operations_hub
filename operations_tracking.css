@@ -1,3 +1,36 @@
+@media print {
+
+#head {
+       display:none;
+    }
+#report_emp_data {
+       display:none;
+    }
+#employee-table-div{
+       display:none;
+    }
+#report_data_div {
+	size: landscape;
+	display: block;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	position: relative;
+	height: 100%;
+	width: 100%;
+	page-break-before: always;
+	page-break-after: avoid;
+	page-break-inside: auto;
+	}
+thead {
+   display:table-header-group;
+    }
+tbody {
+   display:table-row-group;
+   }
+}
+
 .big-button {
     width: 200px;
     height: 75px;
