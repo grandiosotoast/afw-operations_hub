@@ -1,5 +1,5 @@
 @media print {
-   
+
 #head {
        display:none;
     }
@@ -23,7 +23,6 @@
 	page-break-after: avoid;
 	page-break-inside: auto;
 	}
-
 thead {
    display:table-header-group;
     }
@@ -31,7 +30,7 @@ tbody {
    display:table-row-group;
    }
 }
-	
+
 .big-button {
     width: 200px;
     height: 75px;
